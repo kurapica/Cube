@@ -1,22 +1,18 @@
 ﻿## Interface: 50100
 ## Title: Cube
 ## Author: kurapica
-## Version: 3.9
+## Version: v4
 ## Notes: Simple Development&Debug tools. type /cube to open GUI.
 ## Notes-zhCN: 简单的开发调试工具，使用/cube 命令打开配置界面。
 ## Notes-zhTW: 簡單的開發調試工具，使用/cube 命令打開配置界面。
 ## eMail: kurapica125@hotmail.com
-## URL: http://bbs.cwowaddon.com/thread-5335-1-1.html
-## X-Embeds: IGAS
-## OptionalDeps: IGAS
+## URL: http://github.com/kurapica
+## Dependencies: IGAS
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
 ## SavedVariables: CubeSave
 ## SavedVariablesPerCharacter: CubeSavePerCharacter
 
-embeds.xml
-
-localization\localization.lua
 localization\localization.cn.lua
 localization\localization.tw.lua
 
@@ -32,3 +28,6 @@ Frames\BugList.Designer.lua
 Frames\BugList.Script.lua
 Frames\LogView.Designer.lua
 Frames\LogView.Script.lua
+
+Guide\Guide.Designer.lua
+Guide\Guide.Script.lua

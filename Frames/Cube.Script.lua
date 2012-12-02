@@ -48,16 +48,16 @@ function _M:OnLoad()
 
 	fileTree:SetTree(CubeSave.CodeTree)
 	fileTree:GetNode(1).ToggleState = true
-	
+
 	code:RegisterControlKey("S")
-	
+
 	chkShowRow.Checked = not CubeSave.NotShowRowNumber
 	code.ShowLineNumber = not CubeSave.NotShowRowNumber
-	
+
 	if CubeSave.CubeMainSize then
 		Cube_Main.Size = CubeSave.CubeMainSize
 	end
-	
+
 	if CubeSave.CubeMainLocation then
 		Cube_Main.Location = CubeSave.CubeMainLocation
 	end
@@ -125,7 +125,7 @@ function fileTree:OnNodeFunctionClick(func, node)
 		if node.Level == 1 then
 			if node.Index == 1 then
 				local name = IGAS:MsgBox(L["Please input the snipet's name"], "ic")
-				
+
 				if type(name) == "string" then
 					name = strtrim(name)
 
@@ -143,7 +143,7 @@ function fileTree:OnNodeFunctionClick(func, node)
 				end
 			else
 				local name = IGAS:MsgBox(L["Please input the addon's name"], "ic")
-				
+
 				if type(name) == "string" then
 					name = strtrim(name)
 
@@ -162,7 +162,7 @@ function fileTree:OnNodeFunctionClick(func, node)
 			end
 		else
 			local name = IGAS:MsgBox(L["Please input the module's name"], "ic")
-			
+
 			if type(name) == "string" then
 				name = strtrim(name)
 
@@ -253,7 +253,7 @@ function run:OnClick()
 
 	local func, err, status
 
-	if code.Text ~= "" then		
+	if code.Text ~= "" then
 		func, err = loadstring(code.Text)
 
 		if func then
@@ -389,7 +389,7 @@ function GetTitle(node)
 end
 
 function AddModule(name)
-	
+
 end
 
 function errorhandler(err)
@@ -449,7 +449,7 @@ function LoadAddon(node)
 	node.FunctionName = "Del,Add"
 
 	_LoadedModule[node] = nil
-	
+
 	-- Loading
 	if node.MetaData[_PlayerName] then
 		Log(2, "Loading Addon......%s", GetTitle(node))
@@ -516,7 +516,9 @@ function EnableAddon(node, flag)
 	end
 end
 
-function _G.CubeLog(msg)
+function _G.CubeLog(...)
+	local msg = strjoin(" ", tostringall(...))
+
 	if txtLog.Text and txtLog.Text ~= "" then
 		txtLog.Text = txtLog.Text..msg.."\n"
 	else

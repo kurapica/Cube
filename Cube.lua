@@ -33,6 +33,7 @@ GRY    ='|cffA0A0A0'
 -- Binding Text
 _G.BINDING_HEADER_CUBE = L["Cube"]
 _G.BINDING_NAME_CUBE_CODE = L["Simple Dev Tool"]
+_G.BINDING_NAME_CUBE_GUIDE = L["Developer's Guide"]
 _G.BINDING_NAME_CUBE_BUGLIST = L["Simple Bug List"]
 _G.BINDING_NAME_CUBE_DEBUG = L["Simple Debug Tool"]
 _G.BINDING_NAME_CUBE_LOGVIEW = L["Simple Log View"]
@@ -48,6 +49,7 @@ end
 
 function _Addon:OnSlashCmd()
 	Log(2, "/cube code  ("..L["Open the code editor"]..")")
+	Log(2, "/cube guide  ("..L["Open the developer's guide"]..")")
 	Log(2, "/cube bug   ("..L["Open the buglist"]..")")
 	Log(2, "/cube debug ("..L["Open the debug tool"]..")")
 	Log(2, "/cube log   ("..L["Open the log view"]..")")
@@ -185,12 +187,14 @@ function pairsByKeys (t, f)
 end
 
 local readedTable = {}
-function Format(v)
-    if type(v) == "string" then
+function Format(v, format)
+    if type(v) == "string" and format then
         return string.format("%q", v)
     elseif type(v) == "table" then
     	wipe(readedTable)
-    	return SerializeTable(t) .. "\n"
+    	local ret = SerializeTable(v)
+    	wipe(readedTable)
+    	return ret
     else
         return tostring(v)
     end
@@ -203,7 +207,7 @@ function SerializeTable(t)
 
     for name, value in pairs(t) do
         if type(name) == "string" or type(name) == "number" then
-            name = (type(name) == "string" and Format(name)) or tostring(name)
+            name = Format(name, true)
             if type(value) == "table" then
             	if readedTable[value] then
             		str = str.."    ["..name.."] = "..tostring(value)..",\n"
@@ -211,10 +215,10 @@ function SerializeTable(t)
                 	str = str.."    ["..name.."] = "..string.gsub(SerializeTable(value), "\n", "\n    ")..",\n"
                 end
             elseif type(value) == "number" or type(value) == "string" then
-                str = str.."    ["..name.."] = "..Format(value)..",\n"
+                str = str.."    ["..name.."] = "..Format(value, true)..",\n"
             elseif type(value) == "boolean" then
                 value = (value and true) or false
-                str = str.."    ["..name.."] = "..Format(value)..",\n"
+                str = str.."    ["..name.."] = "..Format(value, true)..",\n"
             end
         end
     end
@@ -224,66 +228,57 @@ function SerializeTable(t)
     return str
 end
 
-local LOCAL_ToStringAllTemp = {};
+local LOCAL_ToStringAllTemp = {}
 function tostringall(...)
-    local n = select('#', ...);
+    local n = select('#', ...)
     -- Simple versions for common argument counts
     if (n == 1) then
-        return tostring(...);
+        return Format(...)
     elseif (n == 2) then
-        local a, b = ...;
-        return tostring(a), tostring(b);
+        local a, b = ...
+        return Format(a), Format(b)
     elseif (n == 3) then
-        local a, b, c = ...;
-        return tostring(a), tostring(b), tostring(c);
+        local a, b, c = ...
+        return Format(a), Format(b), Format(c)
     elseif (n == 0) then
-        return;
+        return
     end
 
-    local needfix;
+    local needfix
     for i = 1, n do
-        local v = select(i, ...);
+        local v = select(i, ...)
         if (type(v) ~= "string") then
-            needfix = i;
-            break;
+            needfix = i
+            break
         end
     end
-    if (not needfix) then return ...; end
+    if (not needfix) then return ... end
 
-    wipe(LOCAL_ToStringAllTemp);
+    wipe(LOCAL_ToStringAllTemp)
     for i = 1, needfix - 1 do
-        LOCAL_ToStringAllTemp[i] = select(i, ...);
+        LOCAL_ToStringAllTemp[i] = select(i, ...)
     end
     for i = needfix, n do
-        LOCAL_ToStringAllTemp[i] = tostring(select(i, ...));
+        LOCAL_ToStringAllTemp[i] = Format(select(i, ...))
     end
-    return unpack(LOCAL_ToStringAllTemp);
+    return unpack(LOCAL_ToStringAllTemp)
 end
 
 local LOCAL_PrintHandler =
     function(...)
-        DEFAULT_CHAT_FRAME:AddMessage(strjoin(" ", tostringall(...)));
+        DEFAULT_CHAT_FRAME:AddMessage(strjoin(" ", tostringall(...)))
     end
 
 function setprinthandler(func)
     if (type(func) ~= "function") then
-        error("Invalid print handler");
+        error("Invalid print handler")
     else
-        LOCAL_PrintHandler = func;
+        LOCAL_PrintHandler = func
     end
 end
 
-function getprinthandler() return LOCAL_PrintHandler; end
-
-local function print_inner(...)
-    forceinsecure();
-    local ok, err = pcall(LOCAL_PrintHandler, ...);
-    if (not ok) then
-        local func = geterrorhandler();
-        func(err);
-    end
-end
+function getprinthandler() return LOCAL_PrintHandler end
 
 function print(...)
-    securecall(pcall, print_inner, ...);
+	LOCAL_PrintHandler(...)
 end
