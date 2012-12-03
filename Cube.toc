@@ -31,3 +31,4 @@ Frames\LogView.Script.lua
 
 Guide\Guide.Designer.lua
 Guide\Guide.Script.lua
+Guide\Guide.Chapter.xml
