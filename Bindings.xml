@@ -9,11 +9,6 @@
 			IGAS.UIParent.Cube_Debug.Visible = not IGAS.UIParent.Cube_Debug.Visible
 		end
     </Binding>
-    <Binding name="CUBE_GUIDE">
-		if IGAS.UIParent.Cube_Guide then
-			IGAS.UIParent.Cube_Guide.Visible = not IGAS.UIParent.Cube_Guide.Visible
-		end
-    </Binding>
     <Binding name="CUBE_BUGLIST">
 		if IGAS.UIParent.Cube_BugList then
 			IGAS.UIParent.Cube_BugList.Visible = not IGAS.UIParent.Cube_BugList.Visible

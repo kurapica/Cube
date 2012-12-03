@@ -28,7 +28,3 @@ Frames\BugList.Designer.lua
 Frames\BugList.Script.lua
 Frames\LogView.Designer.lua
 Frames\LogView.Script.lua
-
-Guide\Guide.Designer.lua
-Guide\Guide.Script.lua
-Guide\Guide.Chapter.xml

@@ -33,7 +33,6 @@ GRY    ='|cffA0A0A0'
 -- Binding Text
 _G.BINDING_HEADER_CUBE = L["Cube"]
 _G.BINDING_NAME_CUBE_CODE = L["Simple Dev Tool"]
-_G.BINDING_NAME_CUBE_GUIDE = L["Developer's Guide"]
 _G.BINDING_NAME_CUBE_BUGLIST = L["Simple Bug List"]
 _G.BINDING_NAME_CUBE_DEBUG = L["Simple Debug Tool"]
 _G.BINDING_NAME_CUBE_LOGVIEW = L["Simple Log View"]
@@ -49,7 +48,6 @@ end
 
 function _Addon:OnSlashCmd()
 	Log(2, "/cube code  ("..L["Open the code editor"]..")")
-	Log(2, "/cube guide  ("..L["Open the developer's guide"]..")")
 	Log(2, "/cube bug   ("..L["Open the buglist"]..")")
 	Log(2, "/cube debug ("..L["Open the debug tool"]..")")
 	Log(2, "/cube log   ("..L["Open the log view"]..")")
