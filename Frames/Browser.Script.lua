@@ -94,6 +94,13 @@ function LoadUrl(data)
 		_History.Index = _History.Index - 1
 
 		data = _History[_History.Index]
+	elseif data == "Next" then
+		if not _History[_History.Index + 1] then
+			return
+		end
+
+		_History.Index = _History.Index + 1
+		data = _History[_History.Index]
 	else
 		if data == _History[_History.Index] then
 			return
@@ -121,7 +128,7 @@ end
 
 function BuildHeader(data)
 	local ns = IGAS
-	local header = BuildHref("Back") .. "　　　"
+	local header = BuildHref("Back") .. " | " .. BuildHref("Next") .. "　　　"
 
 	local isFirst = true
 
