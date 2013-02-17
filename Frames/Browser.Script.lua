@@ -126,6 +126,14 @@ function BuildHref(data, text)
 	end
 end
 
+function ParseInfo(content)
+	if content then
+		content = content:gsub("System%.[%._%w]*%w+", BuildHref)
+	end
+
+	return content
+end
+
 function BuildHeader(data)
 	local ns = IGAS
 	local header = BuildHref("Back") .. " | " .. BuildHref("Next") .. "　　　"
@@ -424,7 +432,7 @@ function BuildBody(data)
 									result = result .. "<br/><br/>　<cyan>Parameter</cyan> :"
 									for param, info in desc do
 										if info and info:len() > 0 then
-											result = result .. "<br/>　　" .. param .. " - " .. info
+											result = result .. "<br/>　　" .. param .. " - " .. ParseInfo(info)
 										else
 											result = result .. "<br/>　　" .. param
 										end
@@ -515,7 +523,7 @@ function BuildBody(data)
 							result = result .. "<br/><br/>　<cyan>Parameter</cyan> :"
 							for param, info in desc do
 								if info and info:len() > 0 then
-									result = result .. "<br/>　  " .. param .. " - " .. info
+									result = result .. "<br/>　  " .. param .. " - " .. ParseInfo(info)
 								else
 									result = result .. "<br/>　  " .. param
 								end
@@ -613,7 +621,7 @@ function BuildBody(data)
 							result = result .. "<br/><br/>　<cyan>Parameter</cyan> :"
 							for param, info in desc do
 								if info and info:len() > 0 then
-									result = result .. "<br/>　　" .. param .. " - " .. info
+									result = result .. "<br/>　　" .. param .. " - " .. ParseInfo(info)
 								else
 									result = result .. "<br/>　　" .. param
 								end
@@ -635,7 +643,7 @@ function BuildBody(data)
 							result = result .. "<br/><br/>　<cyan>Return</cyan> :"
 							for ret, info in desc do
 								if info and info:len() > 0 then
-									result = result .. "<br/>　　" .. ret .. " - " .. info
+									result = result .. "<br/>　　" .. ret .. " - " .. ParseInfo(info)
 								else
 									result = result .. "<br/>　　" .. ret
 								end
