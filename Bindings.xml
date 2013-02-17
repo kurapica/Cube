@@ -19,4 +19,9 @@
 			IGAS.UIParent.Cube_LogView.Visible = not IGAS.UIParent.Cube_LogView.Visible
 		end
     </Binding>
+    <Binding name="CUBE_BROWSER">
+		if IGAS.UIParent.Cube_Browser then
+			IGAS.UIParent.Cube_Browser.Visible = not IGAS.UIParent.Cube_Browser.Visible
+		end
+    </Binding>
 </Bindings>

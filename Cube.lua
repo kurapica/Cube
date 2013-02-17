@@ -36,6 +36,7 @@ _G.BINDING_NAME_CUBE_CODE = L["Simple Dev Tool"]
 _G.BINDING_NAME_CUBE_BUGLIST = L["Simple Bug List"]
 _G.BINDING_NAME_CUBE_DEBUG = L["Simple Debug Tool"]
 _G.BINDING_NAME_CUBE_LOGVIEW = L["Simple Log View"]
+_G.BINDING_NAME_CUBE_BROWSER = L["Simple Browser"]
 
 function _Addon:OnLoad()
 	-- SavedVariables
@@ -51,6 +52,7 @@ function _Addon:OnSlashCmd()
 	Log(2, "/cube bug   ("..L["Open the buglist"]..")")
 	Log(2, "/cube debug ("..L["Open the debug tool"]..")")
 	Log(2, "/cube log   ("..L["Open the log view"]..")")
+	Log(2, "/cube br   ("..L["Open the igas browser"]..")")
 end
 
 -- Functions
