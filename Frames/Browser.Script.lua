@@ -128,6 +128,7 @@ end
 
 function ParseInfo(content)
 	if content then
+		content = content:gsub("|", "||")
 		content = content:gsub("System%.[%._%w]*%w+", BuildHref)
 	end
 
@@ -136,7 +137,7 @@ end
 
 function BuildHeader(data)
 	local ns = IGAS
-	local header = BuildHref("Back") .. " | " .. BuildHref("Next") .. "　　　"
+	local header = BuildHref("Back", "&lt;&lt;&lt;") .. "　" .. BuildHref("Next", "&gt;&gt;&gt;") .. "　　　"
 
 	local isFirst = true
 
@@ -150,13 +151,13 @@ function BuildHeader(data)
 					isFirst = false
 					header = header .. BuildHref(ns, sname)
 				else
-					header = header .. " > " .. BuildHref(ns, sname)
+					header = header .. " &gt; " .. BuildHref(ns, sname)
 				end
 			else
 				if header == "" then
 					header = sname
 				else
-					header = header .. " > " .. sname
+					header = header .. " &gt; " .. sname
 				end
 
 				break
@@ -165,6 +166,84 @@ function BuildHeader(data)
 	end
 
 	return header
+end
+
+_Enums = {}
+_Structs = {}
+_Classes = {}
+_Interfaces = {}
+_Namespaces = {}
+
+function BuildSubNamespace(ns)
+	local result = ""
+
+	wipe(_Enums)
+	wipe(_Structs)
+	wipe(_Classes)
+	wipe(_Interfaces)
+	wipe(_Namespaces)
+
+	local subNS = GetSubNamespace(ns)
+
+	if subNS and next(subNS) then
+		for _, sns in ipairs(subNS) do
+			sns = ns[sns]
+
+			if IsEnum(sns) then
+				tinsert(_Enums, sns)
+			elseif IsStruct(sns) then
+				tinsert(_Structs, sns)
+			elseif IsInterface(sns) then
+				tinsert(_Interfaces, sns)
+			elseif IsClass(sns) then
+				tinsert(_Classes, sns)
+			else
+				tinsert(_Namespaces, sns)
+			end
+		end
+
+		if next(_Enums) then
+			result = result .. "<br/><br/>　<cyan>Sub Enum</cyan> :"
+
+			for _, sns in ipairs(_Enums) do
+				result = result .. "<br/>　　" .. BuildHref(sns)
+			end
+		end
+
+		if next(_Structs) then
+			result = result .. "<br/><br/>　<cyan>Sub Struct</cyan> :"
+
+			for _, sns in ipairs(_Structs) do
+				result = result .. "<br/>　　" .. BuildHref(sns)
+			end
+		end
+
+		if next(_Interfaces) then
+			result = result .. "<br/><br/>　<cyan>Sub Interface</cyan> :"
+
+			for _, sns in ipairs(_Interfaces) do
+				result = result .. "<br/>　　" .. BuildHref(sns)
+			end
+		end
+
+		if next(_Classes) then
+			result = result .. "<br/><br/>　<cyan>Sub Class</cyan> :"
+
+			for _, sns in ipairs(_Classes) do
+				result = result .. "<br/>　　" .. BuildHref(sns)
+			end
+		end
+
+		if next(_Namespaces) then
+			result = result .. "<br/><br/>　<cyan>Sub NameSpace</cyan> :"
+
+			for _, sns in ipairs(_Namespaces) do
+				result = result .. "<br/>　　" .. BuildHref(sns)
+			end
+		end
+	end
+
+	return result
 end
 
 function BuildBody(data)
@@ -207,13 +286,7 @@ function BuildBody(data)
 				local result = "<blue>[Struct]</blue> " .. BuildHref(ns) .. " :"
 
 				-- SubNameSpace
-				local subNS = GetSubNamespace(ns)
-				if subNS and next(subNS) then
-					result = result .. "<br/><br/>　<cyan>Sub NameSpace</cyan> :"
-					for _, sns in ipairs(subNS) do
-						result = result .. "<br/>　　" .. BuildHref(ns[sns], sns)
-					end
-				end
+				result = result .. BuildSubNamespace(ns)
 
 				if GetStructType(ns) == "MEMBER" then
 					-- Part
@@ -329,13 +402,7 @@ function BuildBody(data)
 					end
 
 					-- SubNameSpace
-					local subNS = GetSubNamespace(ns)
-					if subNS and next(subNS) then
-						result = result .. "<br/><br/>　<cyan>Sub NameSpace</cyan> :"
-						for _, sns in ipairs(subNS) do
-							result = result .. "<br/>　　" .. BuildHref(ns[sns], sns)
-						end
-					end
+					result = result .. BuildSubNamespace(ns)
 
 					-- Script
 					local scripts = GetScripts(ns, true)
@@ -514,7 +581,7 @@ function BuildBody(data)
 								end
 							end
 
-							result = result .. ")<br/>　      -- Handle the script<br/>　  end"
+							result = result .. ")<br/>　  　  -- Handle the script<br/>　  end"
 						end
 
 						-- Params
@@ -557,7 +624,7 @@ function BuildBody(data)
 								typestring = typestring:sub(3, -1)
 							end
 
-							result = result .. "<br/>　Type :<br/>　　" .. typestring
+							result = result .. "<br/><br/>　<cyan>Type</cyan> :<br/>　　" .. typestring
 						end
 
 						-- Readonly
@@ -681,13 +748,7 @@ function BuildBody(data)
 				end
 
 				-- SubNameSpace
-				local subNS = GetSubNamespace(ns)
-				if subNS and next(subNS) then
-					result = result .. "<br/><br/>　<cyan>Sub NameSpace</cyan> :"
-					for _, sns in ipairs(subNS) do
-						result = result .. "<br/>　　" .. BuildHref(ns[sns], sns)
-					end
-				end
+				result = result .. BuildSubNamespace(ns)
 
 				return result
 			end
