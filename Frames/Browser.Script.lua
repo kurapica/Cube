@@ -362,6 +362,7 @@ function BuildBody(data)
 				if not name or name == "" then
 					local result
 					local desc
+					local hasDocument
 
 					if IsInterface(ns) then
 						result = "<blue>[Interface]</blue> " .. BuildHref(ns) .. " :"
@@ -409,7 +410,18 @@ function BuildBody(data)
 					if scripts and next(scripts) then
 						result = result .. "<br/><br/>　<cyan>Script</cyan> :"
 						for _, sc in pairs(scripts) do
-							result = result .. "<br/>　　" .. BuildHref(GetFullName(ns).."."..sc.."-script", sc)
+							hasDocument = HasDocument(ns, "script", prop)
+
+							-- Desc
+							desc = hasDocument and GetDocument(ns, "script", name, "desc")
+							desc = desc and desc()
+							if desc then
+								desc = desc:gsub("<br>", "<br/>　　　　")
+							else
+								desc = ""
+							end
+
+							result = result .. "<br/>　　" .. BuildHref(GetFullName(ns).."."..sc.."-script", sc) .. "　" .. desc
 						end
 					end
 
@@ -418,7 +430,18 @@ function BuildBody(data)
 					if props and next(props) then
 						result = result .. "<br/><br/>　<cyan>Property</cyan> :"
 						for _, prop in pairs(props) do
-							result = result .. "<br/>　　" .. BuildHref(GetFullName(ns).."."..prop.."-property", prop)
+							hasDocument = HasDocument(ns, "property", prop)
+
+							-- Desc
+							desc = hasDocument and GetDocument(ns, "property", name, "desc")
+							desc = desc and desc()
+							if desc then
+								desc = desc:gsub("<br>", "<br/>　　　　")
+							else
+								desc = ""
+							end
+
+							result = result .. "<br/>　　" .. BuildHref(GetFullName(ns).."."..prop.."-property", prop) .. "　" .. desc
 						end
 					end
 
@@ -427,7 +450,18 @@ function BuildBody(data)
 					if methods and next(methods) then
 						result = result .. "<br/><br/>　<cyan>Method</cyan> :"
 						for _, method in pairs(methods) do
-							result = result .. "<br/>　　" .. BuildHref(GetFullName(ns).."."..method.."-method", method)
+							hasDocument = HasDocument(ns, "method", prop)
+
+							-- Desc
+							desc = hasDocument and GetDocument(ns, "method", name, "desc")
+							desc = desc and desc()
+							if desc then
+								desc = desc:gsub("<br>", "<br/>　　　　")
+							else
+								desc = ""
+							end
+
+							result = result .. "<br/>　　" .. BuildHref(GetFullName(ns).."."..method.."-method", method) .. "　" .. desc
 						end
 					end
 
