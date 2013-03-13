@@ -27,9 +27,9 @@ HTML_NO_DOCUMENT = [[
 The document system in IGAS is disabled, please enable it to use the browser :<br/><br/>
 
 Open the /World of Warcraft/Interface/AddOns/IGAS/IGAS.lua, find<br/><br/>
-<lime>System.Reflector.EnableDocumentSystem(false)</lime><br/><br/>
+<lime>System.Reflector.EnableDocumentSystem(<red>false</red>)</lime><br/><br/>
 Change to<br/><br/>
-<lime>System.Reflector.EnableDocumentSystem(true)</lime><br/><br/>
+<lime>System.Reflector.EnableDocumentSystem(<red>true</red>)</lime><br/><br/>
 Save the file, then reload the game.
 </p>
 </body>
@@ -410,18 +410,18 @@ function BuildBody(data)
 					if scripts and next(scripts) then
 						result = result .. "<br/><br/>　<cyan>Script</cyan> :"
 						for _, sc in pairs(scripts) do
-							hasDocument = HasDocument(ns, "script", prop)
+							hasDocument = HasDocument(ns, "script", sc)
 
 							-- Desc
-							desc = hasDocument and GetDocument(ns, "script", name, "desc")
+							desc = hasDocument and GetDocument(ns, "script", sc, "desc")
 							desc = desc and desc()
 							if desc then
-								desc = desc:gsub("<br>", "<br/>　　　　")
+								desc = "　-　" .. desc:gsub("<br>", "<br/>　　　　")
 							else
 								desc = ""
 							end
 
-							result = result .. "<br/>　　" .. BuildHref(GetFullName(ns).."."..sc.."-script", sc) .. "　" .. desc
+							result = result .. "<br/>　　" .. BuildHref(GetFullName(ns).."."..sc.."-script", sc) .. desc
 						end
 					end
 
@@ -433,15 +433,15 @@ function BuildBody(data)
 							hasDocument = HasDocument(ns, "property", prop)
 
 							-- Desc
-							desc = hasDocument and GetDocument(ns, "property", name, "desc")
+							desc = hasDocument and GetDocument(ns, "property", prop, "desc")
 							desc = desc and desc()
 							if desc then
-								desc = desc:gsub("<br>", "<br/>　　　　")
+								desc = "　-　" .. desc:gsub("<br>", "<br/>　　　　")
 							else
 								desc = ""
 							end
 
-							result = result .. "<br/>　　" .. BuildHref(GetFullName(ns).."."..prop.."-property", prop) .. "　" .. desc
+							result = result .. "<br/>　　" .. BuildHref(GetFullName(ns).."."..prop.."-property", prop) .. desc
 						end
 					end
 
@@ -450,18 +450,18 @@ function BuildBody(data)
 					if methods and next(methods) then
 						result = result .. "<br/><br/>　<cyan>Method</cyan> :"
 						for _, method in pairs(methods) do
-							hasDocument = HasDocument(ns, "method", prop)
+							hasDocument = HasDocument(ns, "method", method)
 
 							-- Desc
-							desc = hasDocument and GetDocument(ns, "method", name, "desc")
+							desc = hasDocument and GetDocument(ns, "method", method, "desc")
 							desc = desc and desc()
 							if desc then
-								desc = desc:gsub("<br>", "<br/>　　　　")
+								desc = "　-　" .. desc:gsub("<br>", "<br/>　　　　")
 							else
 								desc = ""
 							end
 
-							result = result .. "<br/>　　" .. BuildHref(GetFullName(ns).."."..method.."-method", method) .. "　" .. desc
+							result = result .. "<br/>　　" .. BuildHref(GetFullName(ns).."."..method.."-method", method) .. desc
 						end
 					end
 
@@ -484,6 +484,7 @@ function BuildBody(data)
 
 					-- Constructor
 					local isFormat = false
+					desc = nil
 
 					if IsClass(ns) then
 						while ns do
@@ -746,7 +747,7 @@ function BuildBody(data)
 								if info and info:len() > 0 then
 									result = result .. "<br/>　　" .. ret .. " - " .. ParseInfo(info)
 								else
-									result = result .. "<br/>　　" .. ret
+									result = result .. "<br/>　　" .. ParseInfo(ret)
 								end
 							end
 						end
