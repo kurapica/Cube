@@ -1,6 +1,6 @@
-﻿---------------------------------------------------------------------------------------------------
+﻿-----------------------------------
 -- Cube Frame Designer
----------------------------------------------------------------------------------------------------
+-----------------------------------
 
 -- Addon Initialize
 IGAS:NewAddon "Cube.Mdl_Cube_Main"
@@ -156,6 +156,7 @@ else
 	btnUnit:SetWidth(60)
 end
 btnUnit:SetPoint("RIGHT", run, "LEFT", -6, 0)
+btnUnit.Visible = false	-- block now
 
 -- Result Frame
 frmResult = Form("frmResult", Cube_Main)

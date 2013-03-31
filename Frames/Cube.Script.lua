@@ -1,13 +1,13 @@
-﻿---------------------------------------------------------------------------------------------------
+﻿-----------------------------------
 -- Cube Frame Script
----------------------------------------------------------------------------------------------------
+-----------------------------------
 
 -- Addon Initialize
 IGAS:NewAddon "Cube.Mdl_Cube_Main"
 
-local _LoadedModule = setmetatable({}, {__mode = "k"})
+_LoadedModule = setmetatable({}, {__mode = "k"})
 
-local lUnit = _Addon:GetModule("lUnit")
+lUnit = _Addon:GetModule("lUnit")
 
 -- Script
 _Addon.OnSlashCmd = _Addon.OnSlashCmd + function(self, option)
@@ -16,6 +16,13 @@ _Addon.OnSlashCmd = _Addon.OnSlashCmd + function(self, option)
 		return true
 	end
 end
+
+_ModuleType = {
+	"Localization",
+	"Definition",
+	"Script",
+	"Frame",
+}
 
 function _M:OnLoad()
 	_PlayerName = GetRealmName().."-"..GetUnitName("player")
@@ -46,6 +53,14 @@ function _M:OnLoad()
 		CubeSave.CodeList = nil
 	end
 
+	-- Clear Addon for the new version
+	if not CubeSave.CodeTree[2].StudioVersion then
+		CubeSave.CodeTree[2].StudioVersion = 1
+
+		-- Clear directly
+		wipe(CubeSave.CodeTree[2].StudioVersion.Childs)
+	end
+
 	fileTree:SetTree(CubeSave.CodeTree)
 	fileTree:GetNode(1).ToggleState = true
 
@@ -74,16 +89,16 @@ end
 function toggleBtn:OnClick()
 	if fileTree.Visible then
 		fileTree.Visible = false
-		toggleBtn:SetNormalTexture("Interface\\BUTTONS\\UI-SpellbookIcon-PrevPage-Up")
-		toggleBtn:SetPushedTexture("Interface\\BUTTONS\\UI-SpellbookIcon-PrevPage-Down")
-		toggleBtn:SetDisabledTexture("Interface\\BUTTONS\\UI-SpellbookIcon-PrevPage-Disabled")
-		toggleBtn:SetHighlightTexture("Interface\\Buttons\\UI-Common-MouseHilight", "ADD")
+		self:SetNormalTexture("Interface\\BUTTONS\\UI-SpellbookIcon-PrevPage-Up")
+		self:SetPushedTexture("Interface\\BUTTONS\\UI-SpellbookIcon-PrevPage-Down")
+		self:SetDisabledTexture("Interface\\BUTTONS\\UI-SpellbookIcon-PrevPage-Disabled")
+		self:SetHighlightTexture("Interface\\Buttons\\UI-Common-MouseHilight", "ADD")
 	else
 		fileTree.Visible = true
-		toggleBtn:SetNormalTexture("Interface\\BUTTONS\\UI-SpellbookIcon-NextPage-Up")
-		toggleBtn:SetPushedTexture("Interface\\BUTTONS\\UI-SpellbookIcon-NextPage-Down")
-		toggleBtn:SetDisabledTexture("Interface\\BUTTONS\\UI-SpellbookIcon-NextPage-Disabled")
-		toggleBtn:SetHighlightTexture("Interface\\Buttons\\UI-Common-MouseHilight", "ADD")
+		self:SetNormalTexture("Interface\\BUTTONS\\UI-SpellbookIcon-NextPage-Up")
+		self:SetPushedTexture("Interface\\BUTTONS\\UI-SpellbookIcon-NextPage-Down")
+		self:SetDisabledTexture("Interface\\BUTTONS\\UI-SpellbookIcon-NextPage-Disabled")
+		self:SetHighlightTexture("Interface\\Buttons\\UI-Common-MouseHilight", "ADD")
 	end
 end
 
