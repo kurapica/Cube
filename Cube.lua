@@ -38,6 +38,9 @@ _G.BINDING_NAME_CUBE_DEBUG = L["Simple Debug Tool"]
 _G.BINDING_NAME_CUBE_LOGVIEW = L["Simple Log View"]
 _G.BINDING_NAME_CUBE_BROWSER = L["Simple Browser"]
 
+_G.Cube = {}
+Cube = _G.Cube
+
 function _Addon:OnLoad()
 	-- SavedVariables
 	self:AddSavedVariable("CubeSave")

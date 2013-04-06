@@ -24,7 +24,15 @@ _ModuleType = {
 	"Frame",
 }
 
-function _M:OnLoad()
+_NewAddonFile = [[
+IGAS:NewAddon "@Addon"
+
+function OnLoad(self)
+
+end
+]]
+
+function OnLoad(self)
 	_PlayerName = GetRealmName().."-"..GetUnitName("player")
 
 	CubeSave.CodeTree = CubeSave.CodeTree or {
@@ -58,14 +66,21 @@ function _M:OnLoad()
 		CubeSave.CodeTree[2].StudioVersion = 1
 
 		-- Clear directly
-		wipe(CubeSave.CodeTree[2].StudioVersion.Childs)
+		wipe(CubeSave.CodeTree[2].Childs)
 	end
 
+	-- Save DB for addons defined in the Cube
+	CubeSave.AddonSaveDB = CubeSave.AddonSaveDB or {}
+	CubeSavePerCharacter.AddonSaveDB = CubeSavePerCharacter.AddonSaveDB or {}
+
+	-- Build tree
 	fileTree:SetTree(CubeSave.CodeTree)
 	fileTree:GetNode(1).ToggleState = true
 
+	-- Register Ctrl+S to save the code
 	code:RegisterControlKey("S")
 
+	-- Load the settings
 	chkShowRow.Checked = not CubeSave.NotShowRowNumber
 	code.ShowLineNumber = not CubeSave.NotShowRowNumber
 
@@ -76,6 +91,50 @@ function _M:OnLoad()
 	if CubeSave.CubeMainLocation then
 		Cube_Main.Location = CubeSave.CubeMainLocation
 	end
+
+	-- Loading in-game addons
+	local node = fileTree:GetNode(2)
+	local subNode
+
+	for i = 1, node.ChildNodeCount do
+		subNode = node:GetNode(i)
+		if subNode.MetaData[_PlayerName] then
+			LoadAddon(subNode)
+		end
+	end
+end
+
+function OnEnable(self)
+	self.OnEnable = nil
+
+	-- Enabling in-game addons
+	local node = fileTree:GetNode(2)
+	local subNode
+
+	for i = 1, node.ChildNodeCount do
+		subNode = node:GetNode(i)
+		if subNode.MetaData[_PlayerName] then
+			EnableAddon(subNode)
+		end
+	end
+
+	-- Loading the snippets
+	self:ThreadCall(function(self)
+		System.Threading.Sleep(2)
+
+		local node, subNode
+
+		-- Loading Common code
+		node = fileTree:GetNode(1)
+
+		for i = 1, node.ChildNodeCount do
+			subNode = node:GetNode(i)
+			if subNode.MetaData[_PlayerName] then
+				LoadSnippet(subNode)
+			end
+		end
+
+	end)
 end
 
 function Cube_Main:OnSizeChanged()
@@ -99,12 +158,6 @@ function toggleBtn:OnClick()
 		self:SetPushedTexture("Interface\\BUTTONS\\UI-SpellbookIcon-NextPage-Down")
 		self:SetDisabledTexture("Interface\\BUTTONS\\UI-SpellbookIcon-NextPage-Disabled")
 		self:SetHighlightTexture("Interface\\Buttons\\UI-Common-MouseHilight", "ADD")
-	end
-end
-
-function _M:OnEnable()
-	if initTimer then
-		initTimer.Interval = 3
 	end
 end
 
@@ -144,15 +197,13 @@ function fileTree:OnNodeFunctionClick(func, node)
 				if type(name) == "string" then
 					name = strtrim(name)
 
-					local parent = fileTree:GetNode(1)
-
-					for i = 1, parent.ChildNodeCount do
-						if parent:GetNode(i).Text == name then
-							return parent:GetNode(i):Select()
+					for i = 1, node.ChildNodeCount do
+						if node:GetNode(i).Text == name then
+							return node:GetNode(i):Select()
 						end
 					end
 
-					local node = parent:AddNode{Text = name, Content = "", FunctionName = "Del",}
+					node = node:AddNode{Text = name, Content = "", FunctionName = "Del",}
 
 					return node:Select()
 				end
@@ -162,15 +213,13 @@ function fileTree:OnNodeFunctionClick(func, node)
 				if type(name) == "string" then
 					name = strtrim(name)
 
-					local parent = fileTree:GetNode(2)
-
-					for i = 1, parent.ChildNodeCount do
-						if parent:GetNode(i).Text == name then
-							return parent:GetNode(i):Select()
+					for i = 1, node.ChildNodeCount do
+						if node:GetNode(i).Text == name then
+							return node:GetNode(i):Select()
 						end
 					end
 
-					local node = parent:AddNode{Text = name, Content = ("IGAS:NewAddon \"%s\"\n\n"):format(name), FunctionName = "Del,Add", ChildOrderChangable = true, }
+					node = node:AddNode{Text = name, Content = ("IGAS:NewAddon \"%s\"\n\n"):format(name), FunctionName = "Del,Add", ChildOrderChangable = true, }
 
 					return node:Select()
 				end
@@ -218,35 +267,6 @@ end
 function chkShowRow:OnValueChanged(value)
 	CubeSave.NotShowRowNumber = not value
 	code.ShowLineNumber = not CubeSave.NotShowRowNumber
-end
-
-function initTimer:OnTimer()
-	local node, subNode
-
-	self.Interval = 0
-
-	-- Loading Common code
-	node = fileTree:GetNode(1)
-
-	for i = 1, node.ChildNodeCount do
-		subNode = node:GetNode(i)
-		if subNode.MetaData[_PlayerName] then
-			LoadSnippet(subNode)
-		end
-	end
-
-	-- Loading Addon code
-	node = fileTree:GetNode(2)
-
-	for i = 1, node.ChildNodeCount do
-		subNode = node:GetNode(i)
-		LoadAddon(subNode)
-		EnableAddon(subNode)
-	end
-
-	self:Dispose()
-
-	initTimer = nil
 end
 
 function reset:OnClick()
@@ -531,7 +551,7 @@ function EnableAddon(node, flag)
 	end
 end
 
-function _G.CubeLog(...)
+function Cube:Log(...)
 	local msg = strjoin(" ", tostringall(...))
 
 	if txtLog.Text and txtLog.Text ~= "" then
@@ -540,4 +560,8 @@ function _G.CubeLog(...)
 		txtLog.Text = msg.."\n"
 	end
 	frmLog.Visible = true
+end
+
+function Cube:AddSavedVariable(...)
+	-- body
 end

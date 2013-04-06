@@ -1,10 +1,8 @@
-﻿-----------------------------------
--- Cube Frame Designer
------------------------------------
-
--- Addon Initialize
 IGAS:NewAddon "Cube.Mdl_Cube_Main"
 
+-----------------------------------
+-- Cube Main Form
+-----------------------------------
 local width
 
 -- Main Form
@@ -13,9 +11,6 @@ Cube_Main.Height = 480
 Cube_Main.Width = 560
 Cube_Main.Caption = "Cube - "..L["Simple Dev Tool"]
 Cube_Main.Visible = false
-
--- Timer
-initTimer = Timer("InitTimer", Cube_Main)
 
 -- File Tree
 fileTree = TreeView("FileTree", Cube_Main)
@@ -193,3 +188,8 @@ frmLog:SetPoint("TOPRIGHT", Cube_Main, "BOTTOMRIGHT")
 txtLog = MultiLineTextBox("Result", frmLog)
 txtLog:SetPoint("TOPLEFT", frmLog, "TOPLEFT", 4, -4)
 txtLog:SetPoint("BOTTOMRIGHT", frmLog, "BOTTOMRIGHT", -4, 4)
+
+-----------------------------------
+-- New Addon Form
+-----------------------------------
+frmNewAddon = Form("")
