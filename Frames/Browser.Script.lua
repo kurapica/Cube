@@ -487,6 +487,8 @@ function BuildBody(data)
 					desc = nil
 
 					if IsClass(ns) then
+						local ons = ns
+
 						while ns do
 							isFormat = true
 
@@ -545,6 +547,22 @@ function BuildBody(data)
 							end
 
 							ns = GetSuperClass(ns)
+						end
+
+						ns = ons
+					end
+
+					-- Usage
+					if IsInterface(ns) then
+						desc = GetDocument(ns, "interface", GetName(ns), "usage")
+					else
+						desc = GetDocument(ns, "class", GetName(ns), "usage")
+					end
+
+					if desc then
+						result = result .. "<br/><br/>　<cyan>Usage</cyan> :"
+						for usage in desc do
+							result = result .. "<br/>　　" .. usage:gsub("<br>", "<br/>　　"):gsub("  ", "　"):gsub("\t", "　　")
 						end
 					end
 
@@ -760,7 +778,7 @@ function BuildBody(data)
 					if desc then
 						result = result .. "<br/><br/>　<cyan>Usage</cyan> :"
 						for usage in desc do
-							result = result .. "<br/>　　" .. usage:gsub("<br>", "<br/>　　")
+							result = result .. "<br/>　　" .. usage:gsub("<br>", "<br/>　　"):gsub("  ", "　"):gsub("\t", "　　")
 						end
 					end
 
