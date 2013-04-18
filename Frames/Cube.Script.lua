@@ -18,10 +18,22 @@ _Addon.OnSlashCmd = _Addon.OnSlashCmd + function(self, option)
 end
 
 _ModuleType = {
-	L"Localization",
-	L"Definition",
-	L"Script",
-	L"Frame",
+	"Localization",
+	"Definition",
+	"Module",
+	"Frame",
+}
+
+_LocaleType = {
+	"enUS",
+    "frFR",
+    "deDE",
+    "koKR",
+    "zhCN",
+    "zhTW",
+    "ruRU",
+    "esES",
+    "esMX",
 }
 
 _NewAddonFile = [[
@@ -29,6 +41,9 @@ IGAS:NewAddon "%s"
 
 import "System"
 
+%s-----------------------------------
+-- Addon Event Handler
+-----------------------------------
 function OnLoad(self)
 %s
 end
@@ -36,7 +51,8 @@ end
 function OnEnable(self)
 
 end
-]]
+
+%s]]
 
 _NewAddonDB = [[
 	-- _DB is used to store datas for the account
@@ -48,21 +64,60 @@ _NewAddonDBChar = [[
 	_DBChar = Cube:AddSavedVariablePerCharacter(_Name)
 ]]
 
+_NewSlashCommand = [[
+	-- Register a slash command
+	self:AddSlashCmd("%s")
+]]
+
+_NewSlashHandler = [[
+function OnSlashCmd(self, option, info)
+	-- for command /cmd hi some information
+	-- option is 'hi'
+	-- info is 'some information'
+end
+]]
+
 _NewAddonLocale = [[
-	-- L is used to store localization strings
-	L = Locale(_Name)
+-----------------------------------
+-- Localization manager
+-----------------------------------
+L = Locale(_Name)
 ]]
 
 _NewAddonLogger = [[
-	-- Log is used to control messages
-	Log = Logger(_Name)
+-----------------------------------
+-- Logger
+-----------------------------------
+Log = Logger(_Name)
 
-	Log.LogLevel = 2
+Log.LogLevel = 2
 
-	Log:SetPrefix(1, System.Widget.FontColor.RED .. "[" .. _Name .. ":Debug]" .. System.Widget.FontColor.CLOSE)
-	Log:SetPrefix(2, "[" .. _Name .. ":Info]")
+Log:SetPrefix(1, System.Widget.FontColor.RED .. "[" .. _Name .. ":Debug]" .. System.Widget.FontColor.CLOSE)
+Log:SetPrefix(2, "[" .. _Name .. ":Info]")
 
-	Log:AddHandler(print)
+Log:AddHandler(print)
+]]
+
+_NewLocalizationFile = [[
+IGAS:NewAddon "%s"
+
+if GetLocale() ~= "%s" then return end
+
+]]
+
+_NewModuleFile = [[
+IGAS:NewAddon "%s.%s"
+
+-----------------------------------
+-- Module Event Handler
+-----------------------------------
+function OnLoad(self)
+
+end
+
+function OnEnable(self)
+
+end
 ]]
 
 function OnLoad(self)
@@ -220,7 +275,17 @@ end
 function fileTree:OnNodeFunctionClick(func, node)
 	if func == "Del" then
 		if IGAS:MsgBox(L["Do you want delete %s."]:format(GetTitle(node)), "n") then
-			node:Dispose()
+			if node.Level == 2 and node.Parent.Index == 1 then
+				-- Dispose snippets directly
+				node:Dispose()
+			else
+				-- Dispose the addon
+				if _LoadedModule[node] then
+					_LoadedModule[node]:Dispose()
+				end
+
+				node:Dispose()
+			end
 		end
 	elseif func == "Add" then
 		if node.Level == 1 then
@@ -256,6 +321,20 @@ function fileTree:OnNodeFunctionClick(func, node)
 						end
 					end
 
+					local head = ""
+
+					if IGAS:MsgBox(L["Need localization features?"], "n") then
+						head = head .. _NewAddonLocale
+					end
+
+					if IGAS:MsgBox(L["Need Logger to control messages?"], "n") then
+						if head ~= "" then
+							head = head .. "\n"
+						end
+
+						head = head .. _NewAddonLogger
+					end
+
 					local content = ""
 
 					if IGAS:MsgBox(L["Need saved variable for account?"], "n") then
@@ -270,24 +349,20 @@ function fileTree:OnNodeFunctionClick(func, node)
 						content = content .. _NewAddonDBChar
 					end
 
-					if IGAS:MsgBox(L["Need localization features?"], "n") then
+					local slashCmd = IGAS:MsgBox(L["Need a slash command?"], "ic")
+					local handler = ""
+
+					if slashCmd and slashCmd ~= "" then
 						if content ~= "" then
 							content = content .. "\n"
 						end
 
-						content = content .. _NewAddonLocale
+						content = content .. _NewSlashCommand:format(slashCmd)
+
+						handler = _NewSlashHandler
 					end
 
-					if IGAS:MsgBox(L["Need Logger to control messages?"], "n") then
-						if content ~= "" then
-							content = content .. "\n"
-						end
-
-						content = content .. _NewAddonLogger
-					end
-
-
-					node = node:AddNode{Text = name, Content = _NewAddonFile:format(name, content), FunctionName = "Del,Add", ChildOrderChangable = true, }
+					node = node:AddNode{Text = name, Content = _NewAddonFile:format(name, head, content, handler), FunctionName = "Del,Add", ChildOrderChangable = true, }
 
 					return node:Select()
 				end
@@ -306,11 +381,11 @@ function fileTree:OnNodeFunctionClick(func, node)
 					end
 				end
 
-				local mtype = IGAS:MsgBox(L["Please select the module's type"], _ModuleType)
+				local mtype = IGAS:MsgBox(L["Please select the module's type"], "c", _ModuleType)
 
 				if not mtype or mtype == "" then return end
 
-				node = parent:AddNode{Text = name, Content =  ("IGAS:NewAddon \"%s.%s\"\n\n"):format(GetTitle(parent), name), FunctionName = "Del,Add", ChildOrderChangable = true, }
+				node = parent:AddNode{Text = name, Content =  ("IGAS:NewAddon \"%s.%s\"\n\n"):format(GetTitle(parent), name), FunctionName = "Del", ChildOrderChangable = true, }
 
 				return node:Select()
 			end
