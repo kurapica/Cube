@@ -18,18 +18,51 @@ _Addon.OnSlashCmd = _Addon.OnSlashCmd + function(self, option)
 end
 
 _ModuleType = {
-	"Localization",
-	"Definition",
-	"Script",
-	"Frame",
+	L"Localization",
+	L"Definition",
+	L"Script",
+	L"Frame",
 }
 
 _NewAddonFile = [[
-IGAS:NewAddon "@Addon"
+IGAS:NewAddon "%s"
+
+import "System"
 
 function OnLoad(self)
+%s
+end
+
+function OnEnable(self)
 
 end
+]]
+
+_NewAddonDB = [[
+	-- _DB is used to store datas for the account
+	_DB = Cube:AddSavedVariable(_Name)
+]]
+
+_NewAddonDBChar = [[
+	-- _DBChar is used to store datas for the character
+	_DBChar = Cube:AddSavedVariablePerCharacter(_Name)
+]]
+
+_NewAddonLocale = [[
+	-- L is used to store localization strings
+	L = Locale(_Name)
+]]
+
+_NewAddonLogger = [[
+	-- Log is used to control messages
+	Log = Logger(_Name)
+
+	Log.LogLevel = 2
+
+	Log:SetPrefix(1, System.Widget.FontColor.RED .. "[" .. _Name .. ":Debug]" .. System.Widget.FontColor.CLOSE)
+	Log:SetPrefix(2, "[" .. _Name .. ":Info]")
+
+	Log:AddHandler(print)
 ]]
 
 function OnLoad(self)
@@ -213,13 +246,48 @@ function fileTree:OnNodeFunctionClick(func, node)
 				if type(name) == "string" then
 					name = strtrim(name)
 
+					if IGAS:GetAddon(name) then
+						return IGAS:MsgBox(L["There is an addon existed with that name."])
+					end
+
 					for i = 1, node.ChildNodeCount do
 						if node:GetNode(i).Text == name then
 							return node:GetNode(i):Select()
 						end
 					end
 
-					node = node:AddNode{Text = name, Content = ("IGAS:NewAddon \"%s\"\n\n"):format(name), FunctionName = "Del,Add", ChildOrderChangable = true, }
+					local content = ""
+
+					if IGAS:MsgBox(L["Need saved variable for account?"], "n") then
+						content = _NewAddonDB
+					end
+
+					if IGAS:MsgBox(L["Need saved variable for character?"], "n") then
+						if content ~= "" then
+							content = content .. "\n"
+						end
+
+						content = content .. _NewAddonDBChar
+					end
+
+					if IGAS:MsgBox(L["Need localization features?"], "n") then
+						if content ~= "" then
+							content = content .. "\n"
+						end
+
+						content = content .. _NewAddonLocale
+					end
+
+					if IGAS:MsgBox(L["Need Logger to control messages?"], "n") then
+						if content ~= "" then
+							content = content .. "\n"
+						end
+
+						content = content .. _NewAddonLogger
+					end
+
+
+					node = node:AddNode{Text = name, Content = _NewAddonFile:format(name, content), FunctionName = "Del,Add", ChildOrderChangable = true, }
 
 					return node:Select()
 				end
@@ -237,6 +305,10 @@ function fileTree:OnNodeFunctionClick(func, node)
 						return parent:GetNode(i):Select()
 					end
 				end
+
+				local mtype = IGAS:MsgBox(L["Please select the module's type"], _ModuleType)
+
+				if not mtype or mtype == "" then return end
 
 				node = parent:AddNode{Text = name, Content =  ("IGAS:NewAddon \"%s.%s\"\n\n"):format(GetTitle(parent), name), FunctionName = "Del,Add", ChildOrderChangable = true, }
 
@@ -562,6 +634,18 @@ function Cube:Log(...)
 	frmLog.Visible = true
 end
 
-function Cube:AddSavedVariable(...)
-	-- body
+function Cube:AddSavedVariable(name)
+	if type(name) ~= "string" then return end
+
+	CubeSave.AddonSaveDB[name] = CubeSave.AddonSaveDB[name] or {}
+
+	return CubeSave.AddonSaveDB[name]
+end
+
+function Cube:AddSavedVariablePerCharacter(name)
+	if type(name) ~= "string" then return end
+
+	CubeSavePerCharacter.AddonSaveDB[name] = CubeSavePerCharacter.AddonSaveDB[name] or {}
+
+	return CubeSavePerCharacter.AddonSaveDB[name]
 end

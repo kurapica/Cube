@@ -192,4 +192,4 @@ txtLog:SetPoint("BOTTOMRIGHT", frmLog, "BOTTOMRIGHT", -4, 4)
 -----------------------------------
 -- New Addon Form
 -----------------------------------
-frmNewAddon = Form("")
+
