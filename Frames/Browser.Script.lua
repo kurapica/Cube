@@ -763,7 +763,7 @@ function BuildBody(data)
 							result = result .. "<br/><br/>　<cyan>Return</cyan> :"
 							for ret, info in desc do
 								if info and info:len() > 0 then
-									result = result .. "<br/>　　" .. ret .. " - " .. ParseInfo(info)
+									result = result .. "<br/>　　" .. ParseInfo(ret) .. " - " .. ParseInfo(info)
 								else
 									result = result .. "<br/>　　" .. ParseInfo(ret)
 								end
