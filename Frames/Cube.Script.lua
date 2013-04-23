@@ -304,7 +304,7 @@ function fileTree:OnNodeFunctionClick(func, node)
 	elseif func == "Add" then
 		if node.Level == 1 then
 			if node.Index == 1 then
-				local name = IGAS:MsgBox(L["Please input the snipet's name"], "ic")
+				local name = IGAS:MsgBox(L["Please input the snippet's name"], "ic")
 
 				if type(name) == "string" then
 					name = strtrim(name)

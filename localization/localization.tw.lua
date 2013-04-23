@@ -54,7 +54,7 @@ L["Reset"] = "重置"
 L["Show Row Number"] = "顯示行號"
 
 L["Do you want delete %s."] = "是否確認刪除%s"
-L["Please input the snipet's name"] = "請輸入代碼段的名稱"
+L["Please input the snippet's name"] = "請輸入代碼段的名稱"
 L["Please input the addon's name"] = "請輸入插件的名稱"
 L["Please input the module's name"] = "請輸入模塊的名稱"
 L["Can't save code."] = "無法保存"
