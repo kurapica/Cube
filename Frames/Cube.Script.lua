@@ -19,7 +19,7 @@ end
 
 _ModuleType = {
 	"Localization",
-	"Definition",
+	--"Definition",
 	"Module",
 	"Frame",
 }
@@ -87,13 +87,15 @@ L = Locale(_Name)
 _NewAddonLogger = [[
 -----------------------------------
 -- Logger
+-- Using Debug("some message") to send debug messages
+-- Using Info("some message") to send informations
 -----------------------------------
 Log = Logger(_Name)
 
 Log.LogLevel = 2
 
-Log:SetPrefix(1, System.Widget.FontColor.RED .. "[" .. _Name .. ":Debug]" .. System.Widget.FontColor.CLOSE)
-Log:SetPrefix(2, "[" .. _Name .. ":Info]")
+Log:SetPrefix(1, System.Widget.FontColor.RED .. "[" .. _Name .. ":Debug]" .. System.Widget.FontColor.CLOSE, "Debug")
+Log:SetPrefix(2, "[" .. _Name .. ":Info]", "Info")
 
 Log:AddHandler(print)
 ]]
@@ -118,6 +120,18 @@ end
 function OnEnable(self)
 
 end
+]]
+
+_NewFrameDesigner = [[
+IGAS:NewAddon "%s.%s"
+
+import "System.Widget"
+
+]]
+
+_NewFrameScript = [[
+IGAS:NewAddon "%s.%s"
+
 ]]
 
 function OnLoad(self)
@@ -357,7 +371,7 @@ function fileTree:OnNodeFunctionClick(func, node)
 							content = content .. "\n"
 						end
 
-						content = content .. _NewSlashCommand:format(slashCmd)
+						content = content .. _NewSlashCommand:format(slashCmd:gsub("%s*,%s*", "\", \""))
 
 						handler = _NewSlashHandler
 					end
@@ -368,12 +382,18 @@ function fileTree:OnNodeFunctionClick(func, node)
 				end
 			end
 		else
-			local name = IGAS:MsgBox(L["Please input the module's name"], "ic")
+			local parent = node
 
-			if type(name) == "string" then
-				name = strtrim(name)
+			local mtype = IGAS:MsgBox(L["Please select the module's type"], "c", _ModuleType)
 
-				local parent = node
+			if not mtype or mtype == "" then return end
+
+			if mtype == "Localization" then
+				local loc = IGAS:MsgBox(L["Please select the code indicating the localization"], "c", _LocaleType)
+
+				if not loc or loc == "" then return end
+
+				local name = "Localization_" .. loc
 
 				for i = 1, parent.ChildNodeCount do
 					if parent:GetNode(i).Text == name then
@@ -381,13 +401,43 @@ function fileTree:OnNodeFunctionClick(func, node)
 					end
 				end
 
-				local mtype = IGAS:MsgBox(L["Please select the module's type"], "c", _ModuleType)
+				node = parent:AddNode{Text = name, Type = mtype, Content = _NewLocalizationFile:format(parent.Text, loc), FunctionName = "Del,Gather"}
+			elseif mtype == "Module" then
+				local name = IGAS:MsgBox(L["Please input the module's name"], "ic")
 
-				if not mtype or mtype == "" then return end
+				if type(name) == "string" then
+					name = strtrim(name)
 
-				node = parent:AddNode{Text = name, Content =  ("IGAS:NewAddon \"%s.%s\"\n\n"):format(GetTitle(parent), name), FunctionName = "Del", ChildOrderChangable = true, }
+					local parent = node
 
-				return node:Select()
+					for i = 1, parent.ChildNodeCount do
+						if parent:GetNode(i).Text == name then
+							return parent:GetNode(i):Select()
+						end
+					end
+
+					node = parent:AddNode{Text = name, Type = mtype, Content = _NewModuleFile:format(parent.Text, name), FunctionName = "Del"}
+
+					return node:Select()
+				end
+			elseif mtype == "Frame" then
+				local name = IGAS:MsgBox(L["Please input the frame's name"], "ic")
+
+				if type(name) == "string" then
+					name = strtrim(name)
+
+					local parent = node
+
+					for i = 1, parent.ChildNodeCount do
+						if parent:GetNode(i).Text == name then
+							return parent:GetNode(i):Select()
+						end
+					end
+
+					node = parent:AddNode{Text = name, Type = mtype, Designer = _NewFrameDesigner:format(parent.Text, name), Script = _NewFrameScript:format(parent.Text, name), FunctionName = "Del"}
+
+					return node:Select()
+				end
 			end
 		end
 	elseif func == "Enable" then
