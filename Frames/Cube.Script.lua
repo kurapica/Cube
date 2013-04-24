@@ -41,7 +41,8 @@ IGAS:NewAddon "%s"
 
 import "System"
 
-%s-----------------------------------
+%s
+-----------------------------------
 -- Addon Event Handler
 -----------------------------------
 function OnLoad(self)
@@ -135,6 +136,8 @@ IGAS:NewAddon "%s.%s"
 ]]
 
 function OnLoad(self)
+	self:RegisterEvent("PLAYER_LOGOUT") -- used to clear to keep safe
+
 	_PlayerName = GetRealmName().."-"..GetUnitName("player")
 
 	CubeSave.CodeTree = CubeSave.CodeTree or {
@@ -237,6 +240,11 @@ function OnEnable(self)
 		end
 
 	end)
+end
+
+function PLAYER_LOGOUT(self)
+	CubeSave.AddonSaveDB = CubeSave.AddonSaveDB or {}
+	CubeSavePerCharacter.AddonSaveDB = CubeSavePerCharacter.AddonSaveDB or {}
 end
 
 function Cube_Main:OnSizeChanged()
