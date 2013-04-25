@@ -243,8 +243,8 @@ function OnEnable(self)
 end
 
 function PLAYER_LOGOUT(self)
-	CubeSave.AddonSaveDB = CubeSave.AddonSaveDB or {}
-	CubeSavePerCharacter.AddonSaveDB = CubeSavePerCharacter.AddonSaveDB or {}
+	ValidateTable(CubeSave.AddonSaveDB)
+	ValidateTable(CubeSavePerCharacter.AddonSaveDB)
 end
 
 function Cube_Main:OnSizeChanged()
@@ -401,7 +401,9 @@ function fileTree:OnNodeFunctionClick(func, node)
 
 				if not loc or loc == "" then return end
 
-				local name = "Localization_" .. loc
+				
+
+				local name = "Locale_" .. loc
 
 				for i = 1, parent.ChildNodeCount do
 					if parent:GetNode(i).Text == name then
@@ -756,6 +758,31 @@ function EnableAddon(node, flag)
 	end
 end
 
+function ValidateTable(tbl, cache)
+	cache = cache or {[_G] = true}
+
+	cache[tbl] = true
+
+	for k, v in pairs(tbl) do
+		if type(k) == "table" then
+			-- no table as key
+			tbl[k] = nil
+		end
+
+		if type(v) == "table" then
+			if cache[v] then
+				-- make sure no recursive, no table be the value twice, just keep simple
+				tbl[k] = nil
+			else
+				ValidateTable(v, cache)
+			end
+		end
+	end
+end
+
+-----------------------------------
+-- Cube API
+-----------------------------------
 function Cube:Log(...)
 	local msg = strjoin(" ", tostringall(...))
 
