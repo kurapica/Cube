@@ -23,13 +23,14 @@ fileTree:ActiveThread("OnNodeFunctionClick")
 
 -- Toggle Button
 toggleBtn = Button("ToggleButton", Cube_Main)
+toggleBtn.FrameStrata = "HIGH"
 toggleBtn:SetWidth(32)
 toggleBtn:SetHeight(32)
 toggleBtn:SetNormalTexture("Interface\\BUTTONS\\UI-SpellbookIcon-PrevPage-Up")
 toggleBtn:SetPushedTexture("Interface\\BUTTONS\\UI-SpellbookIcon-PrevPage-Down")
 toggleBtn:SetDisabledTexture("Interface\\BUTTONS\\UI-SpellbookIcon-PrevPage-Disabled")
 toggleBtn:SetHighlightTexture("Interface\\Buttons\\UI-Common-MouseHilight", "ADD")
-toggleBtn:SetPoint("TOPLEFT", Cube_Main, "TOPLEFT", 4, -24)
+toggleBtn:SetPoint("TOPLEFT", Cube_Main, "TOPLEFT", 4, -4)
 
 -- Check AutoRun
 chkAuto = CheckBox("AutoRun", Cube_Main)
@@ -41,18 +42,21 @@ chkShowRow = CheckBox("ShowRow", Cube_Main)
 chkShowRow.Text = L["Show Row Number"]
 chkShowRow:SetPoint("TOPRIGHT", chkAuto, "TOPLEFT", 0, 0)
 
--- Label Titile
-titleModule = FontString("TitleModule", Cube_Main)
-titleModule.Height = 24
-titleModule:SetPoint("LEFT", toggleBtn, "RIGHT")
-titleModule:SetPoint("RIGHT", chkAuto, "LEFT")
-titleModule.JustifyH = "left"
+-- CodeEditor Container
+tabCode = TabLayoutPanel("TabContainer", Cube_Main)
+tabCode:SetPoint("TOPLEFT", toggleBtn, "BOTTOMLEFT", 0, -4)
+tabCode:SetPoint("BOTTOMRIGHT", Cube_Main, "BOTTOMRIGHT", -4, 50)
+tabCode.AutoDisposing = false
+tabCode.ShowCloseButton = true
+
+-- CodeEditor Recycle
+rycCodeEditor = Recycle(CodeEditor, "CodeEditor_%d", tabCode)
 
 -- Code Form
-code = CodeEditor("Code", Cube_Main)
-code:SetPoint("TOPLEFT", toggleBtn, "BOTTOMLEFT", 0, -4)
-code:SetPoint("BOTTOMRIGHT", Cube_Main, "BOTTOMRIGHT", -4, 50)
-code.ShowLineNumber = true
+-- code = CodeEditor("Code", Cube_Main)
+-- code:SetPoint("TOPLEFT", toggleBtn, "BOTTOMLEFT", 0, -4)
+-- code:SetPoint("BOTTOMRIGHT", Cube_Main, "BOTTOMRIGHT", -4, 50)
+-- code.ShowLineNumber = true
 
 -- Reset Button
 reset = NormalButton("Reset", Cube_Main)

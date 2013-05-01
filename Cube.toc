@@ -1,7 +1,7 @@
 ﻿## Interface: 50200
 ## Title: Cube
 ## Author: kurapica
-## Version: v5.0
+## Version: v5.1
 ## Notes: Simple Development&Debug tools. type /cube to open GUI.
 ## Notes-zhCN: 简单的开发调试工具，使用/cube 命令打开配置界面。
 ## Notes-zhTW: 簡單的開發調試工具，使用/cube 命令打開配置界面。
@@ -19,6 +19,7 @@ localization\localization.tw.lua
 Cube.lua
 
 Scripts\lunit.lua
+Scripts\EventData.lua
 
 Frames\Cube.Designer.lua
 Frames\Cube.Script.lua

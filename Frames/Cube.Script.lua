@@ -20,7 +20,7 @@ end
 _ModuleType = {
 	"Localization",
 	--"Definition",
-	"Module",
+	--"Module",
 	"Frame",
 }
 
@@ -183,11 +183,10 @@ function OnLoad(self)
 	fileTree:GetNode(1).ToggleState = true
 
 	-- Register Ctrl+S to save the code
-	code:RegisterControlKey("S")
+	-- code:RegisterControlKey("S")
 
 	-- Load the settings
 	chkShowRow.Checked = not CubeSave.NotShowRowNumber
-	code.ShowLineNumber = not CubeSave.NotShowRowNumber
 
 	if CubeSave.CubeMainSize then
 		Cube_Main.Size = CubeSave.CubeMainSize
@@ -272,22 +271,36 @@ function toggleBtn:OnClick()
 end
 
 function fileTree:OnNodeSelected(node)
-	code.Text = node.MetaData.Content or ""
+	if node.MetaData.Type == "Folder" then return end
+
+	-- Check if has a editor
+	for i = 1, tabCode.Count do
+		if tabCode:GetWidget(i).Node == node then
+			return tabCode:SelectWidget(i)
+		end
+	end
+
+	-- New CodeEditor for the node
+	local code = rycCodeEditor()
+
+	tabCode:AddWidget(code, node.Text)
+	code.Node = node
+	code.Text = node.MetaData.Content or node.MetaData.Script or ""
+
+	tabCode:SelectWidget(code)
 
 	if node.Level == 2 then
 		chkAuto.Visible = true
 		chkAuto.Text = L["AutoRun"]
 		chkAuto.Checked = node.MetaData[_PlayerName]
-	elseif node.Level > 2 then
-		chkAuto.Visible = true
-		chkAuto.Text = L["Disable"]
-		chkAuto.Checked = node.MetaData[_PlayerName]
+	--elseif node.Level > 2 then
+	--	chkAuto.Visible = true
+	--	chkAuto.Text = L["Disable"]
+	--	chkAuto.Checked = node.MetaData[_PlayerName]
 	else
 		chkAuto.Visible = false
 		chkAuto.Checked = false
 	end
-
-	titleModule.Text = GetTitle(node)
 
 	Cube_Main.Message = ""
 	lstUnitTest.Visible = false
@@ -297,6 +310,12 @@ end
 function fileTree:OnNodeFunctionClick(func, node)
 	if func == "Del" then
 		if IGAS:MsgBox(L["Do you want delete %s."]:format(GetTitle(node)), "n") then
+			for i = 1, tabCode.Count do
+				if tabCode:GetWidget(i).Node == node then
+					rycCodeEditor(tabCode:RemoveWidget(i, true))
+				end
+			end
+
 			if node.Level == 2 and node.Parent.Index == 1 then
 				-- Dispose snippets directly
 				node:Dispose()
@@ -401,9 +420,14 @@ function fileTree:OnNodeFunctionClick(func, node)
 
 				if not loc or loc == "" then return end
 
-				
+				if parent:GetNode(1).Text == "Localization" then
+					parent = parent:GetNode(1)
+				else
+					parent = parent:AddNode{Text = "Localization", NoOrderChange = true, Type="Folder", FunctionName = "Gather"}
+					parent.Index = 1
+				end
 
-				local name = "Locale_" .. loc
+				local name = loc
 
 				for i = 1, parent.ChildNodeCount do
 					if parent:GetNode(i).Text == name then
@@ -411,7 +435,9 @@ function fileTree:OnNodeFunctionClick(func, node)
 					end
 				end
 
-				node = parent:AddNode{Text = name, Type = mtype, Content = _NewLocalizationFile:format(parent.Text, loc), FunctionName = "Del,Gather"}
+				node = parent:AddNode{Text = name, Type = mtype, Content = _NewLocalizationFile:format(parent.Parent.Text, loc), FunctionName = "Del"}
+			
+				return node:Select()
 			elseif mtype == "Module" then
 				local name = IGAS:MsgBox(L["Please input the module's name"], "ic")
 
@@ -444,12 +470,14 @@ function fileTree:OnNodeFunctionClick(func, node)
 						end
 					end
 
-					node = parent:AddNode{Text = name, Type = mtype, Designer = _NewFrameDesigner:format(parent.Text, name), Script = _NewFrameScript:format(parent.Text, name), FunctionName = "Del"}
+					node = parent:AddNode{Text = name, Type = mtype, Designer = _NewFrameDesigner:format(parent.Text, name), Script = _NewFrameScript:format(parent.Text, name), FunctionName = "Design,Del"}
 
 					return node:Select()
 				end
 			end
 		end
+	elseif func == "Gather" then
+		
 	elseif func == "Enable" then
 		if node.Level == 2 then
 			return EnableAddon(node, true)
@@ -466,37 +494,59 @@ function fileTree:OnNodeFunctionClick(func, node)
 end
 
 function chkAuto:OnValueChanged(value)
-	if fileTree.SelectedNode and fileTree.SelectedNode.Level > 1 then
-		fileTree.SelectedNode.MetaData[_PlayerName] = value or nil
+	if not tabCode.SelectedWidget then return end
+
+	local node = tabCode.SelectedWidget.Node
+
+	if node.Level == 2 then
+		node.MetaData[_PlayerName] = value or nil
 	end
 end
 
 function chkShowRow:OnValueChanged(value)
 	CubeSave.NotShowRowNumber = not value
-	code.ShowLineNumber = not CubeSave.NotShowRowNumber
+	for i = 1, tabCode.Count do
+		tabCode:GetWidget(i).ShowLineNumber = not CubeSave.NotShowRowNumber
+	end
 end
 
 function reset:OnClick()
-	return fileTree.SelectedNode and fileTree:OnNodeSelected(fileTree.SelectedNode)
+	local code = tabCode.SelectedWidget
+
+	if not code then return end
+
+	code.Text = code.Node.Content or code.Node.Script or ""
 end
 
 function save:OnClick()
-	if fileTree.SelectedNode and fileTree.SelectedNode.Level > 1 then
-		fileTree.SelectedNode.MetaData.Content = code.Text
+	local code = tabCode.SelectedWidget
+
+	if code and code.Node.Level > 1 then
+		if code.Node.MetaData.Type == "Frame" then
+			code.Node.MetaData.Script = code.Text
+		else
+			code.Node.MetaData.Content = code.Text
+		end
 	else
 		Cube_Main.Message = L["Can't save code."]
 	end
 end
 
 function run:OnClick()
+	local code = tabCode.SelectedWidget
+
+	if not code then return end
+
 	Cube_Main.Message = ""
 	lstUnitTest.Visible = false
 	frmResult.Visible = false
 
-	local func, err, status
+	local func, err, status, text
 
-	if code.Text ~= "" then
-		func, err = loadstring(code.Text)
+	text = code.Text
+
+	if text ~= "" then
+		func, err = loadstring(text)
 
 		if func then
 			status, err = pcall(func)
@@ -514,7 +564,7 @@ function run:OnClick()
 			txtResult.Text = GetErrMsg(err)
 		end
 	end
-
+	--[[
 	local node = fileTree.SelectedNode
 
 	if not node then return end
@@ -533,16 +583,22 @@ function run:OnClick()
 		else
 			node.FunctionName = "Del,Add,Enable"
 		end
-	end
+	end--]]
 end
 
 function btnUnit:OnClick()
+	local code = tabCode.SelectedWidget
+
+	if not code then return end
+
 	Cube_Main.Message = ""
 
-	local sm
+	local sm, text
 
-	if code.Text ~= "" then
-		lstUnitTest.Report = lUnit.Run(code.Text)
+	text = code.Text
+
+	if text ~= "" then
+		lstUnitTest.Report = lUnit.Run(text)
 
 		lstUnitTest:Clear()
 		lstUnitTest.Visible = true
@@ -595,23 +651,49 @@ function cubeLog:OnClick()
 	frmLog.Visible = not frmLog.Visible
 end
 
-function code:OnFunctionKey(key)
-    if key == "F5" then
-        run:OnClick()
-    end
+function rycCodeEditor:OnInit(obj)
+	obj.ShowLineNumber = true
+
+	-- Register Ctrl+S to save the code
+	obj:RegisterControlKey("S")
+
+	obj.OnFunctionKey = OnFunctionKey
+	obj.OnControlKey = OnControlKey
 end
 
-function code:OnControlKey(key)
-	if key and string.upper(key) == "S" then
-		if fileTree.SelectedNode and fileTree.SelectedNode.Level > 1 then
-			fileTree.SelectedNode.MetaData.Content = code.Text
-			Cube_Main.Message = L["Snippet is saved."]
-		else
-			Cube_Main.Message = L["Can't save code."]
-		end
+function rycCodeEditor:OnPush(obj)
+	obj.Node = nil
+	obj.Visible = false
+end
+
+function rycCodeEditor:OnPop(obj)
+	obj.ShowLineNumber = not CubeSave.NotShowRowNumber
+end
+
+function tabCode:OnTabClose(obj)
+	rycCodeEditor(obj)
+end
+
+function tabCode:OnTabChange(old, new)
+	local node = new.Node
+
+	if node.Level == 2 then
+		chkAuto.Visible = true
+		chkAuto.Text = L["AutoRun"]
+		chkAuto.Checked = node.MetaData[_PlayerName]
+	else
+		chkAuto.Visible = false
+		chkAuto.Checked = false
 	end
+
+	Cube_Main.Message = ""
+	lstUnitTest.Visible = false
+	frmResult.Visible = false
 end
 
+-----------------------------------
+-- Helper API
+-----------------------------------
 function GetTitle(node)
 	if node.Level == 2 and node.Parent.Index == 1 then
 		return node.MetaData.Text
@@ -776,6 +858,23 @@ function ValidateTable(tbl, cache)
 			else
 				ValidateTable(v, cache)
 			end
+		end
+	end
+end
+
+function OnFunctionKey(self, key)
+    if key == "F5" then
+        run:OnClick()
+    end
+end
+
+function OnControlKey(self, key)
+	if key and string.upper(key) == "S" then
+		if self.Node.Level > 1 then
+			self.Node.MetaData.Content = self.Text
+			Cube_Main.Message = L["Snippet is saved."]
+		else
+			Cube_Main.Message = L["Can't save code."]
 		end
 	end
 end
