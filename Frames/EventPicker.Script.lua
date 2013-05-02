@@ -14,15 +14,15 @@ function Cube:PickEvent()
 end
 
 function picker:OnShow()
-	lstCategory.SelectedIndex = 1
-
+	lstCategory.SelectedIndex = -1
+	lstEvent:Clear()
 	lstSelected:Clear()
 end
 
 function picker:OnHide()
 	local ret = {}
 
-	for _, v in ipairs(lstSelected.Items) do
+	for _, v in ipairs(lstSelected.Keys) do
 		tinsert(ret, v)
 	end
 
@@ -42,17 +42,19 @@ end
 function lstCategory:OnItemChoosed(key)
 	local header
 
+	wipe(lstE)
+
 	for k in pairs(Event_Data) do
 		header = k:match("^%w+")
 
 		if header == key then
-			tinsert(lstC, k)
+			tinsert(lstE, k)
 		end
 	end
 
-	lstEvent:SetList(lstC)
+	System.Array.Sort(lstE)
 
-	wipe(lstC)
+	lstEvent:Refresh()
 end
 
 function lstEvent:OnItemChoosed(key)
@@ -61,6 +63,10 @@ end
 
 function lstEvent:OnItemDoubleClick(key)
 	lstSelected:SetItem(key, key)
+end
+
+function lstSelected:OnItemDoubleClick(key)
+	self:RemoveItem(key)
 end
 
 function btnOkay:OnClick()

@@ -37,12 +37,12 @@ Event_Data = {
 	},
 	ADDON_ACTION_FORBIDDEN = {
 	    Description = [[Fires when a non-Blizzard addon attempts to use a protected API. In the default UI, this event triggers a dialog box providing the name of the addon and offering to disable it and reload the UI.]],
-	    Signature = [["culprit"]],
+	    Signature = [[culprit]],
 	    [[culprit  - The name of the addon that called the forbidden function (string) ]],
 	},
 	ADDON_LOADED = {
 	    Description = [[Fires when an addon and its saved variables are loaded. Fires once for each addon (i.e. an addon loaded early in sequence will see ADDON_LOADED events for all addons loaded later).]],
-	    Signature = [["name"]],
+	    Signature = [[name]],
 	    [[name  - The name of the addon that has been loaded (string) ]],
 	},
 	ARCHAEOLOGY_CLOSED = {
@@ -68,7 +68,7 @@ Event_Data = {
 	},
 	ARENA_TEAM_INVITE_REQUEST = {
 	    Description = [[Fires when the player is invited to join an arena team]],
-	    Signature = [["source", "team"]],
+	    Signature = [[source, team]],
 	    [[source  - The name of the player that invited you to join a team. (string) ]],
 	    [[team  - The name of the team that you have been invited to join. (string) ]],
 	},
@@ -82,7 +82,7 @@ Event_Data = {
 	},
 	ARTIFACT_COMPLETE = {
 	    Description = [[Fires when an artifact is completed (solved project)]],
-	    Signature = [["name"]],
+	    Signature = [[name]],
 	    [[name  - Name of the completed artifact (string) ]],
 	},
 	ARTIFACT_DIG_SITE_UPDATED = {
@@ -274,13 +274,13 @@ Event_Data = {
 	},
 	CHANNEL_INVITE_REQUEST = {
 	    Description = [[Fires when a player is invited into a chat channel]],
-	    Signature = [["channelName", "inviterName"]],
+	    Signature = [[channelName, inviterName]],
 	    [[channelName  - The name of the channel you have been invited to. (string) ]],
 	    [[inviterName  - The name of the character that invited you. (string) ]],
 	},
 	CHANNEL_PASSWORD_REQUEST = {
 	    Description = [[Fires when the player attempts to join a password protected channel]],
-	    Signature = [["channelName"]],
+	    Signature = [[channelName]],
 	    [[channelName  - The name of the channel you are attempting to join. (string) ]],
 	},
 	CHANNEL_ROSTER_UPDATE = {
@@ -309,7 +309,7 @@ Event_Data = {
 	},
 	CHAT_MSG_ADDON = {
 	    Description = [[Fires when an addon communication message is received (see SendAddonMessage()). The local client receives any messages it sends; thus, this event fires for messages sent by the local client as well as those receives from others.]],
-	    Signature = [["prefix", "message", "channel", "sender"]],
+	    Signature = [[prefix, message, channel, sender]],
 	    [[prefix  - The prefix declared from SendAddonMessage. (string) ]],
 	    [[message  - The message from SendAddonMessage. (string) ]],
 	    [[channel  - The message channel used for this message.  Possible values include PARTY, RAID, GUILD, BATTLEGROUND, or WHISPER. (string) ]],
@@ -317,7 +317,7 @@ Event_Data = {
 	},
 	CHAT_MSG_AFK = {
 	    Description = [[Fires when an automatic AFK response is received. When the player attempts to whisper or invite a character whose status is AFK, an automatic response is returned containing either a custom message set by that character or the default message, "Away From Keyboard"]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter, "senderGUID"]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter, senderGUID]],
 	    [[message  - The response message (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -333,22 +333,22 @@ Event_Data = {
 	},
 	CHAT_MSG_BG_SYSTEM_ALLIANCE = {
 	    Description = [[Fires when an Alliance-related battleground system message is received. Faction-related messages include flags picked up, bases assaulted, etc.]],
-	    Signature = [["message"]],
+	    Signature = [[message]],
 	    [[message  - The message received. (string) ]],
 	},
 	CHAT_MSG_BG_SYSTEM_HORDE = {
 	    Description = [[Fires when a Horde-related battleground system message is received. Faction-related messages include flags picked up, bases assaulted, etc.]],
-	    Signature = [["message"]],
+	    Signature = [[message]],
 	    [[message  - The message received. (string) ]],
 	},
 	CHAT_MSG_BG_SYSTEM_NEUTRAL = {
 	    Description = [[Fires when a general battleground, zone or world message is received. General battleground messages include those indicating that the match has ended or will begin soon. Also includes scripted events in certain zones (e.g. a warning to players entering Zul'Gurub) and occasional messages broadcast to all players in the realm, such as during major server events (e.g. "The wrath of Neptulon has subsided...").]],
-	    Signature = [["message"]],
+	    Signature = [[message]],
 	    [[message  - The message received. (string) ]],
 	},
 	CHAT_MSG_BN_CONVERSATION = {
 	    Description = [[Fires when you type a message in chat or when you recive a message from another player using Battle.Net]],
-	    Signature = [["message", "sender", "unknown", "channelString", "unknown", "unknown", unknown, channelNumber, "unknown", unknown, counter, "unknown", presenceID, unknown]],
+	    Signature = [[message, sender, unknown, channelString, unknown, unknown, unknown, channelNumber, unknown, unknown, counter, unknown, presenceID, unknown]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's RealID name. (i.e 'John Doe') (string) ]],
 	    [[unknown  - unknown (string) ]],
@@ -366,7 +366,7 @@ Event_Data = {
 	},
 	CHAT_MSG_BN_CONVERSATION_NOTICE = {
 	    Description = [[Fires when you join a conversation channel (private channel for you and your friends) on Battle.Net]],
-	    Signature = [["message/status", "sender", "unknown", "channelString", "unknown", "unknown", unknown, channelNumber, "unknown", unknown, counter, "unknown", presenceID, unknown]],
+	    Signature = [[message/status, sender, unknown, channelString, unknown, unknown, unknown, channelNumber, unknown, unknown, counter, unknown, presenceID, unknown]],
 	    [[message/status  - The message thats received or a statuscode like YOU_ JOINED_ CONVERSATION, YOU_ LEFT_ CONVERSATION, MEMBER_ LEFT. (string) ]],
 	    [[sender  - The sender's RealID name. (i.e 'John Doe') or sometimes your own wow characters name. (looks like it will use the wow-character name when you are chatting, but will contain realid when other clients send messages) (string) ]],
 	    [[unknown  - unknown (string) ]],
@@ -384,7 +384,7 @@ Event_Data = {
 	},
 	CHAT_MSG_BN_INLINE_TOAST_BROADCAST = {
 	    Description = [[Fires whenever a user changes their broadcast message on Battle.Net]],
-	    Signature = [["message", "sender", "unknown", "unknown", "unknown", "unknown", unknown, unknown, "unknown", unknown, counter, "unknown", presenceID, unknown]],
+	    Signature = [[message, sender, unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown, counter, unknown, presenceID, unknown]],
 	    [[message  - The broadcast message. (string) ]],
 	    [[sender  - The sender's RealID name. (i.e 'John Doe') (string) ]],
 	    [[unknown  - unknown (string) ]],
@@ -402,7 +402,7 @@ Event_Data = {
 	},
 	CHAT_MSG_BN_INLINE_TOAST_BROADCAST_INFORM = {
 	    Description = [[Fires when the player sends a new broadcast (online message)]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter, "guid"]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter, guid]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -418,7 +418,7 @@ Event_Data = {
 	},
 	CHAT_MSG_BN_WHISPER = {
 	    Description = [[Fires when you receive a whisper though Battle.net]],
-	    Signature = [["message", "sender", "unknown", "unknown", "unknown", "unknown", unknown, unknown, "unknown", unknown, counter, "unknown", presenceID, unknown]],
+	    Signature = [[message, sender, unknown, unknown, unknown, unknown, unknown, unknown, unknown, unknown, counter, unknown, presenceID, unknown]],
 	    [[message  - The message received (string) ]],
 	    [[sender  - The sender's Real ID name. (i.e 'John Doe') or sometimes your own WoW character's name. (Looks like it will use the WoW character name when you are chatting, but will contain Real ID when other clients send messages) (string) ]],
 	    [[unknown  - unknown (string) ]],
@@ -439,7 +439,7 @@ Event_Data = {
 	},
 	CHAT_MSG_CHANNEL = {
 	    Description = [[Fires when a message is received in a world or custom chat channel. Used for numbered chat channels (e.g. Trade, General, and player-created channels).]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter, "guid"]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter, guid]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -455,7 +455,7 @@ Event_Data = {
 	},
 	CHAT_MSG_CHANNEL_JOIN = {
 	    Description = [[Fires when another character joins a world or custom chat channel monitored by the player. Used for numbered chat channels (e.g. Trade, General, and player-created channels). Only used for other characters joining a channel -- when the player joins a channel, CHAT_MSG_CHANNEL_NOTICE fires.]],
-	    Signature = [["unkown", "sender", "unknown", "channelString", "unknown", "unknown", unknown, channelNumber, "channelName", unknown, unknown]],
+	    Signature = [[unkown, sender, unknown, channelString, unknown, unknown, unknown, channelNumber, channelName, unknown, unknown]],
 	    [[unkown  - empty string (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[unknown  - empty string (string) ]],
@@ -470,7 +470,7 @@ Event_Data = {
 	},
 	CHAT_MSG_CHANNEL_LEAVE = {
 	    Description = [[Fires when another character leaves a world or custom chat channel monitored by the player. Used for numbered chat channels (e.g. Trade, General, and player-created channels). Only used for other characters leaving the channel -- when the player leaves the channel, CHAT_MSG_CHANNEL_NOTICE fires.]],
-	    Signature = [["unkown", "sender", "unknown", "channelString", "unknown", "unknown", unknown, channelNumber, "channelName", unknown, unknown]],
+	    Signature = [[unkown, sender, unknown, channelString, unknown, unknown, unknown, channelNumber, channelName, unknown, unknown]],
 	    [[unkown  - empty string (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[unknown  - empty string (string) ]],
@@ -485,7 +485,7 @@ Event_Data = {
 	},
 	CHAT_MSG_CHANNEL_LIST = {
 	    Description = [[Fires in response to a channel list query (e.g. /chatlist). If the channel contains many characters, the event fires multiple times to list them all.]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -500,7 +500,7 @@ Event_Data = {
 	},
 	CHAT_MSG_CHANNEL_NOTICE = {
 	    Description = [[Fires when certain actions happen on a world or custom chat channel. Examples of actions causing notice messages include when the player joins or leaves a channel, when the player attempts to send a chat message in a channel in which the player is silenced, or when a zone-specific channel (e.g. General, LocalDefense) changes as the player moves between zones.]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (as a globalstring name) (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -515,7 +515,7 @@ Event_Data = {
 	},
 	CHAT_MSG_CHANNEL_NOTICE_USER = {
 	    Description = [[Fires when certain actions pertaining to specific members happen on a world or custom chat channel. Examples of member-specific actions include a member enabling the channel for voice chat, a member becoming the channel owner, or one member kicking or banning another from the channel.]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -530,7 +530,7 @@ Event_Data = {
 	},
 	CHAT_MSG_COMBAT_FACTION_CHANGE = {
 	    Description = [[Fires when the player gains or loses reputation with a faction]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -545,7 +545,7 @@ Event_Data = {
 	},
 	CHAT_MSG_COMBAT_GUILD_XP_GAIN = {
 	    Description = [[Fires when a guild experience gain message appears in chat]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -560,7 +560,7 @@ Event_Data = {
 	},
 	CHAT_MSG_COMBAT_HONOR_GAIN = {
 	    Description = [[Fires when the player gains honor points]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -575,7 +575,7 @@ Event_Data = {
 	},
 	CHAT_MSG_COMBAT_MISC_INFO = {
 	    Description = [[Fires for miscellaneous messages to be displayed in the combat log, such as loss of equipment durability upon death]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -590,7 +590,7 @@ Event_Data = {
 	},
 	CHAT_MSG_COMBAT_XP_GAIN = {
 	    Description = [[Fires when the player gains experience points]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -605,7 +605,7 @@ Event_Data = {
 	},
 	CHAT_MSG_DND = {
 	    Description = [[Fires when an automatic DND response is received. When the player attempts to whisper or invite a character whose status is DND, an automatic response is returned containing either a custom message set by that character or the default message, "Do Not Disturb"]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -620,7 +620,7 @@ Event_Data = {
 	},
 	CHAT_MSG_EMOTE = {
 	    Description = [[Fires when a custom emote message is received.. Custom emote messages are those sent by typing /emote followed by some text; see CHAT_MSG_TEXT_EMOTE for standard emotes such as /dance and /flirt.]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -638,7 +638,7 @@ Event_Data = {
 	},
 	CHAT_MSG_GUILD = {
 	    Description = [[Fires when a message is received in the guild chat channel]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -653,13 +653,13 @@ Event_Data = {
 	},
 	CHAT_MSG_GUILD_ACHIEVEMENT = {
 	    Description = [[Fires when a member of the player's guild earns an achievement]],
-	    Signature = [["message", "sender"]],
+	    Signature = [[message, sender]],
 	    [[message  - The message displayed to guild members (string) ]],
 	    [[sender  - The name of the guild member who earned the achievement (string) ]],
 	},
 	CHAT_MSG_IGNORED = {
 	    Description = [[Fires when an automatic response is received after whispering or inviting a character who is ignoring the player]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -674,7 +674,7 @@ Event_Data = {
 	},
 	CHAT_MSG_LOOT = {
 	    Description = [[Fires when receiving notice that the player or a member of the player's group has looted an item]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -689,7 +689,7 @@ Event_Data = {
 	},
 	CHAT_MSG_MONEY = {
 	    Description = [[Fires when the player receives money as loot]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -704,7 +704,7 @@ Event_Data = {
 	},
 	CHAT_MSG_MONSTER_EMOTE = {
 	    Description = [[Fires when a nearby NPC performs emote text. e.g. Cro Threadstrong crushes an apple under his boot.]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -722,7 +722,7 @@ Event_Data = {
 	},
 	CHAT_MSG_MONSTER_SAY = {
 	    Description = [[Fires when a nearby NPC speaks (visible only to players in the immediate area). e.g. Granny smith says: What is that poor orc yelling about? Someone should see what is going on.]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -737,7 +737,7 @@ Event_Data = {
 	},
 	CHAT_MSG_MONSTER_WHISPER = {
 	    Description = [[Fires when an NPC whispers to the player]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -752,7 +752,7 @@ Event_Data = {
 	},
 	CHAT_MSG_MONSTER_YELL = {
 	    Description = [[Fires when an NPC yells (visible to players in a wide area or the entire zone). e.g. Doom Lord Kazzak yells, All mortals will perish!]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -767,7 +767,7 @@ Event_Data = {
 	},
 	CHAT_MSG_OFFICER = {
 	    Description = [[Fires when a message is received in officer chat.]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -785,7 +785,7 @@ Event_Data = {
 	},
 	CHAT_MSG_PARTY = {
 	    Description = [[Fires when a message is received in the party chat channel]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -809,7 +809,7 @@ Event_Data = {
 	},
 	CHAT_MSG_RAID = {
 	    Description = [[Fires when a message is received in the raid chat channel]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -824,7 +824,7 @@ Event_Data = {
 	},
 	CHAT_MSG_RAID_BOSS_EMOTE = {
 	    Description = [[Fires when a raid boss performs emote text. In the default UI, emotes from a raid boss are displayed in large text in the center of the screen.]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -842,7 +842,7 @@ Event_Data = {
 	},
 	CHAT_MSG_RAID_LEADER = {
 	    Description = [[Fires when a message is received in the raid chat channel from the raid leader]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -857,7 +857,7 @@ Event_Data = {
 	},
 	CHAT_MSG_RAID_WARNING = {
 	    Description = [[Fires when a raid warning message is received. These messages can be sent by the raid leader or a raid assistant; in the default UI, they appear in large text in the center of the screen.]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -875,7 +875,7 @@ Event_Data = {
 	},
 	CHAT_MSG_SAY = {
 	    Description = [[Fires when the player or a nearby character speaks (visible to other nearby characters)]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -890,7 +890,7 @@ Event_Data = {
 	},
 	CHAT_MSG_SKILL = {
 	    Description = [[Fires when skill related messages are received.. e.g. "Your skill in Unarmed has increased to 357."]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -905,7 +905,7 @@ Event_Data = {
 	},
 	CHAT_MSG_SYSTEM = {
 	    Description = [[Fires when a system message is received. System messages are a catch-all category for messages received in via the chat system. Examples:]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[The server message which appears upon login (e.g. "Welcome to Patch 3.4! If you encounter interface problems, please disable your addons and delete your WTF folder.")]],
 	    [[The feedback message which appears when the player enters AFK or DND status]],
 	    [[Results from a /who query, if the query has three or fewer results]],
@@ -927,7 +927,7 @@ Event_Data = {
 	},
 	CHAT_MSG_TEXT_EMOTE = {
 	    Description = [[Fires when the player receives a standard emote (e.g. /dance, /flirt) message. For custom emote messages (those sent by typing /emote followed by some text), see CHAT_MSG_EMOTE.]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -945,7 +945,7 @@ Event_Data = {
 	},
 	CHAT_MSG_WHISPER = {
 	    Description = [[Fires when the player receives a whisper from a player character]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter, guid]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter, guid]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -961,7 +961,7 @@ Event_Data = {
 	},
 	CHAT_MSG_WHISPER_INFORM = {
 	    Description = [[Fires when the player sends a whisper to a player character]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -976,7 +976,7 @@ Event_Data = {
 	},
 	CHAT_MSG_YELL = {
 	    Description = [[Fires when the player or another player character yells (visible to other characters in a wide area) ]],
-	    Signature = [["message", "sender", "language", "channelString", "target", "flags", unknown, channelNumber, "channelName", unknown, counter]],
+	    Signature = [[message, sender, language, channelString, target, flags, unknown, channelNumber, channelName, unknown, counter]],
 	    [[message  - The message thats received (string) ]],
 	    [[sender  - The sender's username. (string) ]],
 	    [[language  - The language the message is in. (string) ]],
@@ -1017,7 +1017,7 @@ Event_Data = {
 	},
 	COMBAT_TEXT_UPDATE = {
 	    Description = [[Fires when a message is received which can be displayed by the default UI's floating combat text feature]],
-	    Signature = [["type", desc1, desc2]],
+	    Signature = [[type, desc1, desc2]],
 	    [[type  - Token identifying the type of message (string) ]],
 	    [[desc1  - This field varies depending on the type of message.  See the chart for details (varies) ]],
 	    [[desc2  - This field varies depending on the type of message.  See the chart for details (varies) ]],
@@ -1033,7 +1033,7 @@ Event_Data = {
 	},
 	CONFIRM_BINDER = {
 	    Description = [[Fires when the player attempts to set a new Hearthstone location]],
-	    Signature = [["newHome"]],
+	    Signature = [[newHome]],
 	    [[newHome  - Name of the new Hearthstone location (string) ]],
 	},
 	CONFIRM_DISENCHANT_ROLL = {
@@ -1079,13 +1079,13 @@ Event_Data = {
 	},
 	CVAR_UPDATE = {
 	    Description = [[Fires when the value of a configuration variable is updated. Fires regardless of whether the variable's value has changed.]],
-	    Signature = [["glStr", "value"]],
+	    Signature = [[glStr, value]],
 	    [[glStr  - Global string related to the given CVAR (like "ENABLEBGSOUND" for "SoundEnableSoundWhenGameIsInBG" CVAR). (string) ]],
 	    [[value  - The updated value assigned to the CVAR. Note: For boolean values this is a string of 0 or 1. (string) ]],
 	},
 	DELETE_ITEM_CONFIRM = {
 	    Description = [[Fires when the player attempts to delete an item]],
-	    Signature = [["itemName", itemQuality]],
+	    Signature = [[itemName, itemQuality]],
 	    [[itemName  - The name of the item you are attempting to delete (string) ]],
 	    [[itemQuality  - The numeric index representing the items quality. (number) ]],
 	},
@@ -1109,7 +1109,7 @@ Event_Data = {
 	},
 	DUEL_REQUESTED = {
 	    Description = [[Fires when the player is challenged to a duel. No event (other than the associated system message) fires when the player challenges another to a duel.]],
-	    Signature = [["challenger"]],
+	    Signature = [[challenger]],
 	    [[challenger  - The challenger's username (string) ]],
 	},
 	ENABLE_TAXI_BENCHMARK = {
@@ -1182,7 +1182,7 @@ Event_Data = {
 	},
 	GOSSIP_CONFIRM = {
 	    Description = [[Fires when the player is requested to confirm a gossip choice. Used when a gossip interaction involves a warning, such as for spending a large amount of money (e.g. purchasing Dual Talent Specialization).]],
-	    Signature = [[index, "message", cost]],
+	    Signature = [[index, message, cost]],
 	    [[index  - The numeric index of the gossip option you're confirming (number) ]],
 	    [[message  - The message to display for the confirmation (string) ]],
 	    [[cost  - The cost of the action you're confirming.  Will be 0 if there is no cost. (number) ]],
@@ -1242,13 +1242,13 @@ Event_Data = {
 	},
 	GUILD_INVITE_REQUEST = {
 	    Description = [[Fires when the player is invited to join a guild]],
-	    Signature = [["from", "guildname"]],
+	    Signature = [[from, guildname]],
 	    [[from  - The username of the player who invited you to their guild (string) ]],
 	    [[guildname  - The name of the guild you are being invited to (string) ]],
 	},
 	GUILD_MOTD = {
 	    Description = [[Fires when the guild message of the day is updated. Also fires during the login process so that the player can see the existing message.]],
-	    Signature = [["message"]],
+	    Signature = [[message]],
 	    [[message  - The new guild message. (string) ]],
 	},
 	GUILD_NEWS_UPDATE = {
@@ -1262,7 +1262,7 @@ Event_Data = {
 	},
 	GUILD_RANKS_UPDATE = {
 	    Description = [[Fires when unit is promoted or demoted within the guild. This event fires when unit is promoted or demoted within the guild. GUILD_ROSTER_UPDATE is fired at the same time.]],
-	    Signature = [["unit"]],
+	    Signature = [[unit]],
 	    [[unit  - The unit that was promoted or demoted (string, unitId) ]],
 	},
 	GUILD_REGISTRAR_CLOSED = {
@@ -1287,7 +1287,7 @@ Event_Data = {
 	},
 	INCOMING_RESURRECT_CHANGED = {
 	    Description = [[Fires when a resurrection spell is cast. Guaranteed to always have a return, whether "target", "raid20", or "party1", etc.]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	INSPECT_ACHIEVEMENT_READY = {
@@ -1325,7 +1325,7 @@ Event_Data = {
 	},
 	ITEM_PUSH = {
 	    Description = [[Fires when the player receives an item. This event fires in addition to others which may indicate the item's origin (e.g. QUEST_ACCEPTED or CHAT_MSG_LOOT); in the default UI, this event triggers an "item falling into bag" animation displayed above the bag icons.]],
-	    Signature = [[bagID, "icon"]],
+	    Signature = [[bagID, icon]],
 	    [[bagID  - The id of the bag that the item is going into. (number) ]],
 	    [[icon  - The icon file for the item being received. (string) ]],
 	},
@@ -1471,7 +1471,7 @@ Event_Data = {
 	},
 	MINIMAP_PING = {
 	    Description = [[Fires when the player or a group member "pings" a point on the minimap to share its location with the group]],
-	    Signature = [["unit", x, y]],
+	    Signature = [[unit, x, y]],
 	    [[unit  - The unit of the player that was the source of said event (string) ]],
 	    [[x  - The x coordinate.  0 is the center point going out to .5 to the right and -.5 to the left. (number) ]],
 	    [[y  - The y coordinate.  0 is the center point going out to .5 to the top and -.5 to the bottom. (number) ]],
@@ -1489,7 +1489,7 @@ Event_Data = {
 	},
 	MIRROR_TIMER_START = {
 	    Description = [[Fires when a special countdown timer starts. Mirror timers are used for breath and fatigue when swimming and for the hunter Feign Death ability.]],
-	    Signature = [["name", value, maxvalue, step, pause, "label"]],
+	    Signature = [[name, value, maxvalue, step, pause, label]],
 	    [[name  - The name of the timer that is starting. (string) ]],
 	    [[value  - The current value of the timer. (number) ]],
 	    [[maxvalue  - The max value of the timer. (number) ]],
@@ -1499,12 +1499,12 @@ Event_Data = {
 	},
 	MIRROR_TIMER_STOP = {
 	    Description = [[Fires when a special countdown timer stops. Mirror timers are used for breath and fatigue when swimming and for the hunter Feign Death ability.]],
-	    Signature = [["name"]],
+	    Signature = [[name]],
 	    [[name  - The name associated with the timer that stopped. (string) ]],
 	},
 	MODIFIER_STATE_CHANGED = {
 	    Description = [[Fires when a modifier key is pressed or released.]],
-	    Signature = [["key", state]],
+	    Signature = [[key, state]],
 	    [[key  - The name of the key that you pressed.  Possible values are LSHIFT, RSHIFT, LCTRL, RCTRL, LALT, and RALT. (string) ]],
 	    [[state  - The state the key has entered. 1 means that the the key has been pressed.  0 means that the key has been released. (number) ]],
 	},
@@ -1516,7 +1516,7 @@ Event_Data = {
 	},
 	MOVIE_UNCOMPRESSED_MOVIE = {
 	    Description = [[Fires when the client prompts the player to allow compression of a movie recording]],
-	    Signature = [["filename"]],
+	    Signature = [[filename]],
 	    [[filename  - The filename of the movie to compress (string) ]],
 	},
 	MUTELIST_UPDATE = {
@@ -1530,7 +1530,7 @@ Event_Data = {
 	},
 	NEW_TITLE_EARNED = {
 	    Description = [[Fires when the player earns a new title]],
-	    Signature = [["title"]],
+	    Signature = [[title]],
 	    [[title  - The name of the title (string) ]],
 	},
 	NEW_WMO_CHUNK = {
@@ -1541,7 +1541,7 @@ Event_Data = {
 	},
 	OLD_TITLE_LOST = {
 	    Description = [[Fires when one of the player's titles is no longer available]],
-	    Signature = [["title"]],
+	    Signature = [[title]],
 	    [[title  - The name of the title you've lost (string) ]],
 	},
 	OPEN_MASTER_LOOT_LIST = {
@@ -1558,7 +1558,7 @@ Event_Data = {
 	},
 	PARTY_INVITE_REQUEST = {
 	    Description = [[Fires when the player is invited to join a group]],
-	    Signature = [["sender"]],
+	    Signature = [[sender]],
 	    [[sender  - The name of the person who sent the invite. (string) ]],
 	},
 	PARTY_LEADER_CHANGED = {
@@ -1683,7 +1683,7 @@ Event_Data = {
 	},
 	PLAYER_DAMAGE_DONE_MODS = {
 	    Description = [[Fires when an effect changes the player's spell bonus damage]],
-	    Signature = [["unit"]],
+	    Signature = [[unit]],
 	    [[unit  - Is always 'player' (string) ]],
 	},
 	PLAYER_DEAD = {
@@ -1709,7 +1709,7 @@ Event_Data = {
 	},
 	PLAYER_FLAGS_CHANGED = {
 	    Description = [[Fires when a unit's AFK or DND status changes]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit of the affected player. (string) ]],
 	},
 	PLAYER_FOCUS_CHANGED = {
@@ -1720,7 +1720,7 @@ Event_Data = {
 	},
 	PLAYER_GUILD_UPDATE = {
 	    Description = [[Fires when information about the player's guild membership changes]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit of the player effect.  Most of the time this will be player, however sometimes it will be nil. (string) ]],
 	},
 	PLAYER_LEAVE_COMBAT = {
@@ -1731,7 +1731,7 @@ Event_Data = {
 	},
 	PLAYER_LEVEL_UP = {
 	    Description = [[Fires when the player gains a character level. Ding!]],
-	    Signature = [["level", hp, mp, talentPoints, strength, agility, stamina, intellect, spirit]],
+	    Signature = [[level, hp, mp, talentPoints, strength, agility, stamina, intellect, spirit]],
 	    [[level  - The new player level. More accurate than UnitLevel at that time. (string) ]],
 	    [[hp  - Hit points gained. (number) ]],
 	    [[mp  - Mana points gained. (number) ]],
@@ -1780,7 +1780,7 @@ Event_Data = {
 	},
 	PLAYER_TARGET_CHANGED = {
 	    Description = [[Fires when the player changes targets]],
-	    Signature = [["cause"]],
+	    Signature = [[cause]],
 	    [[cause  - a token indicating the cause of the target change (string) LeftButton - selected the target using static frames in the UI]],
 	    [[NIL - target moved out of range and was lost]],
 	    [[down - pressed Escape to clear the target selection]],
@@ -1829,7 +1829,7 @@ Event_Data = {
 	},
 	QUEST_ACCEPT_CONFIRM = {
 	    Description = [[Fires when certain kinds of quests (e.g. NPC escort quests) are started by another member of the player's group]],
-	    Signature = [["name", "quest"]],
+	    Signature = [[name, quest]],
 	    [[name  - The name of the user who started the quest. (string) ]],
 	    [[quest  - The name of the quest that was started. (string) ]],
 	},
@@ -1866,7 +1866,7 @@ Event_Data = {
 	},
 	RAID_INSTANCE_WELCOME = {
 	    Description = [[Fires when the player enters an instance that has a reset timer]],
-	    Signature = [["name", ttl]],
+	    Signature = [[name, ttl]],
 	    [[name  - The name of the instance you're entering (string) ]],
 	    [[ttl  - The time till the instance resets, in seconds. (number) ]],
 	},
@@ -1881,7 +1881,7 @@ Event_Data = {
 	},
 	READY_CHECK = {
 	    Description = [[Fires when a ready check is triggered]],
-	    Signature = [["name"]],
+	    Signature = [[name]],
 	    [[name  - The username of the person who triggered the ready check (string) ]],
 	},
 	READY_CHECK_CONFIRM = {
@@ -1898,13 +1898,13 @@ Event_Data = {
 	},
 	REPLACE_ENCHANT = {
 	    Description = [[Fires when the player attempts to enchant an item which is already enchanted]],
-	    Signature = [["current", "new"]],
+	    Signature = [[current, new]],
 	    [[current  - The name of the current enchant. (string) ]],
 	    [[new  - The name of the proposed enchant. (string) ]],
 	},
 	RESURRECT_REQUEST = {
 	    Description = [[Fires when another character offers to resurrect the player]],
-	    Signature = [["name"]],
+	    Signature = [[name]],
 	    [[name  - The name of the user who is attempting to ressurect you/ (string) ]],
 	},
 	RUNE_TYPE_UPDATE = {
@@ -1946,7 +1946,7 @@ Event_Data = {
 	},
 	SPELL_ACTIVATION_OVERLAY_SHOW = {
 	    Description = [[Fires when the player receives a reactive buff that should appear on the screen overlay. Positions can be simple:]],
-	    Signature = [[spellID, "texture", "positions", scale, r, g, b]],
+	    Signature = [[spellID, texture, positions, scale, r, g, b]],
 	    [[CENTER]],
 	    [[LEFT]],
 	    [[RIGHT]],
@@ -2045,7 +2045,7 @@ Event_Data = {
 	},
 	TRADE_REPLACE_ENCHANT = {
 	    Description = [[Fires if the player attempts to enchant an item offered by the trade target which is already enchanted]],
-	    Signature = [["current", "new"]],
+	    Signature = [[current, new]],
 	    [[current  - The current item enchant (string) ]],
 	    [[new  - The name of the new proposed item enchant (string) ]],
 	},
@@ -2097,12 +2097,12 @@ Event_Data = {
 	},
 	UI_ERROR_MESSAGE = {
 	    Description = [[Fires when a game error message should be displayed. e.g. "You cannot attack that target", "Your pet is dead", "Your inventory is full"]],
-	    Signature = [["message"]],
+	    Signature = [[message]],
 	    [[message  - The message thats to be displayed. (string) ]],
 	},
 	UI_INFO_MESSAGE = {
 	    Description = [[Fires when an informative message should be displayed. e.g. "No fish are hooked", "You must be at least level 80 and in a raid group to enter this instance"]],
-	    Signature = [["message"]],
+	    Signature = [[message]],
 	    [[message  - The message that needs to be displayed (string) ]],
 	},
 	UI_SCALE_CHANGED = {
@@ -2110,32 +2110,32 @@ Event_Data = {
 	},
 	UNIT_ATTACK = {
 	    Description = [[Fires when a unit's weapon (or standard melee attack damage) changes]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_ATTACK_POWER = {
 	    Description = [[Fires when a unit's attack power changes]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_ATTACK_SPEED = {
 	    Description = [[Fires when a unit's attack speed changes]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_AURA = {
 	    Description = [[Fires when a unit loses or gains a buff or debuff.. This event fires before the effect of the buff can be seen on the character. For example if the unit gains the Mark of the Wild buff, at the time this even fires their stats may not have updated to reflect the gain from the buff. If you wish to be notified when the buff effect is gained or lost, register for the event that tracks the attribute being affected (e.g. UNIT_STATS, UNIT_ATTACK_POWER).]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_CLASSIFICATION_CHANGED = {
 	    Description = [[Fires when a unit changes classification (e.g. if an elite unit becomes non-elite)]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_COMBAT = {
 	    Description = [[Fires when a unit takes or recovers from damage due to a combat effect]],
-	    Signature = [["unitID", "action", "descriptor", damage, damageType]],
+	    Signature = [[unitID, action, descriptor, damage, damageType]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	    [[action  - The action type that happened, i.e. WOUND, DODGE, HEAL (string) ]],
 	    [[descriptor  - A descriptor that describes the action, i.e. CRITICAL, CRUSHING (string) ]],
@@ -2147,23 +2147,23 @@ Event_Data = {
 	},
 	UNIT_CONNECTION = {
 	    Description = [[Fires when the connection status for a unit has changed.]],
-	    Signature = [["unitID", hasConnected]],
+	    Signature = [[unitID, hasConnected]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	    [[hasConnected  - Whether or not the unit has connected. (bool) ]],
 	},
 	UNIT_DAMAGE = {
 	    Description = [[Fires when a unit's weapon damage changes.]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_DEFENSE = {
 	    Description = [[Fires when a unit's defense changes.]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_DISPLAYPOWER = {
 	    Description = [[Fires when a unit's primary power type (e.g. rage, energy, mana) changes. Occurs when a druid shapeshifts as well as in certain other cases.]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_DYNAMIC_FLAGS = {
@@ -2183,37 +2183,37 @@ Event_Data = {
 	},
 	UNIT_FACTION = {
 	    Description = [[Fires when a unit's PvP status changes]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_FLAGS = {
 	    Description = [[Fires when certain combat statuses for a unit change (e.g. stunned, feared)]],
-	    Signature = [["unit"]],
+	    Signature = [[unit]],
 	    [[unit  - The id of the affected unit. (string) ]],
 	},
 	UNIT_HEALTH = {
 	    Description = [[Fires when a unit's health level changes]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_INVENTORY_CHANGED = {
 	    Description = [[Fires when the player (or inspected unit) equips or unequips items]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_LEVEL = {
 	    Description = [[Fires when a unit's character level changes]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_MANA = {
 	    Description = [[Fires when a unit's mana level changes]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_MAXHEALTH = {
 	    Description = [[Fires when a unit's maximum health changes]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_MAXPOWER = {
@@ -2221,17 +2221,17 @@ Event_Data = {
 	},
 	UNIT_MODEL_CHANGED = {
 	    Description = [[Fires when a unit's 3D model changes (e.g. due to shapeshifting, being polymorphed, or equipping gear)]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_NAME_UPDATE = {
 	    Description = [[Fires when a unit's name is changed. Also fires when the client is first notified of a unit's name.]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_PET = {
 	    Description = [[Fires when a unit gains or loses a pet]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_PET_EXPERIENCE = {
@@ -2242,40 +2242,40 @@ Event_Data = {
 	},
 	UNIT_PORTRAIT_UPDATE = {
 	    Description = [[Fires when a unit's portrait changes (e.g. due to shapeshifting, being polymorphed, or equipping gear). Also fires when a unit's portrait changes from a generic race/gender image to one based on the unit's 3D model.]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_POWER = {
 	    Description = [[Fires when a unit's power level changes.]],
-	    Signature = [["unitID", "powerType"]],
+	    Signature = [[unitID, powerType]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	    [[powerType  - 'MANA', 'RAGE', 'ENERGY', 'FOCUS', 'HAPPINESS', 'RUNIC&#95;POWER', 'HOLY&#95;POWER'. (string) ]],
 	},
 	UNIT_QUEST_LOG_CHANGED = {
 	    Description = [[Fires when a unit's quests change (accepted/objective progress/abandoned/completed). This event will trigger both for your status changes, and that of others (when in a party/raid), and signifies that something has changed regarding the unit's current quests. This event triggering means that one of the following has occured: Accepted a new quest, abandoned an existing quest, achieved progress on the objectives of a quest, or completed (turned in) a quest.]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID will be "player" when the event relates to you. This event is VERY reliable for players, and is the preferred event when you ONLY care about changes relating to the player's quests and don't care about all the other triggerings that come with using the player-only QUEST_LOG_UPDATE (that event should really only be used if you are writing a Quest Log replacement addon, as it triggers on many, many non-quest related things).]],
 	    [[unitID will be partyX/raidX when the event relates to a party or raid member. However, this event is EXTREMELY unreliable for party and raid members, as it will ONLY trigger if you are at a very close range to them; and it will only trigger when they GAIN a quest (accepting) or LOSE a quest (abandon/turn in), meaning that you can't expect to use this event to monitor the quest status of other units, as you may be out of range when they accept or finish a quest (and then your client won't trigger this event and you won't know that they have a new quest/no longer has a certain quest). Also, even if they ARE in range it won't trigger for PROGRESS updates (such as finishing or achieving progress on certain objectives). It's best to just completely ignore that this event claims to be for other units, as its range limitation makes it useless for keeping an accurate look at other unit's quest state.]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_RANGEDDAMAGE = {
 	    Description = [[Fires when a unit's ranged attack damage changes. Also fires when a unit's ranged attack speed changes.]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_RANGED_ATTACK_POWER = {
 	    Description = [[Fires when a unit's ranged attack power changes]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_RESISTANCES = {
 	    Description = [[Fires when a unit's magic resistances change. Also seems to fire when a unit's armor value changes.]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that was affected. (string) ]],
 	},
 	UNIT_SPELLCAST_CHANNEL_START = {
 	    Description = [[Fires when a unit starts channeling a spell]],
-	    Signature = [["unitID", "spell", "rank", lineID, spellID]],
+	    Signature = [[unitID, spell, rank, lineID, spellID]],
 	    [[unitID  - The unit that's casting. (string) ]],
 	    [[spell  - The name of the spell that's being casted. (string) ]],
 	    [[rank  - The rank of the spell that's being casted. (string) ]],
@@ -2284,7 +2284,7 @@ Event_Data = {
 	},
 	UNIT_SPELLCAST_CHANNEL_STOP = {
 	    Description = [[Fires when a unit stops or cancels a channeled spell]],
-	    Signature = [["unitID", "spell", "rank", lineID, spellID]],
+	    Signature = [[unitID, spell, rank, lineID, spellID]],
 	    [[unitID  - The unit that's casting. (string) ]],
 	    [[spell  - The name of the spell that's being casted. (string) ]],
 	    [[rank  - The rank of the spell that's being casted. (string) ]],
@@ -2293,7 +2293,7 @@ Event_Data = {
 	},
 	UNIT_SPELLCAST_CHANNEL_UPDATE = {
 	    Description = [[Fires when a unit's channeled spell is interrupted or delayed]],
-	    Signature = [["unitID", "spell", "rank", lineID, spellID]],
+	    Signature = [[unitID, spell, rank, lineID, spellID]],
 	    [[unitID  - The unit that's casting. (string) ]],
 	    [[spell  - The name of the spell that's being casted. (string) ]],
 	    [[rank  - The rank of the spell that's being casted. (string) ]],
@@ -2302,7 +2302,7 @@ Event_Data = {
 	},
 	UNIT_SPELLCAST_DELAYED = {
 	    Description = [[Fires when a unit's spell cast is delayed]],
-	    Signature = [["unitID", "spell", "rank", lineID, spellID]],
+	    Signature = [[unitID, spell, rank, lineID, spellID]],
 	    [[unitID  - The unit that's casting. (string) ]],
 	    [[spell  - The name of the spell that's being casted. (string) ]],
 	    [[rank  - The rank of the spell that's being casted. (string) ]],
@@ -2311,7 +2311,7 @@ Event_Data = {
 	},
 	UNIT_SPELLCAST_FAILED = {
 	    Description = [[Fires when a unit's spell cast fails]],
-	    Signature = [["unitID", "spell", "rank", lineID, spellID]],
+	    Signature = [[unitID, spell, rank, lineID, spellID]],
 	    [[unitID  - The unit that's casting. (string) ]],
 	    [[spell  - The name of the spell that's being casted. (string) ]],
 	    [[rank  - The rank of the spell that's being casted. (string) ]],
@@ -2320,7 +2320,7 @@ Event_Data = {
 	},
 	UNIT_SPELLCAST_FAILED_QUIET = {
 	    Description = [[Fires when a unit's spell cast fails and no error message should be displayed. The default UI displays an error message when UNIT_SPELLCAST_FAILED fires; in some situations (e.g. if the player attempts to cast while mind controlled), this event is used instead, preventing an error message from being displayed while still notifying interested scripts of the failure.]],
-	    Signature = [["unitID", "spell", "rank", lineID, spellID]],
+	    Signature = [[unitID, spell, rank, lineID, spellID]],
 	    [[unitID  - The unit that's casting. (string) ]],
 	    [[spell  - The name of the spell that's being casted. (string) ]],
 	    [[rank  - The rank of the spell that's being casted. (string) ]],
@@ -2329,7 +2329,7 @@ Event_Data = {
 	},
 	UNIT_SPELLCAST_INTERRUPTED = {
 	    Description = [[Fires when a unit's spell cast is interrupted]],
-	    Signature = [["unitID", "spell", "rank", lineID, spellID]],
+	    Signature = [[unitID, spell, rank, lineID, spellID]],
 	    [[unitID  - The unit that's casting. (string) ]],
 	    [[spell  - The name of the spell that's being casted. (string) ]],
 	    [[rank  - The rank of the spell that's being casted. (string) ]],
@@ -2338,17 +2338,17 @@ Event_Data = {
 	},
 	UNIT_SPELLCAST_INTERRUPTIBLE = {
 	    Description = [[Fires when a unit's spell cast becomes interruptible again]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit who's casted spell has become interruptible again. (string, unitID) ]],
 	},
 	UNIT_SPELLCAST_NOT_INTERRUPTIBLE = {
 	    Description = [[Fires when a unit's spell cast becomes uninterruptible]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit who's currently casting spell has cannot be interrupted. (string, unitID) ]],
 	},
 	UNIT_SPELLCAST_SENT = {
 	    Description = [[Fires when a request to cast a spell (on behalf of the player or a unit controlled by the player) is sent to the server]],
-	    Signature = [["unitID", "spell", "rank", "target", lineID]],
+	    Signature = [[unitID, spell, rank, target, lineID]],
 	    [[unitID  - The unit that's casting. (string) ]],
 	    [[spell  - The name of the spell that's being casted. (string) ]],
 	    [[rank  - The rank of the spell that's being casted. (string) ]],
@@ -2357,7 +2357,7 @@ Event_Data = {
 	},
 	UNIT_SPELLCAST_START = {
 	    Description = [[Fires when a unit begins casting a spell]],
-	    Signature = [["unitID", "spell", "rank", lineID, spellID]],
+	    Signature = [[unitID, spell, rank, lineID, spellID]],
 	    [[unitID  - The unit that's casting. (string) ]],
 	    [[spell  - The name of the spell that's being casted. (string) ]],
 	    [[rank  - The rank of the spell that's being casted. (string) ]],
@@ -2366,7 +2366,7 @@ Event_Data = {
 	},
 	UNIT_SPELLCAST_STOP = {
 	    Description = [[Fires when a unit stops or cancels casting a spell]],
-	    Signature = [["unitID", "spell", "rank", lineID, spellID]],
+	    Signature = [[unitID, spell, rank, lineID, spellID]],
 	    [[unitID  - The unit that's casting. (string) ]],
 	    [[spell  - The name of the spell that's being casted. (string) ]],
 	    [[rank  - The rank of the spell that's being casted. (string) ]],
@@ -2375,7 +2375,7 @@ Event_Data = {
 	},
 	UNIT_SPELLCAST_SUCCEEDED = {
 	    Description = [[Fires when a unit's spell cast succeeds]],
-	    Signature = [["unitID", "spell", "rank", lineID, spellID]],
+	    Signature = [[unitID, spell, rank, lineID, spellID]],
 	    [[unitID  - The unit that's casting. (string) ]],
 	    [[spell  - The name of the spell that's being casted. (string) ]],
 	    [[rank  - The rank of the spell that's being casted. (string) ]],
@@ -2384,12 +2384,12 @@ Event_Data = {
 	},
 	UNIT_STATS = {
 	    Description = [[Fires when a unit's primary attributes change. Primary attributes are Strength, Stamina, Agility, Intellect, and Spirit.]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that's being affected by the event. (string) ]],
 	},
 	UNIT_TARGET = {
 	    Description = [[Fires when a unit's target changes]],
-	    Signature = [["unitID"]],
+	    Signature = [[unitID]],
 	    [[unitID  - The unit that's being affected by the event. (string) ]],
 	},
 	UNIT_TARGETABLE_CHANGED = {
@@ -2415,7 +2415,7 @@ Event_Data = {
 	},
 	UPDATE_CHAT_COLOR = {
 	    Description = [[Fires when the color settings for chat message types are updated]],
-	    Signature = [["type", red, green, blue]],
+	    Signature = [[type, red, green, blue]],
 	    [[type  - Chat message type for which the color setting has changed (string) ]],
 	    [[red  - Red component of the color (0.0 - 1.0) (number) ]],
 	    [[green  - Green component of the color (0.0 - 1.0) (number) ]],
@@ -2533,13 +2533,13 @@ Event_Data = {
 	},
 	VOICE_PLATE_START = {
 	    Description = [[Fires when a channel member begins speaking in voice chat]],
-	    Signature = [["name", "unit"]],
+	    Signature = [[name, unit]],
 	    [[name  - The username of the player thats talking (string) ]],
 	    [[unit  - The unit of the player thats talking, i.e. party1. (string) ]],
 	},
 	VOICE_PLATE_STOP = {
 	    Description = [[Fires when a channel member finishes speaking in voice chat]],
-	    Signature = [["name", "unit"]],
+	    Signature = [[name, unit]],
 	    [[name  - The username of the player thats talking (string) ]],
 	    [[unit  - The unit of the player thats talking, i.e. party1. (string) ]],
 	},
@@ -2557,7 +2557,7 @@ Event_Data = {
 	},
 	VOICE_START = {
 	    Description = [[Fires when a channel member begins speaking in voice chat]],
-	    Signature = [["unit"]],
+	    Signature = [[unit]],
 	    [[unit  - The unit of the player thats talking, i.e. party1. (string) ]],
 	},
 	VOICE_STATUS_UPDATE = {
@@ -2565,7 +2565,7 @@ Event_Data = {
 	},
 	VOICE_STOP = {
 	    Description = [[Fires when a channel member finishes speaking in voice chat]],
-	    Signature = [["unit"]],
+	    Signature = [[unit]],
 	    [[unit  - The unit of the player thats talking, i.e. party1. (string) ]],
 	},
 	VOTE_KICK_REASON_NEEDED = {

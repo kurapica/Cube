@@ -21,6 +21,8 @@ Cube.lua
 Scripts\lunit.lua
 Scripts\EventData.lua
 
+Frames\EventPicker.Designer.lua
+Frames\EventPicker.Script.lua
 Frames\Cube.Designer.lua
 Frames\Cube.Script.lua
 Frames\Debug.Designer.lua

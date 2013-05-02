@@ -49,10 +49,6 @@ function OnLoad(self)
 %s
 end
 
-function OnEnable(self)
-
-end
-
 %s]]
 
 _NewAddonDB = [[
@@ -76,6 +72,20 @@ function OnSlashCmd(self, option, info)
 	-- option is 'hi'
 	-- info is 'some information'
 end
+]]
+
+_NewRegisterEventHeader = [[
+	-- Register System Events
+]]
+
+_NewRegisterEvent = [[
+	self:RegisterEvent("%s")
+]]
+
+_NewEventHandler = [[
+function %s(self%s)
+	-- Handle %s event
+%send
 ]]
 
 _NewAddonLocale = [[
@@ -237,8 +247,9 @@ function OnEnable(self)
 				LoadSnippet(subNode)
 			end
 		end
-
 	end)
+
+	fileTree:GetNode(1):Select()
 end
 
 function PLAYER_LOGOUT(self)
@@ -271,7 +282,7 @@ function toggleBtn:OnClick()
 end
 
 function fileTree:OnNodeSelected(node)
-	if node.MetaData.Type == "Folder" then return end
+	if node.MetaData.Type == "Folder" or (node.Level == 1 and node.Index > 1) then return end
 
 	-- Check if has a editor
 	for i = 1, tabCode.Count do
@@ -390,7 +401,7 @@ function fileTree:OnNodeFunctionClick(func, node)
 						content = content .. _NewAddonDBChar
 					end
 
-					local slashCmd = IGAS:MsgBox(L["Need a slash command?"], "ic")
+					local slashCmd = IGAS:MsgBox(L["Need a slash command?(use ',' to seperate)"], "ic")
 					local handler = ""
 
 					if slashCmd and slashCmd ~= "" then
@@ -401,6 +412,43 @@ function fileTree:OnNodeFunctionClick(func, node)
 						content = content .. _NewSlashCommand:format(slashCmd:gsub("%s*,%s*", "\", \""))
 
 						handler = _NewSlashHandler
+					end
+
+					local events = Cube:PickEvent()
+					local args = ""
+					local sign = ""
+
+					if events and #events > 0 then
+						if content ~= "" then
+							content = content .. "\n"
+						end
+
+						content = content .. _NewRegisterEventHeader
+
+						for _, e in ipairs(events) do
+							content = content .. _NewRegisterEvent:format(e)
+
+							if handler ~= "" then
+								handler = handler .. "\n"
+							end
+
+							args = ""
+							sign = ""
+
+							if Event_Data[e].Description then
+								args = args .. "    -- " .. Event_Data[e].Description .. "\n"
+							end
+
+							if Event_Data[e].Signature then
+								sign = ", " .. Event_Data[e].Signature
+							end
+
+							for _, arg in ipairs(Event_Data[e]) do
+								args = args .. "    -- " .. arg .. "\n"
+							end
+
+							handler = handler .. _NewEventHandler:format(e, sign, e, args)
+						end
 					end
 
 					node = node:AddNode{Text = name, Content = _NewAddonFile:format(name, head, content, handler), FunctionName = "Del,Add", ChildOrderChangable = true, }
