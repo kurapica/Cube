@@ -11,6 +11,7 @@ Cube_Main.Height = 480
 Cube_Main.Width = 560
 Cube_Main.Caption = "Cube - "..L["Simple Dev Tool"]
 Cube_Main.Visible = false
+Cube_Main.ClampedToScreen = true
 
 -- File Tree
 fileTree = TreeView("FileTree", Cube_Main)

@@ -41,12 +41,16 @@ IGAS:NewAddon "%s"
 
 import "System"
 
-%s
------------------------------------
+%s-----------------------------------
 -- Addon Event Handler
 -----------------------------------
 function OnLoad(self)
+	-- Fired when the addon is loaded
 %s
+end
+
+function OnEnable(self)
+	-- Fired when the addon is enabled
 end
 
 %s]]
@@ -68,6 +72,7 @@ _NewSlashCommand = [[
 
 _NewSlashHandler = [[
 function OnSlashCmd(self, option, info)
+	-- Fired when the player using the registered slash commands
 	-- for command /cmd hi some information
 	-- option is 'hi'
 	-- info is 'some information'
@@ -191,9 +196,6 @@ function OnLoad(self)
 	-- Build tree
 	fileTree:SetTree(CubeSave.CodeTree)
 	fileTree:GetNode(1).ToggleState = true
-
-	-- Register Ctrl+S to save the code
-	-- code:RegisterControlKey("S")
 
 	-- Load the settings
 	chkShowRow.Checked = not CubeSave.NotShowRowNumber
@@ -376,15 +378,11 @@ function fileTree:OnNodeFunctionClick(func, node)
 					local head = ""
 
 					if IGAS:MsgBox(L["Need localization features?"], "n") then
-						head = head .. _NewAddonLocale
+						head = head .. _NewAddonLocale  .. "\n"
 					end
 
 					if IGAS:MsgBox(L["Need Logger to control messages?"], "n") then
-						if head ~= "" then
-							head = head .. "\n"
-						end
-
-						head = head .. _NewAddonLogger
+						head = head .. _NewAddonLogger  .. "\n"
 					end
 
 					local content = ""
@@ -484,7 +482,7 @@ function fileTree:OnNodeFunctionClick(func, node)
 				end
 
 				node = parent:AddNode{Text = name, Type = mtype, Content = _NewLocalizationFile:format(parent.Parent.Text, loc), FunctionName = "Del"}
-			
+
 				return node:Select()
 			elseif mtype == "Module" then
 				local name = IGAS:MsgBox(L["Please input the module's name"], "ic")
@@ -525,7 +523,7 @@ function fileTree:OnNodeFunctionClick(func, node)
 			end
 		end
 	elseif func == "Gather" then
-		
+
 	elseif func == "Enable" then
 		if node.Level == 2 then
 			return EnableAddon(node, true)
@@ -760,10 +758,6 @@ function GetTitle(node)
 	return ""
 end
 
-function AddModule(name)
-
-end
-
 function errorhandler(err)
 	return geterrorhandler and geterrorhandler()(err)
 end
@@ -794,48 +788,37 @@ function LoadSnippet(node)
 	LoadCode(node.MetaData.Content)
 end
 
-function LoadModule(node)
-	local subNode
-	local parentLoaded = _LoadedModule[node.Parent] or _LoadedModule[node.Parent] and true
-
-	_LoadedModule[node] = nil
-	node.FunctionName = "Del,Add"
-
-	if parentLoaded and not node.MetaData[_PlayerName] then
-		Log(2, "Loading Module......%s", GetTitle(node))
-
-		LoadCode(node.MetaData.Content)
-
-		_LoadedModule[node] = IGAS(GetTitle(node))
-	end
-
-	for i = 1, node.ChildNodeCount do
-		subNode = node:GetNode(i)
-		LoadModule(subNode)
-	end
-end
-
 function LoadAddon(node)
-	local subNode
-
-	node.FunctionName = "Del,Add"
-
 	_LoadedModule[node] = nil
 
 	-- Loading
-	if node.MetaData[_PlayerName] then
+	if node.Level == 2 then
 		Log(2, "Loading Addon......%s", GetTitle(node))
-
-		LoadCode(node.MetaData.Content)
-
-		_LoadedModule[node] = IGAS(GetTitle(node))
 	end
 
-	for i = 1, node.ChildNodeCount do
-		subNode = node:GetNode(i)
-		LoadModule(subNode)
+	if node.MetaData.Type ~= "Folder" then
+		if node.MetaData.Type == "Frame" then
+			LoadCode(node.MetaData.Designer)
+			LoadCode(node.MetaData.Script)
+		else
+			LoadCode(node.MetaData.Content)
+		end
+
+		_LoadedModule[node] = IGAS:GetAddon(GetTitle(node))
 	end
 
+	if _LoadedModule[node] then
+		for i = 1, node.ChildNodeCount do
+			LoadAddon(node:GetNode(i))
+		end
+	end
+
+	if node.Level == 2 then
+		-- Fire OnLoad & OnEnable
+		if _LoadedModule[node] then
+
+		end
+	end
 end
 
 function EnableModule(node, flag)
