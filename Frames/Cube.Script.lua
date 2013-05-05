@@ -523,19 +523,6 @@ function fileTree:OnNodeFunctionClick(func, node)
 			end
 		end
 	elseif func == "Gather" then
-
-	elseif func == "Enable" then
-		if node.Level == 2 then
-			return EnableAddon(node, true)
-		else
-			return EnableModule(node, true)
-		end
-	elseif func == "Disable" then
-		if node.Level == 2 then
-			return EnableAddon(node, false)
-		else
-			return EnableModule(node, false)
-		end
 	end
 end
 
@@ -813,43 +800,26 @@ function LoadAddon(node)
 		end
 	end
 
-	if node.Level == 2 then
+	if node.Level == 2 and _LoadedModule[node] then
 		-- Fire OnLoad & OnEnable
-		if _LoadedModule[node] then
-
-		end
+		FinishLoad(node)
 	end
 end
 
-function EnableModule(node, flag)
+function FinishLoad(node)
 	if _LoadedModule[node] then
-		if flag == nil then _LoadedModule[node]:Fire("OnLoad") end
-
-		if flag == false then
-			_LoadedModule[node]:Disable()
-		elseif flag == true then
-			_LoadedModule[node]:Enable()
-		end
-
-		if _LoadedModule[node]:IsEnabled() then
-			if flag == nil then _LoadedModule[node]:Fire("OnEnable") end
-			node.FunctionName = "Del,Add,Disable"
-		else
-			if flag == nil then _LoadedModule[node]:Fire("OnDisable") end
-			node.FunctionName = "Del,Add,Enable"
-		end
+		_LoadedModule[node]:Fire("OnLoad")
 	end
 
 	for i = 1, node.ChildNodeCount do
-		subNode = node:GetNode(i)
-		EnableModule(subNode, flag)
+		FinishLoad(node:GetNode(i))
 	end
 end
 
 function EnableAddon(node, flag)
-	if _LoadedModule[node] then
-		if flag == nil then _LoadedModule[node]:Fire("OnLoad") end
+	if flag == nil then flag = true end
 
+	if _LoadedModule[node] then
 		if flag == false then
 			_LoadedModule[node]:Disable()
 		elseif flag == true then
@@ -863,11 +833,11 @@ function EnableAddon(node, flag)
 			if flag == nil then _LoadedModule[node]:Fire("OnDisable") end
 			node.FunctionName = "Del,Add,Enable"
 		end
-	end
-
-	for i = 1, node.ChildNodeCount do
-		subNode = node:GetNode(i)
-		EnableModule(subNode, flag)
+		
+		for i = 1, node.ChildNodeCount do
+			subNode = node:GetNode(i)
+			EnableModule(subNode, flag)
+		end
 	end
 end
 
