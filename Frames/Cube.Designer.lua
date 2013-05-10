@@ -3,8 +3,6 @@ IGAS:NewAddon "Cube.Mdl_Cube_Main"
 -----------------------------------
 -- Cube Main Form
 -----------------------------------
-local width
-
 -- Main Form
 Cube_Main = Form("Cube_Main")
 Cube_Main.Height = 480
@@ -64,13 +62,8 @@ reset = NormalButton("Reset", Cube_Main)
 reset.Height = 24
 reset.Width = 60
 reset.Style = "CLASSIC"
+reset.AutoSize = true
 reset.Text = L["Reset"]
-width = reset:GetTextWidth()
-if ( width > 50 ) then
-	reset:SetWidth(width + 20)
-else
-	reset:SetWidth(60)
-end
 reset:SetPoint("BOTTOMLEFT", Cube_Main, "BOTTOMLEFT", 4, 20)
 
 -- Save Button
@@ -78,13 +71,8 @@ save = NormalButton("Save", Cube_Main)
 save.Height = 24
 save.Width = 60
 save.Style = "CLASSIC"
+save.AutoSize = true
 save.Text = L["Save"]
-width = save:GetTextWidth()
-if ( width > 50 ) then
-	save:SetWidth(width + 20)
-else
-	save:SetWidth(60)
-end
 save:SetPoint("LEFT", reset, "RIGHT", 6, 0)
 
 -- Debug Button
@@ -92,13 +80,8 @@ debug = NormalButton("Debug", Cube_Main)
 debug.Height = 24
 debug.Width = 60
 debug.Style = "CLASSIC"
+debug.AutoSize = true
 debug.Text = L["Debug"]
-width = debug:GetTextWidth()
-if ( width > 50 ) then
-	debug:SetWidth(width + 20)
-else
-	debug:SetWidth(60)
-end
 debug:SetPoint("LEFT", save, "RIGHT", 6, 0)
 
 -- BugList Button
@@ -106,13 +89,8 @@ bugList = NormalButton("BugList", Cube_Main)
 bugList.Height = 24
 bugList.Width = 60
 bugList.Style = "CLASSIC"
+bugList.AutoSize = true
 bugList.Text = L["BugList"]
-width = bugList:GetTextWidth()
-if ( width > 50 ) then
-	bugList:SetWidth(width + 20)
-else
-	bugList:SetWidth(60)
-end
 bugList:SetPoint("LEFT", debug, "RIGHT", 6, 0)
 
 -- CubeLog Button
@@ -120,13 +98,8 @@ cubeLog = NormalButton("CubeLog", Cube_Main)
 cubeLog.Height = 24
 cubeLog.Width = 60
 cubeLog.Style = "CLASSIC"
+cubeLog.AutoSize = true
 cubeLog.Text = L["Log"]
-width = cubeLog:GetTextWidth()
-if ( width > 50 ) then
-	cubeLog:SetWidth(width + 20)
-else
-	cubeLog:SetWidth(60)
-end
 cubeLog:SetPoint("LEFT", bugList, "RIGHT", 6, 0)
 
 -- Run Button
@@ -134,13 +107,8 @@ run = NormalButton("Run", Cube_Main)
 run.Height = 24
 run.Width = 60
 run.Style = "CLASSIC"
+run.AutoSize = true
 run.Text = L["Run"]
-width = run:GetTextWidth()
-if ( width > 50 ) then
-	run:SetWidth(width + 20)
-else
-	run:SetWidth(60)
-end
 run:SetPoint("BOTTOMRIGHT", Cube_Main, "BOTTOMRIGHT", -4, 20)
 
 -- Result Button
@@ -148,13 +116,8 @@ btnUnit = NormalButton("Result", Cube_Main)
 btnUnit.Height = 24
 btnUnit.Width = 60
 btnUnit.Style = "CLASSIC"
+btnUnit.AutoSize = true
 btnUnit.Text = L["Unit Test"]
-width = btnUnit:GetTextWidth()
-if ( width > 50 ) then
-	btnUnit:SetWidth(width + 20)
-else
-	btnUnit:SetWidth(60)
-end
 btnUnit:SetPoint("RIGHT", run, "LEFT", -6, 0)
 btnUnit.Visible = false	-- block now
 
