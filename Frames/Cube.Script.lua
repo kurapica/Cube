@@ -382,9 +382,11 @@ function fileTree:OnNodeFunctionClick(func, node)
 					end
 
 					local head = ""
+					local useLocale = false
 
 					if IGAS:MsgBox(L["Need localization features?"], "n") then
 						head = head .. _NewAddonLocale  .. "\n"
+						useLocale = true
 					end
 
 					if IGAS:MsgBox(L["Need Logger to control messages?"], "n") then
@@ -456,6 +458,10 @@ function fileTree:OnNodeFunctionClick(func, node)
 					end
 
 					node = node:AddNode{Text = name, Content = _NewAddonFile:format(name, head, content, handler), FunctionName = "Del,Add,Load", ChildOrderChangable = true, }
+
+					if useLocale then
+						node:AddNode{Text = "Localization", NoOrderChange = true, Type="Folder", FunctionName = "Gather"}
+					end
 
 					return node:Select()
 				end
