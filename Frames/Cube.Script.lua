@@ -22,6 +22,7 @@ _ModuleType = {
 	--"Definition",
 	--"Module",
 	"Frame",
+	"Script",
 }
 
 _LocaleType = {
@@ -147,6 +148,11 @@ import "System.Widget"
 
 _NewFrameScript = [[
 IGAS:NewAddon "%s.%s"
+
+]]
+
+_NewScriptFile = [[
+IGAS:NewAddon "%s"
 
 ]]
 
@@ -449,7 +455,7 @@ function fileTree:OnNodeFunctionClick(func, node)
 						end
 					end
 
-					node = node:AddNode{Text = name, Content = _NewAddonFile:format(name, head, content, handler), FunctionName = "Del,Add", ChildOrderChangable = true, }
+					node = node:AddNode{Text = name, Content = _NewAddonFile:format(name, head, content, handler), FunctionName = "Del,Add,Load", ChildOrderChangable = true, }
 
 					return node:Select()
 				end
@@ -520,9 +526,42 @@ function fileTree:OnNodeFunctionClick(func, node)
 
 					return node:Select()
 				end
+			elseif mtype == "Script" then
+				local name = IGAS:MsgBox(L["Please input the script file's name"], "ic")
+
+				if type(name) == "string" then
+					name = strtrim(name)
+
+					local parent = node
+
+					for i = 1, parent.ChildNodeCount do
+						if parent:GetNode(i).Text == name then
+							return parent:GetNode(i):Select()
+						end
+					end
+
+					node = parent:AddNode{Text = name, Type = mtype, Content = _NewScriptFile:format(parent.Text, name), FunctionName = "Del"}
+
+					return node:Select()
+				end
 			end
 		end
 	elseif func == "Gather" then
+		-- Gather localization strings from files in the addon node
+		local parent = node.Parent
+
+		local cache = {}
+
+		for i = 1, parent.ChildNodeCount do
+			GatherLocale4Node(cache, parent:GetNode(i))
+		end
+
+		-- Update localization files
+		for i = 1, node.ChildNodeCount do
+			UpdateLocaleFile(cache, node:GetNode(i))
+		end
+
+		wipe(cache)
 	end
 end
 
@@ -833,7 +872,7 @@ function EnableAddon(node, flag)
 			if flag == nil then _LoadedModule[node]:Fire("OnDisable") end
 			node.FunctionName = "Del,Add,Enable"
 		end
-		
+
 		for i = 1, node.ChildNodeCount do
 			subNode = node:GetNode(i)
 			EnableModule(subNode, flag)
@@ -859,6 +898,59 @@ function ValidateTable(tbl, cache)
 			else
 				ValidateTable(v, cache)
 			end
+		end
+	end
+end
+
+function GatherLocale(cache, ct)
+	for str in ct:gmatch("[^_%w]L(%b[])") do
+		cache[str:sub(2, -2)] = true
+	end
+
+	for str in ct:gmatch("[^_%w]L(%b\"\")") do
+		cache[str] = true
+	end
+end
+
+function GatherLocale4Node(cache, node)
+	if node.MetaData.Content then
+		GatherLocale(cache, node.MetaData.Content)
+	elseif node.MetaData.Type = "Frame" then
+		GatherLocale(cache, node.MetaData.Designer)
+		GatherLocale(cache, node.MetaData.Script)
+	end
+end
+
+function UpdateLocaleFile(cache, node)
+	local ct = node.MetaData.Content
+
+	-- Add not exist
+    for str in pairs(cache) do
+        if not strfind(ct, str) then
+            if strfind(ct, "\n$") then
+                ct = ct.."L["..str.."] = "..str.."\n"
+            else
+                ct = ct.."\n".."L["..str.."] = "..str.."\n"
+            end
+        end
+    end
+
+    -- remove not exist
+    for str in ct:gmatch("L(%b[])%s*=%s*[^\n]*") do
+        str = str:sub(2, -2)
+        if not cache[str] then
+            ct = gsub(ct, "L%["..str.."%]%s*=%s*[^\n]*\n", "")
+            ct = gsub(ct, "L%["..str.."%]%s*=%s*[^\n]*", "")
+        end
+    end
+
+    node.MetaData.Content = ct
+
+    -- Reset the editor
+    for i = 1, tabCode.Count do
+		if tabCode:GetWidget(i).Node == node then
+			tabCode:GetWidget(i).Text = node.MetaData.Content
+			break
 		end
 	end
 end
