@@ -921,7 +921,7 @@ end
 function GatherLocale4Node(cache, node)
 	if node.MetaData.Content then
 		GatherLocale(cache, node.MetaData.Content)
-	elseif node.MetaData.Type = "Frame" then
+	elseif node.MetaData.Type == "Frame" then
 		GatherLocale(cache, node.MetaData.Designer)
 		GatherLocale(cache, node.MetaData.Script)
 	end
