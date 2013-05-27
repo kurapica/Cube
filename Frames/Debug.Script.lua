@@ -197,8 +197,10 @@ function GetTitle(node)
 	while node.Level > 1 do
 		if type(node.MetaData.Key) == "string" then
 			text = ("[\"%s\"]"):format(node.MetaData.Key)..text
-		else
+		elseif node.MetaData.Key then
 			text = ("[%s]"):format(tostring(node.MetaData.Key))..text
+		elseif node.MetaData.Method then
+			text = (":%s()"):format(tostring(node.MetaData.Method))..text
 		end
 
 		node = node.Parent
@@ -273,6 +275,9 @@ function UpdateType(node)
 		btnCommit.Visible = (coroutine.status(v) == "suspended")
 		btnCommit.Text = L["Resume"]
 		txtValue.Text = tostring(v)
+	else
+		txtValue.Visible = false
+		btnCommit.Visible = false
 	end
 end
 
@@ -415,6 +420,10 @@ function UpdateChild(node)
 				text = text .. " : " .. v
 			end
 
+			if type(v) == "table" and type(v[0]) == "userdata" and v.GetObjectType and v.GetName and IGAS:GetUI(v) == v then
+				text = text .. " \124cff1eff00[T]\124h\124r" .. (v:GetObjectType() or "NoType") .. " \124cff1eff00[N]\124h\124r" .. (v:GetName() or "nil")
+			end
+
 			if type(v) ~= "string" and getmetatable(v) then
 				chNode = node:AddNode{Text = "\124cff1eff00[M]\124h\124r"..text, Value = v, Key = i}
 			else
@@ -427,6 +436,24 @@ function UpdateChild(node)
 				end
 				if node.Menu then
 					chNode.Menu = Menu
+				end
+			end
+		end
+
+		if type(node.MetaData.Value[0]) == "userdata" and (node.MetaData.Value.GetRegions or node.MetaData.Value.GetChildren) and IGAS:GetUI(node.MetaData.Value) == node.MetaData.Value then
+			if node.MetaData.Value.GetRegions then
+				local lst = {node.MetaData.Value:GetRegions()}
+
+				if #lst > 0 then
+					chNode = node:AddNode{Text = "Regions", Value = lst, Method = "GetRegions"}	
+				end
+			end
+
+			if node.MetaData.Value.GetChildren then
+				local lst = {node.MetaData.Value:GetChildren()}
+
+				if #lst > 0 then
+					chNode = node:AddNode{Text = "Children", Value = lst, Method = "GetChildren"}	
 				end
 			end
 		end
