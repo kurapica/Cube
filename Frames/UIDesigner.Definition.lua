@@ -471,7 +471,7 @@ class "PropertyList"
 	]======]
 
 	local function ValidateType(ty)
-		if ty == Number or ty == String or ty == Boolean or Reflector.IsEnum(ty) then
+		if ty == Number or ty == String or ty == Boolean or ty == LocaleString or Reflector.IsEnum(ty) then
 			return true
 		end
 
@@ -498,9 +498,7 @@ class "PropertyList"
 				self[key] = {}
 
 				-- Fill data
-				local props = Reflector.GetProperties(key, true)
-
-				for _, name in ipairs(props) do
+				for _, name in ipairs(Reflector.GetProperties(key, true)) do
 					if Reflector.IsPropertyReadable(key, name) and Reflector.IsPropertyWritable(key, name) then
 						-- Check prop's type
 						local ty = Reflector.GetPropertyType(key, name)
@@ -526,32 +524,85 @@ class "PropertyList"
 	class "PropertySet"
 		inherit "Frame"
 
+		_FrameBackdrop = {
+			bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+			edgeFile = "Interface\\ChatFrame\\CHATFRAMEBACKGROUND",
+			tile = true, tileSize = 16, edgeSize = 1,
+			insets = { left = 3, right = 3, top = 3, bottom = 3 }
+		}
+
 		doc [======[
 			@name PropertySet
 			@type class
 			@desc Used to show a property's name-value pairs of an object
 		]======]
 
-		------------------------------------------------------
-		-- PropertyAccessor
-		------------------------------------------------------
-		class "PropertyAccessor"
-			inherit "ComboBox"
-			extend "IFBorder"
+		local function RefreshValue(self)
+			if self.__Object and self.__Property then
+				local ty = Reflector.GetPropertyType(Reflector.GetObjectClass(self.__Object), self.__Property)[1]
+				local value = self.__Object[self.__Property]
 
-			doc [======[
-				@name PropertyAccessor
-				@type class
-				@desc Used to access the property's value
-			]======]
+				if ty == Number then
+					self.Accessor.Text = string.format("%.1f", value or 0)
+				elseif ty == String or ty == LocaleString then
+					self.Accessor.Text = tostring(value or "")
+				elseif ty == Boolean then
+					self.Accessor.Value = value and true or false
+				elseif Reflector.IsEnum(ty) then
+					self.Accessor.Text = Reflector.ParseEnum(value)
+				end
+			end
+		end
 
-			------------------------------------------------------
-			-- Constructor
-			------------------------------------------------------
-		    function PropertyAccessor(self)
-				self:SetBackdrop(nil)
-		    end
-		endclass "PropertyAccessor"
+		local function SetValue(self, prop, value)
+			self[prop] = valuee
+		end
+
+		local function UpdateValue(self)
+			if self.__Object and self.__Property then
+				local ty = Reflector.GetPropertyType(Reflector.GetObjectClass(self.__Object), self.__Property)[1]
+				local oldValue = self.__Object[self.__Property]
+				local value
+
+				if ty == Number then
+					value = tonumber(self.Accessor.Text)
+
+					if not value then
+						self.Accessor.Text = string.format("%.1f", oldValue or 0)
+					else
+						if oldValue == value then return end
+
+						pcall(SetValue, self.__Object, self.__Property, value)
+
+						RefreshValue(self)
+					end
+				elseif ty == String or ty == LocaleString then
+					value = tostring(self.Accessor.Text) or ""
+
+					if oldValue == value then return end
+
+					pcall(SetValue, self.__Object, self.__Property, value)
+
+					RefreshValue(self)
+				elseif ty == Boolean then
+					value = self.Accessor.Value and true or false
+
+					if oldValue == value then return end
+
+					pcall(SetValue, self.__Object, self.__Property, value)
+
+					RefreshValue(self)
+				elseif Reflector.IsEnum(ty) then
+					value = self.Accessor.Value and true or false
+
+					if oldValue == value then return end
+
+					pcall(SetValue, self.__Object, self.__Property, value)
+
+					RefreshValue(self)
+				end
+			end
+		end
 
 		------------------------------------------------------
 		-- Script
@@ -560,6 +611,59 @@ class "PropertyList"
 		------------------------------------------------------
 		-- Method
 		------------------------------------------------------
+		function SetProperty(self, object, prop)
+			self.Accessor.DropdownBtn.OnClick = self.Accessor.DropdownBtn.OnClick - Advance_Click
+
+			if object and prop then
+				self.__Object = object
+				self.__Property = prop
+
+				local ty = Reflector.GetPropertyType(Reflector.GetObjectClass(object), prop)[1]
+
+				self.Header.Text = prop
+
+				if ty == Number then
+					self.Accessor.DropDownBtn.Visible = false
+					self.Accessor.Editable = true
+					self.Accessor:Clear()
+
+					self.Accessor.Text = string.format("%.1f", object[prop] or 0)
+				elseif ty == String or ty == LocaleString then
+					self.Accessor.DropDownBtn.Visible = false
+					self.Accessor.Editable = true
+					self.Accessor:Clear()
+
+					self.Accessor.Text = tostring(object[prop] or "")
+				elseif ty == Boolean then
+					self.Accessor.DropDownBtn.Visible = true
+					self.Accessor.Editable = false
+					self.Accessor:Clear()
+					self.Accessor:AddItem(false, "false")
+					self.Accessor:AddItem(true, "true")
+
+					self.Accessor.Value = object[prop] and true or false
+				elseif Reflector.IsEnum(ty) then
+					self.Accessor.DropdownBtn.Visible = true
+					self.Accessor.Editable = false
+					self.Accessor:SetList(Reflector.GetEnums(ty))
+
+					self.Accessor.Text = Reflector.ParseEnum(object[prop])
+				elseif Reflector.IsStruct(ty) then
+					self.Accessor.DropdownBtn.Visible = true
+					self.Accessor.Editable = false
+					self.Accessor:Clear()
+
+					self.Accessor.Text = "(Advance)"
+					self.Accessor.DropdownBtn.OnClick = self.Accessor.DropdownBtn.OnClick + Advance_Click
+				end
+			else
+				self.__Object = nil
+				self.__Property = nil
+				self.Header.Text = ""
+				self.Accessor:Clear()
+				self.Accessor.Editable = false
+			end
+		end
 
 		------------------------------------------------------
 		-- Property
@@ -575,6 +679,8 @@ class "PropertyList"
 	    function PropertySet(self)
 	    	self.Parent.__WidgetCount = (self.Parent.__WidgetCount or 0) + 1
 
+	    	self:SetBackdrop(_FrameBackdrop)
+	    	self:SetBackdropColor(0, 0, 0, 1)
 	    	self:SetPoint("LEFT", 10, 0)
 	    	self:SetPoint("RIGHT")
 	    	self.Height = NODE_HEIGHT
@@ -585,11 +691,11 @@ class "PropertyList"
 			title:SetPoint("BOTTOMLEFT")
 			title:SetPoint("RIGHT", self, "CENTER", -10, 0)
 
-			local accessor = PropertyAccessor("Accessor", self)
+			local accessor = ComboBox("Accessor", self)
 			accessor:SetPoint("TOPRIGHT")
 			accessor:SetPoint("BOTTOMRIGHT")
 			accessor:SetPoint("LEFT", title, "RIGHT")
-			accessor:SetBackdrop(nil)
+			accessor:SetBackdrop(_FrameBackdrop)
 			accessor.Editable = true
 			accessor.AutoFocus = false
 	    end
