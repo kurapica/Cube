@@ -536,9 +536,9 @@ function BuildBody(data)
 									result = result .. "<br/><br/>　<cyan>Parameter</cyan> :"
 									for param, info in desc do
 										if info and info:len() > 0 then
-											result = result .. "<br/>　　" .. param .. " - " .. ParseInfo(info)
+											result = result .. "<br/>　　" .. ParseInfo(param) .. " - " .. ParseInfo(info)
 										else
-											result = result .. "<br/>　　" .. param
+											result = result .. "<br/>　　" .. ParseInfo(param)
 										end
 									end
 								end
@@ -614,7 +614,7 @@ function BuildBody(data)
 						if desc then
 							result = result .. "<br/><br/>　<cyan>Format</cyan> :"
 							for fmt in desc do
-								result = result .. "<br/>　　" .. "function object:" .. name .. "(" .. fmt .. ")<br/>　　   -- Handle the script<br/>　  end"
+								result = result .. "<br/>　　" .. "function object:" .. name .. "(" .. ParseInfo(fmt) .. ")<br/>　　   -- Handle the script<br/>　  end"
 							end
 						else
 							result = result .. "<br/><br/>　<cyan>Format</cyan> :<br/>　  function object:" .. name .. "("
@@ -627,9 +627,9 @@ function BuildBody(data)
 								for param in desc do
 									if isFirst then
 										isFirst = false
-										result = result .. param
+										result = result .. ParseInfo(param)
 									else
-										result = result .. ", " .. param
+										result = result .. ", " .. ParseInfo(param)
 									end
 								end
 							end
@@ -643,9 +643,9 @@ function BuildBody(data)
 							result = result .. "<br/><br/>　<cyan>Parameter</cyan> :"
 							for param, info in desc do
 								if info and info:len() > 0 then
-									result = result .. "<br/>　  " .. param .. " - " .. ParseInfo(info)
+									result = result .. "<br/>　  " .. ParseInfo(param) .. " - " .. ParseInfo(info)
 								else
-									result = result .. "<br/>　  " .. param
+									result = result .. "<br/>　  " .. ParseInfo(param)
 								end
 							end
 						end
@@ -705,9 +705,9 @@ function BuildBody(data)
 						if desc then
 							for fmt in desc do
 								if isGlobal then
-									result = result .. "<br/>　　" .. GetName(ns) .. "." .. name .. "(" .. fmt .. ")"
+									result = result .. "<br/>　　" .. GetName(ns) .. "." .. name .. "(" .. ParseInfo(fmt) .. ")"
 								else
-									result = result .. "<br/>　　object:" .. name .. "(" .. fmt .. ")"
+									result = result .. "<br/>　　object:" .. name .. "(" .. ParseInfo(fmt) .. ")"
 								end
 							end
 						else
@@ -725,9 +725,9 @@ function BuildBody(data)
 								for param in desc do
 									if isFirst then
 										isFirst = false
-										result = result .. param
+										result = result .. ParseInfo(param)
 									else
-										result = result .. ", " .. param
+										result = result .. ", " .. ParseInfo(param)
 									end
 								end
 							end
@@ -741,9 +741,9 @@ function BuildBody(data)
 							result = result .. "<br/><br/>　<cyan>Parameter</cyan> :"
 							for param, info in desc do
 								if info and info:len() > 0 then
-									result = result .. "<br/>　　" .. param .. " - " .. ParseInfo(info)
+									result = result .. "<br/>　　" .. ParseInfo(param) .. " - " .. ParseInfo(info)
 								else
-									result = result .. "<br/>　　" .. param
+									result = result .. "<br/>　　" .. ParseInfo(param)
 								end
 							end
 						end
@@ -753,7 +753,7 @@ function BuildBody(data)
 						if desc then
 							result = result .. "<br/><br/>　<cyan>Return Format</cyan> :"
 							for fmt in desc do
-								result = result .. "<br/>　　" .. fmt
+								result = result .. "<br/>　　" .. ParseInfo(fmt)
 							end
 						end
 

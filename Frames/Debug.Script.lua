@@ -11,11 +11,52 @@ format = string.format
 index = 0
 _SelectNode = nil
 
+Cube_Debug.TargetRegion = false
+Cube_Debug.AlphaInterval = 5
+
 -- Addon
 _Addon.OnSlashCmd = _Addon.OnSlashCmd + function(self, option)
 	if option and strupper(option) == "DEBUG" then
 		Cube_Debug.Visible = true
 		return true
+	end
+end
+
+function Cube_Debug:OnUpdate(elapsed)
+	if not self.TargetRegion then return end
+
+	local alpha = self.TargetRegion:GetAlpha()
+
+	alpha = alpha + self.AlphaInterval * elapsed
+
+	if alpha <= 0 then
+		alpha = 0
+		self.AlphaInterval = math.abs(self.AlphaInterval)
+	elseif alpha >= 1 then
+		alpha = 1
+		self.AlphaInterval = - math.abs(self.AlphaInterval)
+	end
+
+	self.TargetRegion:SetAlpha(alpha)
+end
+
+function tabF:OnTabClose(view)
+	SetTargetRegion(nil)
+end
+
+function SetTargetRegion(region)
+	if Cube_Debug.TargetRegion then
+		local tar = Cube_Debug.TargetRegion
+
+		Cube_Debug.TargetRegion = false
+
+		tar:SetAlpha(Cube_Debug.AlphaBackup or 1)
+	end
+
+	if type(region) == "table" and region[0] and region.GetAlpha then
+		Cube_Debug.AlphaBackup = region:GetAlpha()
+
+		Cube_Debug.TargetRegion = region
 	end
 end
 
@@ -42,6 +83,7 @@ end
 
 function Cube_Debug:OnHide()
 	Menu.Visible = false
+	SetTargetRegion(nil)
 end
 
 function Menu:OnShow()
@@ -461,7 +503,9 @@ function UpdateChild(node)
 end
 
 function OnNodeSelected(self, node)
-	return UpdateType(node)
+	UpdateType(node)
+
+	SetTargetRegion(node.MetaData.Value)
 end
 
 function OnNodeToggle(self, node)
