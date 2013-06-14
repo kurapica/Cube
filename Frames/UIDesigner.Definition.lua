@@ -20,16 +20,25 @@ interface "IFBorder"
 	    edgeSize = 1,
 	}
 
+	function _BuildBorder(self)
+		if Reflector.ObjectIsClass(self, Frame) then
+			self.Backdrop = THIN_BORDER
+			self.BackdropBorderColor = DEFAULT_BORDER_COLOR
+		else
+			local bg = Frame("Back", self)
+			bg.FrameStrata = "BACKGROUND"
+			bg:SetPoint("TOPLEFT", -1, 1)
+			bg:SetPoint("BOTTOMRIGHT", 1, -1)
+			bg.Backdrop = THIN_BORDER
+			bg.BackdropBorderColor = DEFAULT_BORDER_COLOR
+		end
+	end
+
 	------------------------------------------------------
 	-- Initialize
 	------------------------------------------------------
     function IFBorder(self)
-		local bg = Frame("Back", self)
-		bg.FrameStrata = "BACKGROUND"
-		bg:SetPoint("TOPLEFT", -1, 1)
-		bg:SetPoint("BOTTOMRIGHT", 1, -1)
-		bg.Backdrop = THIN_BORDER
-		bg.BackdropBorderColor = DEFAULT_BORDER_COLOR
+    	_BuildBorder(self)
     end
 endinterface "IFBorder"
 
@@ -450,9 +459,6 @@ class "WidgetList"
 	------------------------------------------------------
 	-- Constructor
 	------------------------------------------------------
-    function WidgetList(self)
-    	self:SetBackdrop(nil)
-    end
 endclass "WidgetList"
 
 ------------------------------------------------------
@@ -523,13 +529,7 @@ class "PropertyList"
 	------------------------------------------------------
 	class "PropertySet"
 		inherit "Frame"
-
-		_FrameBackdrop = {
-			bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
-			edgeFile = "Interface\\ChatFrame\\CHATFRAMEBACKGROUND",
-			tile = true, tileSize = 16, edgeSize = 1,
-			insets = { left = 3, right = 3, top = 3, bottom = 3 }
-		}
+		extend "IFBorder"
 
 		doc [======[
 			@name PropertySet
@@ -604,6 +604,10 @@ class "PropertyList"
 			end
 		end
 
+		local function Advance_Click(self)
+
+		end
+
 		------------------------------------------------------
 		-- Script
 		------------------------------------------------------
@@ -672,14 +676,39 @@ class "PropertyList"
 		------------------------------------------------------
 		-- Script Handler
 		------------------------------------------------------
+		local function OnValueChanged(self, value)
+			UpdateValue(self.Parent)
+		end
+
+		local function OnEnterPressed(self)
+			self = self.Parent
+
+			if self.ID < self.Parent.__WidgetCount then
+				if self.Parent:GetChild("PropertySet"..(self.ID+1)).Visible then
+					self.Parent:GetChild("PropertySet"..(self.ID+1)):SetFocus()
+				end
+			end
+		end
+
+		local function OnEditFocusGained(self)
+			RefreshValue(self.Parent)
+		end
+
+		local function OnEditFocusLost(self)
+			UpdateValue(self.Parent)
+		end
+
+		local function OnTabPressed(self)
+			return OnEnterPressed(self)
+		end
 
 		------------------------------------------------------
 		-- Constructor
 		------------------------------------------------------
 	    function PropertySet(self)
 	    	self.Parent.__WidgetCount = (self.Parent.__WidgetCount or 0) + 1
+	    	self.ID = self.Parent.__WidgetCount
 
-	    	self:SetBackdrop(_FrameBackdrop)
 	    	self:SetBackdropColor(0, 0, 0, 1)
 	    	self:SetPoint("LEFT", 10, 0)
 	    	self:SetPoint("RIGHT")
@@ -692,12 +721,19 @@ class "PropertyList"
 			title:SetPoint("RIGHT", self, "CENTER", -10, 0)
 
 			local accessor = ComboBox("Accessor", self)
+			IFBorder._BuildBorder(accessor)
 			accessor:SetPoint("TOPRIGHT")
 			accessor:SetPoint("BOTTOMRIGHT")
 			accessor:SetPoint("LEFT", title, "RIGHT")
-			accessor:SetBackdrop(_FrameBackdrop)
 			accessor.Editable = true
 			accessor.AutoFocus = false
+
+			-- Script handlers
+			accessor.OnValueChanged = OnValueChanged
+			accessor.OnEnterPressed = OnEnterPressed
+			accessor.OnTabPressed = OnTabPressed
+			accessor.OnEditFocusGained = OnEditFocusGained
+			accessor.OnEditFocusLost = OnEditFocusLost
 	    end
 	endclass "PropertySet"
 
@@ -778,7 +814,8 @@ class "PropertyList"
 
             local text = FontString("Text", self)
             text:SetPoint("TOPRIGHT")
-            text:SetPoint("BOTTOMLEFT", 14, 0)
+            text:SetPoint("TOPLEFT", 14, 0)
+            text.Height = NODE_HEIGHT
             text.JustifyH = "Left"
 	    end
 	endclass "PropertyCategory"
