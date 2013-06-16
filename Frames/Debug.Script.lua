@@ -236,19 +236,27 @@ function GetTitle(node)
 		return text
 	end
 
+	local left = 0
+
 	while node.Level > 1 do
 		if type(node.MetaData.Key) == "string" then
 			text = ("[\"%s\"]"):format(node.MetaData.Key)..text
 		elseif node.MetaData.Key then
 			text = ("[%s]"):format(tostring(node.MetaData.Key))..text
 		elseif node.MetaData.Method then
-			text = (":%s()"):format(tostring(node.MetaData.Method))..text
+			text = (":%s()})"):format(tostring(node.MetaData.Method))..text
+			left = left + 1
 		end
 
 		node = node.Parent
 	end
 
 	text = node.MetaData.Key..text
+
+	while left > 0 do
+		text = "({"..text
+		left = left - 1
+	end
 
 	return text
 end
@@ -288,8 +296,9 @@ function UpdateType(node)
 
 			txtValue.Text = tostring(v)
 		else
-			txtValue.Text = ""
-			txtValue.Visible = false
+			txtValue.Text = tostring(v)
+			txtValue.MouseEnabled = false
+			txtValue.Visible = true
 		end
 		btnCommit.Visible = false
 	elseif type(v) == "string" then

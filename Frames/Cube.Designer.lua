@@ -22,7 +22,7 @@ fileTree:ActiveThread("OnNodeFunctionClick")
 
 -- Toggle Button
 toggleBtn = Button("ToggleButton", Cube_Main)
-toggleBtn.FrameStrata = "HIGH"
+toggleBtn.FrameLevel = fileTree.FrameLevel + 5
 toggleBtn:SetWidth(32)
 toggleBtn:SetHeight(32)
 toggleBtn:SetNormalTexture("Interface\\BUTTONS\\UI-SpellbookIcon-PrevPage-Up")
