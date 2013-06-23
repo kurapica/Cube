@@ -467,10 +467,10 @@ function BuildBody(data)
 
 					-- Need
 					if IsInterface(ns) then
-						desc = GetDocument(ns, "interface", GetName(ns), "need")
+						desc = GetDocument(ns, "interface", GetName(ns), "overridable")
 
 						if desc then
-							result = result .. "<br/><br/>　<cyan>Need</cyan> :"
+							result = result .. "<br/><br/>　<cyan>Overridable</cyan> :"
 
 							for need, info in desc do
 								if info and info:len() > 0 then
