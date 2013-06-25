@@ -474,7 +474,7 @@ function BuildBody(data)
 
 							for need, info in desc do
 								if info and info:len() > 0 then
-									result = result .. "<br/>　　" .. need .. " - " .. info
+									result = result .. "<br/>　　" .. need .. " - " .. ParseInfo(info)
 								else
 									result = result .. "<br/>　　" .. need
 								end

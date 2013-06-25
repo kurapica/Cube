@@ -103,7 +103,8 @@ class "MenuStrip"
 
 				list = DropDownList("MenuList", menu)
 				list.ShowOnCursor = false
-				list:SetPoint("TOPLEFT", menu, "BOTTOMLEFT")
+				list:SetPoint("LEFT", menu, "LEFT")
+				list:SetPoint("TOP", self, "BOTTOM")
 
 				menu.OnClick = Menu_OnClick
 			end
@@ -127,7 +128,7 @@ class "MenuStrip"
 		self:SetBackdropColor(0,0,0,1)
 		self:SetPoint("TOPLEFT")
 		self:SetPoint("TOPRIGHT")
-		self.Height = 30
+		self.Height = NODE_HEIGHT + 6
     end
 endclass "MenuStrip"
 
