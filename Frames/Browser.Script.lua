@@ -5,7 +5,7 @@ import "System.Reflector"
 
 IsClass = Reflector.IsClass
 IsInterface = Reflector.IsInterface
-HasScript = Reflector.HasScript
+HasEvent = Reflector.HasEvent
 
 HTML_TEMPLATE = [[
 <html>
@@ -36,7 +36,7 @@ Save the file, then reload the game.
 </html>
 ]]
 
--- Script
+-- Event handler
 _Addon.OnSlashCmd = _Addon.OnSlashCmd + function(self, option)
 	if option and (strupper(option) == "BROWSER" or strupper(option) == "BR") then
 		browser.Visible = true
@@ -405,15 +405,15 @@ function BuildBody(data)
 					-- SubNameSpace
 					result = result .. BuildSubNamespace(ns)
 
-					-- Script
-					local scripts = GetScripts(ns, true)
-					if scripts and next(scripts) then
-						result = result .. "<br/><br/>　<cyan>Script</cyan> :"
-						for _, sc in pairs(scripts) do
-							hasDocument = HasDocument(ns, "script", sc)
+					-- Event
+					local events = GetEvents(ns, true)
+					if events and next(events) then
+						result = result .. "<br/><br/>　<cyan>Event</cyan> :"
+						for _, sc in pairs(events) do
+							hasDocument = HasDocument(ns, "event", sc)
 
 							-- Desc
-							desc = hasDocument and GetDocument(ns, "script", sc, "desc")
+							desc = hasDocument and GetDocument(ns, "event", sc, "desc")
 							desc = desc and desc()
 							if desc then
 								desc = "　-　" .. desc:gsub("<br>", "<br/>　　　　")
@@ -421,7 +421,7 @@ function BuildBody(data)
 								desc = ""
 							end
 
-							result = result .. "<br/>　　" .. BuildHref(GetFullName(ns).."."..sc.."-script", sc) .. desc
+							result = result .. "<br/>　　" .. BuildHref(GetFullName(ns).."."..sc.."-event", sc) .. desc
 						end
 					end
 
@@ -580,8 +580,8 @@ function BuildBody(data)
 					querytype = doctype
 
 					if not querytype then
-						if HasScript(ns, name) then
-							querytype = "script"
+						if HasEvent(ns, name) then
+							querytype = "event"
 						elseif HasProperty(ns, name) then
 							querytype = "property"
 						elseif type(ns[name]) == "function" then
@@ -608,13 +608,13 @@ function BuildBody(data)
 						result = result .. "<br/><br/>　<cyan>Description</cyan> :<br/>　　" .. desc:gsub("<br>", "<br/>　　")
 					end
 
-					if querytype == "script" then
+					if querytype == "event" then
 						-- Format
 						desc = hasDocument and GetDocument(ns, doctype, name, "format")
 						if desc then
 							result = result .. "<br/><br/>　<cyan>Format</cyan> :"
 							for fmt in desc do
-								result = result .. "<br/>　　" .. "function object:" .. name .. "(" .. ParseInfo(fmt) .. ")<br/>　　   -- Handle the script<br/>　  end"
+								result = result .. "<br/>　　" .. "function object:" .. name .. "(" .. ParseInfo(fmt) .. ")<br/>　　   -- Handle the event<br/>　  end"
 							end
 						else
 							result = result .. "<br/><br/>　<cyan>Format</cyan> :<br/>　  function object:" .. name .. "("
@@ -634,7 +634,7 @@ function BuildBody(data)
 								end
 							end
 
-							result = result .. ")<br/>　  　  -- Handle the script<br/>　  end"
+							result = result .. ")<br/>　  　  -- Handle the event<br/>　  end"
 						end
 
 						-- Params
