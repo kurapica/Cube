@@ -1,0 +1,6 @@
+package-as: Cube
+
+required-dependencies:
+    - IGAS
+
+manual-changelog: CHANGELOG.txt

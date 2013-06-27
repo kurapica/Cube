@@ -386,8 +386,8 @@ function UpdateChild(node)
 
 		-- No menu
 		if node.MetaData.Type == "Class" or node.MetaData.Type == "Interface" then
-			-- Script
-			node:AddNode{Text = "Script", Value = System.Reflector.GetScripts(node.MetaData.Value, true), Key = "Script"}
+			-- Event
+			node:AddNode{Text = "Event", Value = System.Reflector.GetEvents(node.MetaData.Value, true), Key = "Event"}
 			-- Method
 			node:AddNode{Text = "Method", Value = System.Reflector.GetMethods(node.MetaData.Value, true), Key = "Method"}
 			-- Property
@@ -496,7 +496,7 @@ function UpdateChild(node)
 				local lst = {node.MetaData.Value:GetRegions()}
 
 				if #lst > 0 then
-					chNode = node:AddNode{Text = "Regions", Value = lst, Method = "GetRegions"}	
+					chNode = node:AddNode{Text = "Regions", Value = lst, Method = "GetRegions"}
 				end
 			end
 
@@ -504,7 +504,7 @@ function UpdateChild(node)
 				local lst = {node.MetaData.Value:GetChildren()}
 
 				if #lst > 0 then
-					chNode = node:AddNode{Text = "Children", Value = lst, Method = "GetChildren"}	
+					chNode = node:AddNode{Text = "Children", Value = lst, Method = "GetChildren"}
 				end
 			end
 		end
