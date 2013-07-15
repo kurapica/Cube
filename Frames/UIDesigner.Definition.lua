@@ -157,7 +157,7 @@ class "WidgetList"
 		doc [======[
 			@name WidgetButton
 			@type class
-			@desc Used to mark a widget class
+			@desc Used to represent a widget class
 		]======]
 
 		------------------------------------------------------
@@ -194,7 +194,7 @@ class "WidgetList"
 		local function OnMouseDown(self)
 			if self.ButtonState == "PUSHED" then
 				self.ButtonState = "NORMAL"
-				self.Back.BackdropBorderColor = DEFAULT_BORDER_COLOR
+				self.BackdropBorderColor = DEFAULT_BORDER_COLOR
 
 				if self.Root.SelectedButton == self then
 					self.Root.SelectedButton = nil
@@ -204,9 +204,10 @@ class "WidgetList"
 			else
 				if self.Root.SelectedButton and self.Root.SelectedButton ~= self then
 					self.Root.SelectedButton.ButtonState = "NORMAL"
+					self.Root.SelectedButton.BackdropBorderColor = DEFAULT_BORDER_COLOR
 				end
 				self.ButtonState = "PUSHED"
-				self.Back.BackdropBorderColor = CLICK_BORDER_COLOR
+				self.BackdropBorderColor = CLICK_BORDER_COLOR
 				self.Root.SelectedButton = self
 
 				self.Root:Fire("OnWidgetSelected", self.Widget)
@@ -227,7 +228,7 @@ class "WidgetList"
 	    	self.Locked = true
 			self:SetPoint("LEFT", 10, 0)
 			self:SetPoint("RIGHT", -10, 0)
-			self:SetPoint("TOP", - (NODE_HEIGHT + 2) * self.Parent.__WidgetCount)
+			self:SetPoint("TOP", 0, - (NODE_HEIGHT + 2) * self.Parent.__WidgetCount)
 
 			self.Visible = self.Parent.ToggleState
 
@@ -398,11 +399,11 @@ class "WidgetList"
 	------------------------------------------------------
 	doc [======[
 		@name OnWidgetSelected
-		@type script
+		@type event
 		@desc Fired when a widget class is selected or canceled
 		@param widget the widget class that selected, otherwise nil
 	]======]
-	script "OnWidgetSelected"
+	event "OnWidgetSelected"
 
 	------------------------------------------------------
 	-- Method

@@ -35,4 +35,4 @@ Frames\LogView.Script.lua
 Frames\Browser.Designer.lua
 Frames\Browser.Script.lua
 
-##Frames\UIDesigner.Definition.lua
+Frames\UIDesigner.Definition.lua
