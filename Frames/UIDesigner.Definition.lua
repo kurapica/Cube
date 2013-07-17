@@ -5,11 +5,94 @@ import "System.Widget"
 import "System.Widget.Action"
 import "System.Widget.Unit"
 
--- Default border color
-DEFAULT_BORDER_COLOR = ColorType(1, 1, 1)
-CLICK_BORDER_COLOR = ColorType(1, 0, 0)
+------------------------------------------------------
+--- Global Definitions
+------------------------------------------------------
+do
+	-- Default border color
+	DEFAULT_BORDER_COLOR = ColorType(1, 1, 1)
+	CLICK_BORDER_COLOR = ColorType(1, 0, 0)
 
-NODE_HEIGHT = 24
+	NODE_HEIGHT = 24
+
+	-- Property cache for widget classes
+	FILTER_PROPERTY = {
+		Parent = true,
+	}
+
+	local function ValidateType(ty)
+		if ty == Number or ty == String or ty == Boolean or ty == LocaleString or Reflector.IsEnum(ty) then
+			return true
+		end
+
+		local sty
+
+		if Reflector.IsStruct(ty) and Reflector.GetStructType(ty) == "MEMBER" then
+			for _, part in ipairs(Reflector.GetStructParts(ty)) do
+				sty = Reflector.GetStructPart(ty, part)
+
+				if not sty or #sty ~= 1 or not ValidateType(sty[1]) then
+					return false
+				end
+			end
+
+			return true
+		elseif Reflector.IsStruct(ty) and Reflector.GetStructType(ty) == "ARRAY" then
+			sty = Reflector.GetStructArrayElement(ty)
+
+			if not sty or #sty ~= 1 or not ValidateType(sty[1]) then
+				return false
+			end
+
+			return true
+		end
+
+		return false
+	end
+
+	WIDGET_PROPERTY_CACHE = setmetatable({}, {
+		__index = function(self, key)
+			if Reflector.IsClass(key) and (Reflector.IsSuperClass(key, System.Widget.UIObject) or Reflector.IsSuperClass(key, System.Widget.VirtualUIObject)) then
+				self[key] = {}
+
+				for _, name in ipairs(Reflector.GetProperties(key)) do
+					self[key][name] = true
+				end
+
+				return rawget(self, key)
+			end
+		end,
+	})
+
+	WIDGET_PROPERTY = setmetatable({}, {
+		__index = function(self, key)
+			if Reflector.IsClass(key) and (Reflector.IsSuperClass(key, System.Widget.UIObject) or Reflector.IsSuperClass(key, System.Widget.VirtualUIObject)) then
+				self[key] = {}
+
+				local spCache = Reflector.GetSuperClass(key)
+				spCache = WIDGET_PROPERTY_CACHE[spCache] or {}
+
+				-- Fill data
+				for name in pairs(WIDGET_PROPERTY_CACHE[key]) do
+					if not FILTER_PROPERTY[name] and not spCache[name] and Reflector.IsPropertyReadable(key, name) and Reflector.IsPropertyWritable(key, name) then
+						-- Check prop's type
+						local ty = Reflector.GetPropertyType(key, name)
+
+						-- Skip complex type now
+						-- @todo: complex type support
+						if ty and #ty == 1 and ValidateType(ty[1]) then
+							tinsert(self[key], name)
+						end
+					end
+				end
+
+				Array.Sort(self[key])
+
+				return rawget(self, key)
+			end
+		end,
+	})
+end
 
 ------------------------------------------------------
 --- IFBorder
@@ -478,54 +561,6 @@ class "PropertyList"
 		@desc Used to show an object's property settings
 	]======]
 
-	local function ValidateType(ty)
-		if ty == Number or ty == String or ty == Boolean or ty == LocaleString or Reflector.IsEnum(ty) then
-			return true
-		end
-
-		local sty
-
-		if Reflector.IsStruct(ty) and Reflector.GetStructType(ty) == "MEMBER" then
-			for _, part in ipairs(Reflector.GetStructParts(ty)) do
-				sty = Reflector.GetStructPart(ty, part)
-
-				if not sty or #sty ~= 1 or not ValidateType(sty[1]) then
-					return false
-				end
-			end
-
-			return true
-		end
-
-		return false
-	end
-
-	_WidgetPropCache = setmetatable({}, {
-		__index = function(self, key)
-			if Reflector.IsClass(key) and (Reflector.IsSuperClass(key, System.Widget.UIObject) or Reflector.IsSuperClass(key, System.Widget.VirtualUIObject)) then
-				self[key] = {}
-
-				-- Fill data
-				for _, name in ipairs(Reflector.GetProperties(key, true)) do
-					if Reflector.IsPropertyReadable(key, name) and Reflector.IsPropertyWritable(key, name) then
-						-- Check prop's type
-						local ty = Reflector.GetPropertyType(key, name)
-
-						-- Skip complex type now
-						-- @todo: complex type support
-						if ty and #ty == 1 and ValidateType(ty[1]) then
-							tinsert(self[key], name)
-						end
-					end
-				end
-
-				Array.Sort(self[key])
-
-				return rawget(self, key)
-			end
-		end,
-	})
-
 	------------------------------------------------------
 	-- PropertySet
 	------------------------------------------------------
@@ -539,7 +574,11 @@ class "PropertyList"
 			@desc Used to show a property's name-value pairs of an object
 		]======]
 
-		local function RefreshValue(self)
+		local function SetValue(self, prop, value)
+			self[prop] = value
+		end
+
+		local function RefreshView(self)
 			if self.__Object and self.__Property then
 				local ty = Reflector.GetPropertyType(Reflector.GetObjectClass(self.__Object), self.__Property)[1]
 				local value = self.__Object[self.__Property]
@@ -551,13 +590,9 @@ class "PropertyList"
 				elseif ty == Boolean then
 					self.Accessor.Value = value and true or false
 				elseif Reflector.IsEnum(ty) then
-					self.Accessor.Text = Reflector.ParseEnum(value)
+					self.Accessor.Text = Reflector.ParseEnum(ty, value)
 				end
 			end
-		end
-
-		local function SetValue(self, prop, value)
-			self[prop] = valuee
 		end
 
 		local function UpdateValue(self)
@@ -571,43 +606,27 @@ class "PropertyList"
 
 					if not value then
 						self.Accessor.Text = string.format("%.1f", oldValue or 0)
-					else
-						if oldValue == value then return end
-
-						pcall(SetValue, self.__Object, self.__Property, value)
-
-						RefreshValue(self)
+						return
 					end
 				elseif ty == String or ty == LocaleString then
 					value = tostring(self.Accessor.Text) or ""
-
-					if oldValue == value then return end
-
-					pcall(SetValue, self.__Object, self.__Property, value)
-
-					RefreshValue(self)
 				elseif ty == Boolean then
-					value = self.Accessor.Value and true or false
-
-					if oldValue == value then return end
-
-					pcall(SetValue, self.__Object, self.__Property, value)
-
-					RefreshValue(self)
+					value = self.Accessor.Value
 				elseif Reflector.IsEnum(ty) then
-					value = self.Accessor.Value and true or false
-
-					if oldValue == value then return end
-
-					pcall(SetValue, self.__Object, self.__Property, value)
-
-					RefreshValue(self)
+					value = self.Accessor.Text
+					oldValue = Reflector.ParseEnum(ty, oldValue)
 				end
+
+				if oldValue == value then return end
+
+				pcall(SetValue, self.__Object, self.__Property, value)
+
+				RefreshView(self)
 			end
 		end
 
 		local function Advance_Click(self)
-
+			return true
 		end
 
 		------------------------------------------------------
@@ -617,6 +636,14 @@ class "PropertyList"
 		------------------------------------------------------
 		-- Method
 		------------------------------------------------------
+		doc [======[
+			@name SetProperty
+			@type method
+			@desc Set the property for an object
+			@param object object
+			@param property string, the property name
+			@return nil
+		]======]
 		function SetProperty(self, object, prop)
 			self.Accessor.DropdownBtn.OnClick = self.Accessor.DropdownBtn.OnClick - Advance_Click
 
@@ -628,32 +655,20 @@ class "PropertyList"
 
 				self.Header.Text = prop
 
-				if ty == Number then
+				if ty == Number or ty == String or ty == LocaleString then
 					self.Accessor.DropDownBtn.Visible = false
 					self.Accessor.Editable = true
 					self.Accessor:Clear()
-
-					self.Accessor.Text = string.format("%.1f", object[prop] or 0)
-				elseif ty == String or ty == LocaleString then
-					self.Accessor.DropDownBtn.Visible = false
-					self.Accessor.Editable = true
-					self.Accessor:Clear()
-
-					self.Accessor.Text = tostring(object[prop] or "")
 				elseif ty == Boolean then
 					self.Accessor.DropDownBtn.Visible = true
 					self.Accessor.Editable = false
 					self.Accessor:Clear()
 					self.Accessor:AddItem(false, "false")
 					self.Accessor:AddItem(true, "true")
-
-					self.Accessor.Value = object[prop] and true or false
 				elseif Reflector.IsEnum(ty) then
 					self.Accessor.DropdownBtn.Visible = true
 					self.Accessor.Editable = false
 					self.Accessor:SetList(Reflector.GetEnums(ty))
-
-					self.Accessor.Text = Reflector.ParseEnum(object[prop])
 				elseif Reflector.IsStruct(ty) then
 					self.Accessor.DropdownBtn.Visible = true
 					self.Accessor.Editable = false
@@ -662,12 +677,28 @@ class "PropertyList"
 					self.Accessor.Text = "(Advance)"
 					self.Accessor.DropdownBtn.OnClick = self.Accessor.DropdownBtn.OnClick + Advance_Click
 				end
+
+				RefreshView(self)
 			else
 				self.__Object = nil
 				self.__Property = nil
 				self.Header.Text = ""
 				self.Accessor:Clear()
 				self.Accessor.Editable = false
+
+				self.Visible = false
+			end
+		end
+
+		doc [======[
+			@name TryShow
+			@type method
+			@desc Try show the property set, if point to an object's property
+			@return nil
+		]======]
+		function TryShow(self)
+			if self.__Object and self.__Property then
+				self.Visible = true
 			end
 		end
 
@@ -687,13 +718,13 @@ class "PropertyList"
 
 			if self.ID < self.Parent.__WidgetCount then
 				if self.Parent:GetChild("PropertySet"..(self.ID+1)).Visible then
-					self.Parent:GetChild("PropertySet"..(self.ID+1)):SetFocus()
+					self.Parent:GetChild("PropertySet"..(self.ID+1)).Accessor:SetFocus()
 				end
 			end
 		end
 
 		local function OnEditFocusGained(self)
-			RefreshValue(self.Parent)
+			RefreshView(self.Parent)
 		end
 
 		local function OnEditFocusLost(self)
@@ -715,7 +746,7 @@ class "PropertyList"
 	    	self:SetPoint("LEFT", 10, 0)
 	    	self:SetPoint("RIGHT")
 	    	self.Height = NODE_HEIGHT
-			self:SetPoint("TOP", - NODE_HEIGHT * self.Parent.__WidgetCount)
+			self:SetPoint("TOP", 0, - NODE_HEIGHT * self.Parent.__WidgetCount)
 
 			local title = FontString("Header", self)
 			title:SetPoint("TOPLEFT")
@@ -772,23 +803,93 @@ class "PropertyList"
 			return nextWidget, self, tonumber(key) or 0
 		end
 
+		doc [======[
+			@name SetObject
+			@type method
+			@desc Set the object to be show with inherited classes
+			@param widget
+			@param object
+			@return nil
+		]======]
+		function SetObject(self, widget, object)
+			if widget and object then
+				self.Visible = true
+
+				self:GetChild("Text").Text = Reflector.GetName(widget)
+
+				local cache = WIDGET_PROPERTY[widget]
+				local index = 0
+
+				for _, name in ipairs(cache) do
+					index = index + 1
+
+					PropertySet("PropertySet" .. index, self):SetProperty(object, name)
+				end
+
+				self:Eachk(index, "SetProperty", nil)
+
+				self.ToggleState = true
+			else
+				self.ToggleState = false
+
+				self:Each("SetProperty", nil)
+
+				self.Visible = false
+
+				self:GetChild("Text").Text = ""
+			end
+		end
+
 		------------------------------------------------------
 		-- Property
 		------------------------------------------------------
 		doc [======[
-			@name Category
+			@name ToggleState
 			@type property
-			@desc description
+			@desc The toggle state of the property category
 		]======]
-		property "Category" {
+		property "ToggleState" {
 			Get = function(self)
-				return self:GetChild("Text").Text
+				return self.__ToggleState
 			end,
 			Set = function(self, value)
-				self:GetChild("Text").Text = value
+				self.__ToggleState = value
+
+				if value then
+					self.Toggle:SetNormalTexture("Interface\\Buttons\\UI-MinusButton-UP")
+					self.Toggle:SetPushedTexture("Interface\\Buttons\\UI-MinusButton-DOWN")
+
+					self:Each("TryShow")
+
+					local index = self.__WidgetCount
+
+					while index > 0 and not self:GetChild("PropertySet"..index).Visible do
+						index = index - 1
+					end
+
+					self.Height = (index + 1) * NODE_HEIGHT
+
+					self.Parent:UpdateSize()
+				else
+					self.Toggle:SetNormalTexture("Interface\\Buttons\\UI-PlusButton-UP")
+					self.Toggle:SetPushedTexture("Interface\\Buttons\\UI-PlusButton-DOWN")
+
+					self:Each("Visible", false)
+
+					self.Height = NODE_HEIGHT
+
+					self.Parent:UpdateSize()
+				end
 			end,
-			Type = String,
+			Type = System.Boolean,
 		}
+
+		------------------------------------------------------
+		-- Event Handler
+		------------------------------------------------------
+		local function Toggle_OnClick(self)
+			self.Parent.ToggleState = not self.Parent.ToggleState
+		end
 
 		------------------------------------------------------
 		-- Constructor
@@ -797,6 +898,7 @@ class "PropertyList"
 	    	self.Parent.__WidgetCount = (self.Parent.__WidgetCount or 0) + 1
 
 	    	self.Height = NODE_HEIGHT
+
 	    	if self.Parent.__WidgetCount == 1 then
 	    		self:SetPoint("TOPLEFT", 0, -6)
 	    		self:SetPoint("RIGHT")
@@ -809,16 +911,18 @@ class "PropertyList"
 	    	toggle:SetSize(14, 14)
 	    	toggle:SetPoint("TOPLEFT", 4, -1)
 
-			toggleBtn:SetNormalTexture("Interface\\Buttons\\UI-MinusButton-UP")
-			toggleBtn:SetPushedTexture("Interface\\Buttons\\UI-MinusButton-DOWN")
 			toggleBtn:SetHighlightTexture("Interface\\Buttons\\UI-PlusButton-Hilight")
 			toggleBtn:GetHighlightTexture():SetBlendMode("ADD")
+
+			toggleBtn.OnClick = Toggle_OnClick
 
             local text = FontString("Text", self)
             text:SetPoint("TOPRIGHT")
             text:SetPoint("TOPLEFT", 14, 0)
             text.Height = NODE_HEIGHT
             text.JustifyH = "Left"
+
+            self.ToggleState = false
 	    end
 	endclass "PropertyCategory"
 
@@ -829,6 +933,16 @@ class "PropertyList"
 		if obj then
 			return key, obj
 		end
+	end
+
+	local function SetWidgetObject(self, widget, object)
+		if widget ~= UIObject and widget ~= VirtualUIObject then
+			SetWidgetObject(self, Reflector.GetSuperClass(widget), object)
+		end
+
+		self.__OperIndex = self.__OperIndex + 1
+
+		PropertyCategory("PropertyCategory" .. self.__OperIndex, self):SetObject(widget, object)
 	end
 
 	------------------------------------------------------
@@ -842,6 +956,22 @@ class "PropertyList"
 		return nextWidget, self, tonumber(key) or 0
 	end
 
+	function SetObject(self, obj)
+		local cls = Reflector.GetObjectClass(obj)
+
+		if cls then
+			self.__OperIndex = 0
+			SetWidgetObject(self, cls, object)
+			self:Eachk(self.__OperIndex, "SetObject", nil)
+
+			self.ScrollChild:UpdateSize()
+		else
+			self:Each("SetObject", nil)
+
+			self.ScrollChild.Height = 10
+		end
+	end
+
 	------------------------------------------------------
 	-- Property
 	------------------------------------------------------
@@ -850,6 +980,6 @@ class "PropertyList"
 	-- Constructor
 	------------------------------------------------------
     function PropertyList(self)
-    	self:SetBackdrop(nil)
+		self:SetBackdrop(nil)
     end
 endclass "PropertyList"
