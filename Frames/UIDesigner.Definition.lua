@@ -20,6 +20,8 @@ do
 		Parent = true,
 	}
 
+	EMPTY = {}
+
 	local function ValidateType(ty)
 		if ty == Number or ty == String or ty == Boolean or ty == LocaleString or Reflector.IsEnum(ty) then
 			return true
@@ -28,7 +30,7 @@ do
 		local sty
 
 		if Reflector.IsStruct(ty) and Reflector.GetStructType(ty) == "MEMBER" then
-			for _, part in ipairs(Reflector.GetStructParts(ty)) do
+			for _, part in ipairs(Reflector.GetStructParts(ty) or EMPTY) do
 				sty = Reflector.GetStructPart(ty, part)
 
 				if not sty or #sty ~= 1 or not ValidateType(sty[1]) then
@@ -70,7 +72,7 @@ do
 				self[key] = {}
 
 				local spCache = Reflector.GetSuperClass(key)
-				spCache = WIDGET_PROPERTY_CACHE[spCache] or {}
+				spCache = WIDGET_PROPERTY_CACHE[spCache] or EMPTY
 
 				-- Fill data
 				for name in pairs(WIDGET_PROPERTY_CACHE[key]) do
@@ -656,11 +658,11 @@ class "PropertyList"
 				self.Header.Text = prop
 
 				if ty == Number or ty == String or ty == LocaleString then
-					self.Accessor.DropDownBtn.Visible = false
+					self.Accessor.DropdownBtn.Visible = false
 					self.Accessor.Editable = true
 					self.Accessor:Clear()
 				elseif ty == Boolean then
-					self.Accessor.DropDownBtn.Visible = true
+					self.Accessor.DropdownBtn.Visible = true
 					self.Accessor.Editable = false
 					self.Accessor:Clear()
 					self.Accessor:AddItem(false, "false")
@@ -826,7 +828,7 @@ class "PropertyList"
 					PropertySet("PropertySet" .. index, self):SetProperty(object, name)
 				end
 
-				self:Eachk(index, "SetProperty", nil)
+				self:EachK(index, "SetProperty", nil)
 
 				self.ToggleState = true
 			else
@@ -861,7 +863,7 @@ class "PropertyList"
 
 					self:Each("TryShow")
 
-					local index = self.__WidgetCount
+					local index = self.__WidgetCount or 0
 
 					while index > 0 and not self:GetChild("PropertySet"..index).Visible do
 						index = index - 1
@@ -911,10 +913,10 @@ class "PropertyList"
 	    	toggle:SetSize(14, 14)
 	    	toggle:SetPoint("TOPLEFT", 4, -1)
 
-			toggleBtn:SetHighlightTexture("Interface\\Buttons\\UI-PlusButton-Hilight")
-			toggleBtn:GetHighlightTexture():SetBlendMode("ADD")
+			toggle:SetHighlightTexture("Interface\\Buttons\\UI-PlusButton-Hilight")
+			toggle:GetHighlightTexture():SetBlendMode("ADD")
 
-			toggleBtn.OnClick = Toggle_OnClick
+			toggle.OnClick = Toggle_OnClick
 
             local text = FontString("Text", self)
             text:SetPoint("TOPRIGHT")
@@ -942,7 +944,7 @@ class "PropertyList"
 
 		self.__OperIndex = self.__OperIndex + 1
 
-		PropertyCategory("PropertyCategory" .. self.__OperIndex, self):SetObject(widget, object)
+		PropertyCategory("PropertyCategory" .. self.__OperIndex, self.ScrollChild):SetObject(widget, object)
 	end
 
 	------------------------------------------------------
@@ -961,8 +963,8 @@ class "PropertyList"
 
 		if cls then
 			self.__OperIndex = 0
-			SetWidgetObject(self, cls, object)
-			self:Eachk(self.__OperIndex, "SetObject", nil)
+			SetWidgetObject(self, cls, obj)
+			self:EachK(self.__OperIndex, "SetObject", nil)
 
 			self.ScrollChild:UpdateSize()
 		else
