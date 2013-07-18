@@ -211,9 +211,6 @@ class "MenuStrip"
 	------------------------------------------------------
     function MenuStrip(self)
 		self:SetBackdropColor(0,0,0,1)
-		self:SetPoint("TOPLEFT")
-		self:SetPoint("TOPRIGHT")
-		self.Height = NODE_HEIGHT + 6
     end
 endclass "MenuStrip"
 
@@ -549,6 +546,41 @@ class "WidgetList"
 endclass "WidgetList"
 
 ------------------------------------------------------
+-- ElementList
+------------------------------------------------------
+class "ElementList"
+	inherit "TreeView"
+	extend "IFBorder"
+
+	doc [======[
+		@name ElementList
+		@type class
+		@desc Used to show the elements on the frame
+	]======]
+
+	------------------------------------------------------
+	-- Event
+	------------------------------------------------------
+
+	------------------------------------------------------
+	-- Method
+	------------------------------------------------------
+
+	------------------------------------------------------
+	-- Property
+	------------------------------------------------------
+
+	------------------------------------------------------
+	-- Constructor
+	------------------------------------------------------
+    function ElementList(self)
+		self:SetBackdrop(nil)
+
+		self.Style = "RIGHT"
+    end
+endclass "ElementList"
+
+------------------------------------------------------
 -- PropertyList
 ------------------------------------------------------
 class "PropertyList"
@@ -628,6 +660,8 @@ class "PropertyList"
 		end
 
 		local function Advance_Click(self)
+			PropertyAdvance(self.__Object, self.__Property)
+
 			return true
 		end
 
@@ -985,3 +1019,196 @@ class "PropertyList"
 		self:SetBackdrop(nil)
     end
 endclass "PropertyList"
+
+------------------------------------------------------
+-- Designer
+------------------------------------------------------
+class "Designer"
+	inherit "Frame"
+
+	doc [======[
+		@name Designer
+		@type class
+		@desc Used to edit the frame
+	]======]
+
+	------------------------------------------------------
+	-- Event
+	------------------------------------------------------
+
+	------------------------------------------------------
+	-- Method
+	------------------------------------------------------
+
+	------------------------------------------------------
+	-- Property
+	------------------------------------------------------
+
+	------------------------------------------------------
+	-- Constructor
+	------------------------------------------------------
+    function Designer(self)
+
+    end
+endclass "Designer"
+
+------------------------------------------------------
+-- StructMemberEditor
+------------------------------------------------------
+class "StructMemberEditor"
+	inherit "Form"
+
+	doc [======[
+		@name StructMemberEditor
+		@type class
+		@desc Used to create a struct table of member type
+	]======]
+
+	local function Advance_Click(self)
+		StructAdvance()
+
+		return true
+	end
+
+	------------------------------------------------------
+	-- Event
+	------------------------------------------------------
+
+	------------------------------------------------------
+	-- Method
+	------------------------------------------------------
+	doc [======[
+		@name GetStructValue
+		@type method
+		@desc Show the editor and return a struct value
+		@param struct type
+		@param value init value
+		@return result
+	]======]
+	function GetStructValue(self, srt, value)
+		local ty
+		local parts = Reflector.GetStructParts(srt)
+
+		if #parts > 0 then
+			self.DataGrid.RowCount = #parts
+
+			for i, part in ipairs(parts) do
+				-- Refresh the name
+				self.DataGrid.Cells(i, 1).Text = part
+
+				-- Refresh the value
+				ty = Reflector.GetStructPart(srt, part)[1]
+
+				if ty == Number then
+					self.DataGrid.Cells(i, 2).CellType = "Number"
+				elseif ty == String or ty == LocaleString then
+					self.DataGrid.Cells(i, 2).CellType = "String"
+				elseif ty == Boolean then
+					self.DataGrid.Cells(i, 2).CellType = "Boolean"
+				elseif Reflector.IsEnum(ty) then
+					self.DataGrid.Cells(i, 2).CellType = "ComboBox"
+
+					local enums = Reflector.GetEnums(ty)
+					self.DataGrid.Cells(i, 2).Keys = enums
+					self.DataGrid.Cells(i, 2).Items = enums
+				elseif Reflector.IsStruct(ty) then
+					self.DataGrid.Cells(i, 2).CellType = "Advance"
+					self.DataGrid.Cells(i, 2).SubType = ty
+				end
+			end
+
+			return self.Thread:Yield()
+		end
+	end
+
+	------------------------------------------------------
+	-- Property
+	------------------------------------------------------
+
+	------------------------------------------------------
+	-- Event Handler
+	------------------------------------------------------
+	local function btnCancel_OnClick(self)
+		self = self.Parent
+		self.Visible = false
+		return self.Thread(self.InitValue)
+	end
+
+	local function btnOkay_OnClick(self)
+		self = self.Parent
+		self.Visible = false
+		return self.Thread(self.Value)
+	end
+
+	local function OnAdvance(self, row, col)
+
+	end
+
+	------------------------------------------------------
+	-- Constructor
+	------------------------------------------------------
+    function StructMemberEditor(self)
+    	local dg = DataGrid("DataGrid", self)
+		dg:SetPoint("TOPLEFT", 4, -26)
+		dg:SetPoint("BOTTOMRIGHT", -4, 30)
+		dg.ColumnCount = 2
+		dg.Columns(1).CellType = "Label"
+		dg.Columns(1).Text = L"Field"
+		dg.Columns(2).Text = L"Value"
+		dg.Columns(1).ColumnWidth = 40
+
+		dg.OnAdvance = OnAdvance
+
+		local btnCancel = NormalButton("btnCancel", self)
+		btnCancel.Style = "Classic"
+		btnCancel.AutoSize = true
+		btnCancel.Text = L"Cancel"
+		btnCancel:SetPoint("BOTTOMRIGHT", -4, 4)
+
+		btnCancel.OnClick = btnCancel_OnClick
+
+		local btnOkay = NormalButton("btnOkay", self)
+		btnOkay.Style = "Classic"
+		btnOkay.AutoSize = true
+		btnOkay.Text = L"Okay"
+		btnOkay:SetPoint("RIGHT", btnCancel, "LEFT", -4, 0)
+
+		btnOkay.OnClick = btnOkay_OnClick
+
+		self.Thread = System.Threading.Thread()
+    end
+endclass "StructMemberEditor"
+
+------------------------------------------------------
+-- StructArrayEditor
+------------------------------------------------------
+class "StructArrayEditor"
+	inherit "Form"
+
+	doc [======[
+		@name StructArrayEditor
+		@type class
+		@desc Used to create a struct table of array type
+	]======]
+
+	------------------------------------------------------
+	-- Event
+	------------------------------------------------------
+
+	------------------------------------------------------
+	-- Method
+	------------------------------------------------------
+
+	------------------------------------------------------
+	-- Property
+	------------------------------------------------------
+
+	------------------------------------------------------
+	-- Constructor
+	------------------------------------------------------
+    function StructArrayEditor(self)
+    	local lst = List("List", self)
+		lst:SetPoint("TOPLEFT", 4, -26)
+		lst:SetPoint("BOTTOMRIGHT", -4, 30)
+    end
+endclass "StructArrayEditor"
