@@ -5,9 +5,6 @@ IGAS:NewAddon "Cube.Mdl_UI_Designer"
 -- Property Editor
 ------------------------------------------------------
 do
-	_RcyStructMemberEditor = Recycle(StructMemberEditor, "StructMemberEditor_%d", _UIDesigner)
-	_RcyStructArrayEditor = Recycle(StructArrayEditor, "StructArrayEditor_%d", _UIDesigner)
-
 	function PropertyAdvance(object, prop)
 		if not object or not prop then return end
 

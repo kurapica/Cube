@@ -1053,22 +1053,143 @@ class "Designer"
 endclass "Designer"
 
 ------------------------------------------------------
--- StructMemberEditor
+-- StructEditor
 ------------------------------------------------------
-class "StructMemberEditor"
+class "StructEditor"
 	inherit "Form"
 
 	doc [======[
-		@name StructMemberEditor
+		@name StructEditor
 		@type class
-		@desc Used to create a struct table of member type
+		@desc Used to edit or generate struct table
 	]======]
 
-	local function Advance_Click(self)
-		StructAdvance()
+	------------------------------------------------------
+	-- MemberEditor
+	------------------------------------------------------
+	class "MemberEditor"
+		inherit "DataGrid"
 
-		return true
-	end
+		doc [======[
+			@name MemberEditor
+			@type class
+			@desc Used to create a struct table of member type
+		]======]
+
+		------------------------------------------------------
+		-- Event
+		------------------------------------------------------
+
+		------------------------------------------------------
+		-- Method
+		------------------------------------------------------
+		doc [======[
+			@name GetStructValue
+			@type method
+			@desc Show the editor and return a struct value
+			@param struct type
+			@param value init value
+			@return result
+		]======]
+		function GetStructValue(self, srt, value)
+			local ty
+			local parts = Reflector.GetStructParts(srt)
+
+			if #parts > 0 then
+				self.DataGrid.RowCount = #parts
+
+				for i, part in ipairs(parts) do
+					-- Refresh the name
+					self.DataGrid.Cells(i, 1).Text = part
+
+					-- Refresh the value
+					ty = Reflector.GetStructPart(srt, part)[1]
+
+					if ty == Number then
+						self.DataGrid.Cells(i, 2).CellType = "Number"
+					elseif ty == String or ty == LocaleString then
+						self.DataGrid.Cells(i, 2).CellType = "String"
+					elseif ty == Boolean then
+						self.DataGrid.Cells(i, 2).CellType = "Boolean"
+					elseif Reflector.IsEnum(ty) then
+						self.DataGrid.Cells(i, 2).CellType = "ComboBox"
+
+						local enums = Reflector.GetEnums(ty)
+						self.DataGrid.Cells(i, 2).Keys = enums
+						self.DataGrid.Cells(i, 2).Items = enums
+					elseif Reflector.IsStruct(ty) then
+						self.DataGrid.Cells(i, 2).CellType = "Advance"
+						self.DataGrid.Cells(i, 2).SubType = ty
+					end
+				end
+
+				return self.Thread:Yield()
+			end
+		end
+
+		------------------------------------------------------
+		-- Property
+		------------------------------------------------------
+
+		------------------------------------------------------
+		-- Event Handler
+		------------------------------------------------------
+		local function OnAdvance(self, row, col)
+
+		end
+
+		------------------------------------------------------
+		-- Constructor
+		------------------------------------------------------
+	    function MemberEditor(self)
+			self:SetPoint("TOPLEFT", 4, -26)
+			self:SetPoint("BOTTOMRIGHT", -4, 30)
+			self.ColumnCount = 2
+			self.Columns(1).CellType = "Label"
+			self.Columns(1).Text = L"Field"
+			self.Columns(2).Text = L"Value"
+			self.Columns(1).ColumnWidth = 40
+
+			self.OnAdvance = OnAdvance
+	    end
+	endclass "MemberEditor"
+
+	------------------------------------------------------
+	-- ArrayEditor
+	------------------------------------------------------
+	class "ArrayEditor"
+		inherit "Form"
+
+		doc [======[
+			@name ArrayEditor
+			@type class
+			@desc Used to create a struct table of array type
+		]======]
+
+		------------------------------------------------------
+		-- Event
+		------------------------------------------------------
+
+		------------------------------------------------------
+		-- Method
+		------------------------------------------------------
+
+		------------------------------------------------------
+		-- Property
+		------------------------------------------------------
+
+		------------------------------------------------------
+		-- Constructor
+		------------------------------------------------------
+	    function ArrayEditor(self)
+	    	local lst = List("List", self)
+			lst:SetPoint("TOPLEFT", 4, -26)
+			lst:SetPoint("BOTTOMRIGHT", -4, 30)
+	    end
+	endclass "ArrayEditor"
+
+	_RcyStructMemberEditor = Recycle(MemberEditor, "MemberEditor_%d", _UIDesigner)
+	_RcyStructArrayEditor = Recycle(ArrayEditor, "ArrayEditor_%d", _UIDesigner)
 
 	------------------------------------------------------
 	-- Event
@@ -1077,49 +1198,6 @@ class "StructMemberEditor"
 	------------------------------------------------------
 	-- Method
 	------------------------------------------------------
-	doc [======[
-		@name GetStructValue
-		@type method
-		@desc Show the editor and return a struct value
-		@param struct type
-		@param value init value
-		@return result
-	]======]
-	function GetStructValue(self, srt, value)
-		local ty
-		local parts = Reflector.GetStructParts(srt)
-
-		if #parts > 0 then
-			self.DataGrid.RowCount = #parts
-
-			for i, part in ipairs(parts) do
-				-- Refresh the name
-				self.DataGrid.Cells(i, 1).Text = part
-
-				-- Refresh the value
-				ty = Reflector.GetStructPart(srt, part)[1]
-
-				if ty == Number then
-					self.DataGrid.Cells(i, 2).CellType = "Number"
-				elseif ty == String or ty == LocaleString then
-					self.DataGrid.Cells(i, 2).CellType = "String"
-				elseif ty == Boolean then
-					self.DataGrid.Cells(i, 2).CellType = "Boolean"
-				elseif Reflector.IsEnum(ty) then
-					self.DataGrid.Cells(i, 2).CellType = "ComboBox"
-
-					local enums = Reflector.GetEnums(ty)
-					self.DataGrid.Cells(i, 2).Keys = enums
-					self.DataGrid.Cells(i, 2).Items = enums
-				elseif Reflector.IsStruct(ty) then
-					self.DataGrid.Cells(i, 2).CellType = "Advance"
-					self.DataGrid.Cells(i, 2).SubType = ty
-				end
-			end
-
-			return self.Thread:Yield()
-		end
-	end
 
 	------------------------------------------------------
 	-- Property
@@ -1140,25 +1218,10 @@ class "StructMemberEditor"
 		return self.Thread(self.Value)
 	end
 
-	local function OnAdvance(self, row, col)
-
-	end
-
 	------------------------------------------------------
 	-- Constructor
 	------------------------------------------------------
-    function StructMemberEditor(self)
-    	local dg = DataGrid("DataGrid", self)
-		dg:SetPoint("TOPLEFT", 4, -26)
-		dg:SetPoint("BOTTOMRIGHT", -4, 30)
-		dg.ColumnCount = 2
-		dg.Columns(1).CellType = "Label"
-		dg.Columns(1).Text = L"Field"
-		dg.Columns(2).Text = L"Value"
-		dg.Columns(1).ColumnWidth = 40
-
-		dg.OnAdvance = OnAdvance
-
+    function StructEditor(self)
 		local btnCancel = NormalButton("btnCancel", self)
 		btnCancel.Style = "Classic"
 		btnCancel.AutoSize = true
@@ -1177,38 +1240,4 @@ class "StructMemberEditor"
 
 		self.Thread = System.Threading.Thread()
     end
-endclass "StructMemberEditor"
-
-------------------------------------------------------
--- StructArrayEditor
-------------------------------------------------------
-class "StructArrayEditor"
-	inherit "Form"
-
-	doc [======[
-		@name StructArrayEditor
-		@type class
-		@desc Used to create a struct table of array type
-	]======]
-
-	------------------------------------------------------
-	-- Event
-	------------------------------------------------------
-
-	------------------------------------------------------
-	-- Method
-	------------------------------------------------------
-
-	------------------------------------------------------
-	-- Property
-	------------------------------------------------------
-
-	------------------------------------------------------
-	-- Constructor
-	------------------------------------------------------
-    function StructArrayEditor(self)
-    	local lst = List("List", self)
-		lst:SetPoint("TOPLEFT", 4, -26)
-		lst:SetPoint("BOTTOMRIGHT", -4, 30)
-    end
-endclass "StructArrayEditor"
+endclass "StructEditor"
