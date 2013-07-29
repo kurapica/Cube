@@ -1095,6 +1095,8 @@ class "StructEditor"
 			local ty
 			local parts = Reflector.GetStructParts(srt)
 
+			self.InitValue = value
+
 			if #parts > 0 then
 				self.DataGrid.RowCount = #parts
 
@@ -1218,10 +1220,26 @@ class "StructEditor"
 		return self.Thread(self.Value)
 	end
 
+	local function OnHide(self)
+		-- Clear if existed
+		for i = #(self.EditorList), 1, -1 do
+			local editor = tremove(self.EditorList)
+
+			if Reflector.ObjectIsClass(editor, MemberEditor) then
+				_RcyStructMemberEditor(editor)
+			elseif Reflector.ObjectIsClass(editor, ArrayEditor) then
+				_RcyStructArrayEditor(editor)
+			end
+		end
+	end
+
 	------------------------------------------------------
 	-- Constructor
 	------------------------------------------------------
     function StructEditor(self)
+    	self.Visible = false
+    	self.OnHide = self.OnHide + OnHide
+
 		local btnCancel = NormalButton("btnCancel", self)
 		btnCancel.Style = "Classic"
 		btnCancel.AutoSize = true
@@ -1239,5 +1257,6 @@ class "StructEditor"
 		btnOkay.OnClick = btnOkay_OnClick
 
 		self.Thread = System.Threading.Thread()
+		self.EditorList = {}
     end
 endclass "StructEditor"
