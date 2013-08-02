@@ -1095,37 +1095,97 @@ class "StructEditor"
 			local ty
 			local parts = Reflector.GetStructParts(srt)
 
-			self.InitValue = value
+			if parts and #parts > 0 then
+				self.InitValue = value
+				self.Struct = srt
 
-			if #parts > 0 then
-				self.DataGrid.RowCount = #parts
+				self.RowCount = #parts
 
 				for i, part in ipairs(parts) do
 					-- Refresh the name
-					self.DataGrid.Cells(i, 1).Text = part
+					self.Cells(i, 1).Text = part
 
 					-- Refresh the value
 					ty = Reflector.GetStructPart(srt, part)[1]
 
 					if ty == Number then
-						self.DataGrid.Cells(i, 2).CellType = "Number"
+						self.Cells(i, 2).CellType = "Number"
+
+						self.Cells(i, 2).Value = value and value[part] or 0
 					elseif ty == String or ty == LocaleString then
-						self.DataGrid.Cells(i, 2).CellType = "String"
+						self.Cells(i, 2).CellType = "String"
+
+						self.Cells(i, 2).Value = value and value[part] or ""
 					elseif ty == Boolean then
-						self.DataGrid.Cells(i, 2).CellType = "Boolean"
+						self.Cells(i, 2).CellType = "Boolean"
+
+						self.Cells(i, 2).Value = value and value[part]
 					elseif Reflector.IsEnum(ty) then
-						self.DataGrid.Cells(i, 2).CellType = "ComboBox"
+						self.Cells(i, 2).CellType = "ComboBox"
 
 						local enums = Reflector.GetEnums(ty)
-						self.DataGrid.Cells(i, 2).Keys = enums
-						self.DataGrid.Cells(i, 2).Items = enums
+						self.Cells(i, 2).Keys = enums
+						self.Cells(i, 2).Items = enums
+
+						self.Cells(i, 2).Value = Reflector.ParseEnum(ty, value and value[part])
 					elseif Reflector.IsStruct(ty) then
-						self.DataGrid.Cells(i, 2).CellType = "Advance"
-						self.DataGrid.Cells(i, 2).SubType = ty
+						self.Cells(i, 2).CellType = "Advance"
+						self.Cells(i, 2).SubType = ty
+
+						self.Cells(i, 2).StructValue = value and value[part]
 					end
 				end
 
 				return self.Thread:Yield()
+			else
+				self.Parent.RcyStructMemberEditor(self)
+
+				return value
+			end
+		end
+
+		doc [======[
+			@name Resume
+			@type method
+			@desc Resume the thread with or without new value
+			@param cancel boolean
+			@return nil
+		]======]
+		function Resume(self, cancel)
+			if cancel then
+				return self.Thread(self.InitValue)
+			else
+				return self.Thread(self:GetValue())
+			end
+		end
+
+		doc [======[
+			@name GetValue
+			@type method
+			@desc Get the value of the editor
+			@return value
+		]======]
+		function GetValue(self)
+			local ty
+			local parts = Reflector.GetStructParts(self.Struct)
+
+			if parts and #parts > 0 then
+				local params = {}
+
+				for i, part in ipairs(parts) do
+					-- Refresh the value
+					ty = Reflector.GetStructPart(srt, part)[1]
+
+					if ty == Number or ty == String or ty == LocaleString or ty == Boolean or Reflector.IsEnum(ty) then
+						params[part] = self.Cells(i, 2).Value
+					elseif Reflector.IsStruct(ty) then
+						params[part] = self.Cells(i, 2).StructValue
+					end
+				end
+
+				return params
+			else
+				return nil
 			end
 		end
 
@@ -1137,7 +1197,9 @@ class "StructEditor"
 		-- Event Handler
 		------------------------------------------------------
 		local function OnAdvance(self, row, col)
-
+			if self.Cells(row, col).SubType then
+				self.Cells(row, col).StructValue =  self.Parent:GetStructValue(self.Cells(row, col).SubType, self.Cells(row, col).StructValue)
+			end
 		end
 
 		------------------------------------------------------
@@ -1153,6 +1215,9 @@ class "StructEditor"
 			self.Columns(1).ColumnWidth = 40
 
 			self.OnAdvance = OnAdvance
+
+			self:ActiveThread("OnAdvance")
+			self.Thread = System.Threading.Thread()
 	    end
 	endclass "MemberEditor"
 
@@ -1190,9 +1255,6 @@ class "StructEditor"
 	    end
 	endclass "ArrayEditor"
 
-	_RcyStructMemberEditor = Recycle(MemberEditor, "MemberEditor_%d", _UIDesigner)
-	_RcyStructArrayEditor = Recycle(ArrayEditor, "ArrayEditor_%d", _UIDesigner)
-
 	------------------------------------------------------
 	-- Event
 	------------------------------------------------------
@@ -1200,6 +1262,30 @@ class "StructEditor"
 	------------------------------------------------------
 	-- Method
 	------------------------------------------------------
+	doc [======[
+		@name GetStructValue
+		@type method
+		@desc Get a struct value
+		@format srt[, value]
+		@param srt struct type
+		@param value init value
+		@return value
+	]======]
+	function GetStructValue(self, srt, value)
+		if Reflector.IsStruct(srt) then
+			if Reflector.GetStructType(srt) == "MEMBER" then
+				local editor = self.RcyStructMemberEditor()
+
+				value = editor:GetStructValue(srt, value)
+			elseif Reflector.GetStructType(ty) == "ARRAY" then
+				local editor = self.RcyStructArrayEditor()
+
+				value = editor:GetStructValue(srt, value)
+			end
+		end
+
+		return value
+	end
 
 	------------------------------------------------------
 	-- Property
@@ -1209,27 +1295,57 @@ class "StructEditor"
 	-- Event Handler
 	------------------------------------------------------
 	local function btnCancel_OnClick(self)
-		self = self.Parent
-		self.Visible = false
-		return self.Thread(self.InitValue)
+		return self.CurrentEditor:Resume(true)
 	end
 
 	local function btnOkay_OnClick(self)
-		self = self.Parent
-		self.Visible = false
-		return self.Thread(self.Value)
+		return self.CurrentEditor:Resume()
 	end
 
 	local function OnHide(self)
 		-- Clear if existed
 		for i = #(self.EditorList), 1, -1 do
-			local editor = tremove(self.EditorList)
+			local editor = self.EditorList[i]
 
 			if Reflector.ObjectIsClass(editor, MemberEditor) then
-				_RcyStructMemberEditor(editor)
+				self.RcyStructMemberEditor(editor)
 			elseif Reflector.ObjectIsClass(editor, ArrayEditor) then
-				_RcyStructArrayEditor(editor)
+				self.RcyStructArrayEditor(editor)
 			end
+		end
+	end
+
+	local function OnPop(self, obj)
+		local index = #(self.MainEditor.EditorList)
+
+		if index > 0 then
+			self.MainEditor.EditorList[index].Visible = false
+		else
+			self.MainEditor.Visible = true
+		end
+
+		tinsert(self.MainEditor.EditorList, obj)
+
+		obj.Visible = true
+
+		self.MainEditor.CurrentEditor = obj
+	end
+
+	local function OnPush(self, obj)
+		tremove(self.MainEditor.EditorList)
+
+		obj.Visible = false
+
+		local index = #(self.MainEditor.EditorList)
+
+		if index > 0 then
+			self.MainEditor.EditorList[index].Visible = true
+
+			self.MainEditor.CurrentEditor = self.MainEditor.EditorList[index]
+		else
+			self.MainEditor.Visible = false
+
+			self.MainEditor.CurrentEditor = nil
 		end
 	end
 
@@ -1258,5 +1374,18 @@ class "StructEditor"
 
 		self.Thread = System.Threading.Thread()
 		self.EditorList = {}
+		self.CurrentEditor = nil
+
+		self.RcyStructMemberEditor = Recycle(MemberEditor, "MemberEditor_%d", self)
+		self.RcyStructArrayEditor = Recycle(ArrayEditor, "ArrayEditor_%d", self)
+
+		self.RcyStructMemberEditor.MainEditor = self
+		self.RcyStructArrayEditor.MainEditor = self
+
+		self.RcyStructMemberEditor.OnPop = OnPop
+		self.RcyStructArrayEditor.OnPop = OnPop
+
+		self.RcyStructMemberEditor.OnPush = OnPush
+		self.RcyStructArrayEditor.OnPush = OnPush
     end
 endclass "StructEditor"
