@@ -1,2 +1,5 @@
+2013/08/15: v5.5
+	1. Fix the addon system, now can be used.
+
 2013/06/27: v5.4
     1. Update for IGAS v39
