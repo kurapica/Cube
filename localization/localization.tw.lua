@@ -23,6 +23,7 @@ L["Run"] = "運行"
 L["Unit Test"] = "單元測試"
 L["Must set code name."] = "保存用名稱沒有輸入。"
 L["Must set code."] = "代碼沒有輸入。"
+L["Load Addon"] = "載入插件"
 
 L["Commit"] = "確定"
 L["Show in new page"] = "顯示在另一頁"

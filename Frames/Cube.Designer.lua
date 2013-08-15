@@ -111,6 +111,16 @@ run.AutoSize = true
 run.Text = L["Run"]
 run:SetPoint("BOTTOMRIGHT", Cube_Main, "BOTTOMRIGHT", -4, 20)
 
+-- Load Addon Button
+loadAddon = NormalButton("LoadAddon", Cube_Main)
+loadAddon.Height = 24
+loadAddon.Width = 60
+loadAddon.Style = "CLASSIC"
+loadAddon.AutoSize = true
+loadAddon.Text = L["Load Addon"]
+loadAddon:SetPoint("RIGHT", run, "LEFT", -6, 0)
+loadAddon.Visible = false
+
 -- Result Button
 btnUnit = NormalButton("Result", Cube_Main)
 btnUnit.Height = 24

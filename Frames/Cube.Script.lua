@@ -20,9 +20,9 @@ end
 _ModuleType = {
 	"Localization",
 	--"Definition",
-	--"Module",
-	"Frame",
-	"Script",
+	"Module",
+	--"Frame",
+	--"Script",
 }
 
 _LocaleType = {
@@ -131,13 +131,14 @@ IGAS:NewAddon "%s.%s"
 -- Module Event Handler
 -----------------------------------
 function OnLoad(self)
-
+%s
 end
 
 function OnEnable(self)
 
 end
-]]
+
+%s]]
 
 _NewFrameDesigner = [[
 IGAS:NewAddon "%s.%s"
@@ -236,7 +237,7 @@ function OnEnable(self)
 	for i = 1, node.ChildNodeCount do
 		subNode = node:GetNode(i)
 		if subNode.MetaData[_PlayerName] then
-			EnableAddon(subNode)
+			EnableAddon(subNode, true)
 		end
 	end
 
@@ -469,12 +470,12 @@ function fileTree:OnNodeFunctionClick(func, node)
 		else
 			local parent = node
 
-			local mtype = IGAS:MsgBox(L["Please select the module's type"], "c", _ModuleType)
+			local mtype = IGAS:MsgBox(L["Please select the module's type"], "ic", _ModuleType)
 
 			if not mtype or mtype == "" then return end
 
 			if mtype == "Localization" then
-				local loc = IGAS:MsgBox(L["Please select the code indicating the localization"], "c", _LocaleType)
+				local loc = IGAS:MsgBox(L["Please select the code indicating the localization"], "ic", _LocaleType)
 
 				if not loc or loc == "" then return end
 
@@ -510,7 +511,59 @@ function fileTree:OnNodeFunctionClick(func, node)
 						end
 					end
 
-					node = parent:AddNode{Text = name, Type = mtype, Content = _NewModuleFile:format(parent.Text, name), FunctionName = "Del"}
+					local content = ""
+
+					local slashCmd = IGAS:MsgBox(L["Need a slash command?(use ',' to seperate)"], "ic")
+					local handler = ""
+
+					if slashCmd and slashCmd ~= "" then
+						if content ~= "" then
+							content = content .. "\n"
+						end
+
+						content = content .. _NewSlashCommand:format(slashCmd:gsub("%s*,%s*", "\", \""))
+
+						handler = _NewSlashHandler
+					end
+
+					local events = Cube:PickEvent()
+					local args = ""
+					local sign = ""
+
+					if events and #events > 0 then
+						if content ~= "" then
+							content = content .. "\n"
+						end
+
+						content = content .. _NewRegisterEventHeader
+
+						for _, e in ipairs(events) do
+							content = content .. _NewRegisterEvent:format(e)
+
+							if handler ~= "" then
+								handler = handler .. "\n"
+							end
+
+							args = ""
+							sign = ""
+
+							if Event_Data[e].Description then
+								args = args .. "    -- " .. Event_Data[e].Description .. "\n"
+							end
+
+							if Event_Data[e].Signature then
+								sign = ", " .. Event_Data[e].Signature
+							end
+
+							for _, arg in ipairs(Event_Data[e]) do
+								args = args .. "    -- " .. arg .. "\n"
+							end
+
+							handler = handler .. _NewEventHandler:format(e, sign, e, args)
+						end
+					end
+
+					node = parent:AddNode{Text = name, Type = mtype, Content = _NewModuleFile:format(parent.Text, name, content, handler), FunctionName = "Del"}
 
 					return node:Select()
 				end
@@ -558,6 +611,8 @@ function fileTree:OnNodeFunctionClick(func, node)
 
 		local cache = {}
 
+		GatherLocale4Node(cache, parent)
+
 		for i = 1, parent.ChildNodeCount do
 			GatherLocale4Node(cache, parent:GetNode(i))
 		end
@@ -568,6 +623,18 @@ function fileTree:OnNodeFunctionClick(func, node)
 		end
 
 		wipe(cache)
+	elseif func == "Enable" then
+		if node.Level == 2 then
+			EnableAddon(node, true)
+		else
+			EnableModule(node, true)
+		end
+	elseif func == "Disable" then
+		if node.Level == 2 then
+			EnableAddon(node, false)
+		else
+			EnableModule(node, false)
+		end
 	end
 end
 
@@ -759,14 +826,29 @@ function tabCode:OnTabChange(old, new)
 		chkAuto.Visible = true
 		chkAuto.Text = L["AutoRun"]
 		chkAuto.Checked = node.MetaData[_PlayerName]
+
+		if node.Parent.Index == 2 then
+			loadAddon.Visible = true
+		else
+			loadAddon.Visible = false
+		end
 	else
 		chkAuto.Visible = false
 		chkAuto.Checked = false
+		loadAddon.Visible = false
 	end
 
 	Cube_Main.Message = ""
 	lstUnitTest.Visible = false
 	frmResult.Visible = false
+end
+
+function loadAddon:OnClick()
+	local code = tabCode.SelectedWidget
+
+	if code and code.Node.Level == 2 and code.Node.Parent.Index == 2 then
+		LoadAddon(code.Node)
+	end
 end
 
 -----------------------------------
@@ -862,21 +944,38 @@ function FinishLoad(node)
 end
 
 function EnableAddon(node, flag)
-	if flag == nil then flag = true end
+	local enabled = (flag == nil) or flag
 
 	if _LoadedModule[node] then
-		if flag == false then
-			_LoadedModule[node]:Disable()
-		elseif flag == true then
-			_LoadedModule[node]:Enable()
-		end
+		_LoadedModule[node]._Enabled = enabled
 
-		if _LoadedModule[node]:IsEnabled() then
+		if _LoadedModule[node]._Enabled then
 			if flag == nil then _LoadedModule[node]:Fire("OnEnable") end
 			node.FunctionName = "Del,Add,Disable"
 		else
 			if flag == nil then _LoadedModule[node]:Fire("OnDisable") end
 			node.FunctionName = "Del,Add,Enable"
+		end
+
+		for i = 1, node.ChildNodeCount do
+			subNode = node:GetNode(i)
+			EnableModule(subNode, flag)
+		end
+	end
+end
+
+function EnableModule(node, flag)
+	local enabled = (flag == nil) or flag
+
+	if _LoadedModule[node] then
+		_LoadedModule[node]._Enabled = enabled
+
+		if _LoadedModule[node]._Enabled then
+			if flag == nil then _LoadedModule[node]:Fire("OnEnable") end
+			node.FunctionName = "Del,Disable"
+		else
+			if flag == nil then _LoadedModule[node]:Fire("OnDisable") end
+			node.FunctionName = "Del,Enable"
 		end
 
 		for i = 1, node.ChildNodeCount do
