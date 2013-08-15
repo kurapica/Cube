@@ -1,3 +1,6 @@
+2013/08/15: v5.6
+	1. fix localization error
+
 2013/08/15: v5.5
 	1. Fix the addon system, now can be used.
 
