@@ -688,14 +688,12 @@ function BuildBody(data)
 					elseif querytype == "method" then
 						local isGlobal = false
 
-						if IsInterface(ns) then
-							if name:match("^_") then
+						if name:match("^_") then
+							isGlobal = true
+						else
+							desc = hasDocument and GetDocument(ns, doctype, name, "method")
+							if desc and desc() == "interface" then
 								isGlobal = true
-							else
-								desc = hasDocument and GetDocument(ns, doctype, name, "method")
-								if desc and desc() == "interface" then
-									isGlobal = true
-								end
 							end
 						end
 
