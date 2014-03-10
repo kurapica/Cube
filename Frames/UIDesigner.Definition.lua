@@ -209,7 +209,9 @@ class "MenuStrip"
 	------------------------------------------------------
 	-- Constructor
 	------------------------------------------------------
-    function MenuStrip(self)
+    function MenuStrip(self, name, parent, ...)
+		Super(self, name, parent, ...)
+
 		self:SetBackdropColor(0,0,0,1)
     end
 endclass "MenuStrip"
@@ -299,7 +301,9 @@ class "WidgetList"
 		------------------------------------------------------
 		-- Constructor
 		------------------------------------------------------
-	    function WidgetButton(self)
+	    function WidgetButton(self, name, parent, ...)
+			Super(self, name, parent, ...)
+
 			self.Parent.__WidgetCount = (self.Parent.__WidgetCount or 0) + 1
 
 			self:SetNormalFontObject(GameFontNormal)
@@ -438,7 +442,9 @@ class "WidgetList"
 		------------------------------------------------------
 		-- Constructor
 		------------------------------------------------------
-	    function WidgetCategory(self)
+	    function WidgetCategory(self, name, parent, ...)
+			Super(self, name, parent, ...)
+
 	    	self.Parent.__WidgetCount = (self.Parent.__WidgetCount or 0) + 1
 
 	    	if self.Parent.__WidgetCount == 1 then
@@ -573,7 +579,9 @@ class "ElementList"
 	------------------------------------------------------
 	-- Constructor
 	------------------------------------------------------
-    function ElementList(self)
+    function ElementList(self, name, parent, ...)
+		Super(self, name, parent, ...)
+
 		self:SetBackdrop(nil)
 
 		self.Style = "RIGHT"
@@ -774,7 +782,9 @@ class "PropertyList"
 		------------------------------------------------------
 		-- Constructor
 		------------------------------------------------------
-	    function PropertySet(self)
+	    function PropertySet(self, name, parent, ...)
+			Super(self, name, parent, ...)
+
 	    	self.Parent.__WidgetCount = (self.Parent.__WidgetCount or 0) + 1
 	    	self.ID = self.Parent.__WidgetCount
 
@@ -930,7 +940,9 @@ class "PropertyList"
 		------------------------------------------------------
 		-- Constructor
 		------------------------------------------------------
-	    function PropertyCategory(self)
+	    function PropertyCategory(self, name, parent, ...)
+			Super(self, name, parent, ...)
+
 	    	self.Parent.__WidgetCount = (self.Parent.__WidgetCount or 0) + 1
 
 	    	self.Height = NODE_HEIGHT
@@ -1015,7 +1027,9 @@ class "PropertyList"
 	------------------------------------------------------
 	-- Constructor
 	------------------------------------------------------
-    function PropertyList(self)
+    function PropertyList(self, name, parent, ...)
+		Super(self, name, parent, ...)
+
 		self:SetBackdrop(nil)
     end
 endclass "PropertyList"
@@ -1047,7 +1061,8 @@ class "Designer"
 	------------------------------------------------------
 	-- Constructor
 	------------------------------------------------------
-    function Designer(self)
+    function Designer(self, name, parent, ...)
+		Super(self, name, parent, ...)
 
     end
 endclass "Designer"
@@ -1205,7 +1220,9 @@ class "StructEditor"
 		------------------------------------------------------
 		-- Constructor
 		------------------------------------------------------
-	    function MemberEditor(self)
+	    function MemberEditor(self, name, parent, ...)
+			Super(self, name, parent, ...)
+
 			self:SetPoint("TOPLEFT", 4, -26)
 			self:SetPoint("BOTTOMRIGHT", -4, 30)
 			self.ColumnCount = 2
@@ -1248,7 +1265,9 @@ class "StructEditor"
 		------------------------------------------------------
 		-- Constructor
 		------------------------------------------------------
-	    function ArrayEditor(self)
+	    function ArrayEditor(self, name, parent, ...)
+			Super(self, name, parent, ...)
+
 	    	local lst = List("List", self)
 			lst:SetPoint("TOPLEFT", 4, -26)
 			lst:SetPoint("BOTTOMRIGHT", -4, 30)
@@ -1352,7 +1371,9 @@ class "StructEditor"
 	------------------------------------------------------
 	-- Constructor
 	------------------------------------------------------
-    function StructEditor(self)
+    function StructEditor(self, name, parent, ...)
+		Super(self, name, parent, ...)
+
     	self.Visible = false
     	self.OnHide = self.OnHide + OnHide
 
