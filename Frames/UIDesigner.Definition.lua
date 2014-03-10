@@ -130,15 +130,10 @@ endinterface "IFBorder"
 ------------------------------------------------------
 -- MenuStrip
 ------------------------------------------------------
+__Doc__[[Used to create a menu bar]]
 class "MenuStrip"
 	inherit "Frame"
 	extend "IFBorder"
-
-	doc [======[
-		@name MenuStrip
-		@type class
-		@desc Used to create a menu bar
-	]======]
 
     local function Menu_OnClick(self)
         self.MenuList.Visible = not self.MenuList.Visible
@@ -219,30 +214,20 @@ endclass "MenuStrip"
 ------------------------------------------------------
 -- WidgetList
 ------------------------------------------------------
+__Doc__[[Used to show the selectable widget classes]]
 class "WidgetList"
 	inherit "ScrollForm"
 	extend "IFBorder" "IFIterator"
 
 	NODE_HEIGHT = NODE_HEIGHT
 
-	doc [======[
-		@name WidgetList
-		@type class
-		@desc Used to show the selectable widget classes
-	]======]
-
 	------------------------------------------------------
 	-- WidgetButton
 	------------------------------------------------------
+	__Doc__[[Used to represent a widget class]]
 	class "WidgetButton"
 		inherit "Button"
 		extend "IFBorder"
-
-		doc [======[
-			@name WidgetButton
-			@type class
-			@desc Used to represent a widget class
-		]======]
 
 		------------------------------------------------------
 		-- Script
@@ -255,11 +240,7 @@ class "WidgetList"
 		------------------------------------------------------
 		-- Property
 		------------------------------------------------------
-		doc [======[
-			@name Widget
-			@type property
-			@desc The widget class
-		]======]
+		__Doc__[[The widget class]]
 		property "Widget" {
 			Get = function(self)
 				return self.__Widget
@@ -325,15 +306,10 @@ class "WidgetList"
 	------------------------------------------------------
 	-- WidgetCategory
 	------------------------------------------------------
+	__Doc__[[Used to contain widgets with category]]
 	class "WidgetCategory"
 		inherit "Frame"
 		extend "IFBorder" "IFIterator"
-
-		doc [======[
-			@name WidgetCategory
-			@type class
-			@desc Used to contain widgets with category
-		]======]
 
 		local function nextWidget(self, key)
 			key = key + 1
@@ -369,13 +345,11 @@ class "WidgetList"
 			return nextWidget, self, tonumber(key) or 0
 		end
 
-		doc [======[
-			@name AddWidget
-			@type method
+		__Doc__[[
 			@desc Add widget into this category
 			@param widget the widget class
 			@return WidgetButton
-		]======]
+		]]
 		function AddWidget(self, widget)
 			if Reflector.IsClass(widget) and (Reflector.IsSuperClass(widget, System.Widget.UIObject) or Reflector.IsSuperClass(widget, System.Widget.VirtualUIObject)) then
 				-- Check if already existed
@@ -398,11 +372,7 @@ class "WidgetList"
 		------------------------------------------------------
 		-- Property
 		------------------------------------------------------
-		doc [======[
-			@name ToggleState
-			@type property
-			@desc Whether the section is expanded
-		]======]
+		__Doc__[[Whether the section is expanded]]
 		property "ToggleState" {
 			Get = function(self)
 				return self.__ToggleState
@@ -417,11 +387,7 @@ class "WidgetList"
 			Type = Boolean,
 		}
 
-		doc [======[
-			@name Category
-			@type property
-			@desc The category label
-		]======]
+		__Doc__[[The category label]]
 		property "Category" {
 			Get = function(self)
 				return self:GetChild("Header").Text
@@ -485,25 +451,21 @@ class "WidgetList"
 	------------------------------------------------------
 	-- Script
 	------------------------------------------------------
-	doc [======[
-		@name OnWidgetSelected
-		@type event
+	__Doc__[[
 		@desc Fired when a widget class is selected or canceled
 		@param widget the widget class that selected, otherwise nil
-	]======]
+	]]
 	event "OnWidgetSelected"
 
 	------------------------------------------------------
 	-- Method
 	------------------------------------------------------
-	doc [======[
-		@name AddWidget
-		@type method
+	__Doc__[[
 		@desc Add widget to a category
 		@param category string
 		@param widget widget class
 		@return WidgetButton
-	]======]
+	]]
 	function AddWidget(self, category, widget)
 		if type(category) == "string" and Reflector.IsClass(widget) and (Reflector.IsSuperClass(widget, System.Widget.UIObject) or Reflector.IsSuperClass(widget, System.Widget.VirtualUIObject)) then
 			local cg = nil
@@ -531,11 +493,7 @@ class "WidgetList"
 	------------------------------------------------------
 	-- Property
 	------------------------------------------------------
-	doc [======[
-		@name SelectedButton
-		@type property
-		@desc The selected widget button
-	]======]
+	__Doc__[[The selected widget button]]
 	property "SelectedButton" {
 		Get = function(self)
 			return self.__SelectedButton
@@ -554,15 +512,10 @@ endclass "WidgetList"
 ------------------------------------------------------
 -- ElementList
 ------------------------------------------------------
+__Doc__[[Used to show the elements on the frame]]
 class "ElementList"
 	inherit "TreeView"
 	extend "IFBorder"
-
-	doc [======[
-		@name ElementList
-		@type class
-		@desc Used to show the elements on the frame
-	]======]
 
 	------------------------------------------------------
 	-- Event
@@ -591,30 +544,20 @@ endclass "ElementList"
 ------------------------------------------------------
 -- PropertyList
 ------------------------------------------------------
+__Doc__[[Used to show an object's property settings]]
 class "PropertyList"
 	inherit "ScrollForm"
 	extend "IFBorder" "IFIterator"
 
 	NODE_HEIGHT = NODE_HEIGHT
 
-	doc [======[
-		@name PropertyList
-		@type class
-		@desc Used to show an object's property settings
-	]======]
-
 	------------------------------------------------------
 	-- PropertySet
 	------------------------------------------------------
+	__Doc__[[Used to show a property's name-value pairs of an object]]
 	class "PropertySet"
 		inherit "Frame"
 		extend "IFBorder"
-
-		doc [======[
-			@name PropertySet
-			@type class
-			@desc Used to show a property's name-value pairs of an object
-		]======]
 
 		local function SetValue(self, prop, value)
 			self[prop] = value
@@ -680,14 +623,12 @@ class "PropertyList"
 		------------------------------------------------------
 		-- Method
 		------------------------------------------------------
-		doc [======[
-			@name SetProperty
-			@type method
+		__Doc__[[
 			@desc Set the property for an object
 			@param object object
 			@param property string, the property name
 			@return nil
-		]======]
+		]]
 		function SetProperty(self, object, prop)
 			self.Accessor.DropdownBtn.OnClick = self.Accessor.DropdownBtn.OnClick - Advance_Click
 
@@ -734,12 +675,7 @@ class "PropertyList"
 			end
 		end
 
-		doc [======[
-			@name TryShow
-			@type method
-			@desc Try show the property set, if point to an object's property
-			@return nil
-		]======]
+		__Doc__[[Try show the property set, if point to an object's property]]
 		function TryShow(self)
 			if self.__Object and self.__Property then
 				self.Visible = true
@@ -819,15 +755,10 @@ class "PropertyList"
 	------------------------------------------------------
 	-- PropertyCategory
 	------------------------------------------------------
+	__Doc__[[Used to show a category contains property settings]]
 	class "PropertyCategory"
 		inherit "Frame"
 		extend "IFIterator"
-
-		doc [======[
-			@name PropertyCategory
-			@type class
-			@desc Used to show a category contains property settings
-		]======]
 
 		local function nextWidget(self, key)
 			key = key + 1
@@ -849,14 +780,12 @@ class "PropertyList"
 			return nextWidget, self, tonumber(key) or 0
 		end
 
-		doc [======[
-			@name SetObject
-			@type method
+		__Doc__[[
 			@desc Set the object to be show with inherited classes
 			@param widget
 			@param object
 			@return nil
-		]======]
+		]]
 		function SetObject(self, widget, object)
 			if widget and object then
 				self.Visible = true
@@ -889,11 +818,7 @@ class "PropertyList"
 		------------------------------------------------------
 		-- Property
 		------------------------------------------------------
-		doc [======[
-			@name ToggleState
-			@type property
-			@desc The toggle state of the property category
-		]======]
+		__Doc__[[The toggle state of the property category]]
 		property "ToggleState" {
 			Get = function(self)
 				return self.__ToggleState
@@ -1037,14 +962,9 @@ endclass "PropertyList"
 ------------------------------------------------------
 -- Designer
 ------------------------------------------------------
+__Doc__[[Used to edit the frame]]
 class "Designer"
 	inherit "Frame"
-
-	doc [======[
-		@name Designer
-		@type class
-		@desc Used to edit the frame
-	]======]
 
 	------------------------------------------------------
 	-- Event
@@ -1070,26 +990,16 @@ endclass "Designer"
 ------------------------------------------------------
 -- StructEditor
 ------------------------------------------------------
+__Doc__[[Used to edit or generate struct table]]
 class "StructEditor"
 	inherit "Form"
-
-	doc [======[
-		@name StructEditor
-		@type class
-		@desc Used to edit or generate struct table
-	]======]
 
 	------------------------------------------------------
 	-- MemberEditor
 	------------------------------------------------------
+	__Doc__[[Used to create a struct table of member type]]
 	class "MemberEditor"
 		inherit "DataGrid"
-
-		doc [======[
-			@name MemberEditor
-			@type class
-			@desc Used to create a struct table of member type
-		]======]
 
 		------------------------------------------------------
 		-- Event
@@ -1098,14 +1008,12 @@ class "StructEditor"
 		------------------------------------------------------
 		-- Method
 		------------------------------------------------------
-		doc [======[
-			@name GetStructValue
-			@type method
+		__Doc__[[
 			@desc Show the editor and return a struct value
 			@param struct type
 			@param value init value
 			@return result
-		]======]
+		]]
 		function GetStructValue(self, srt, value)
 			local ty
 			local parts = Reflector.GetStructParts(srt)
@@ -1159,13 +1067,11 @@ class "StructEditor"
 			end
 		end
 
-		doc [======[
-			@name Resume
-			@type method
+		__Doc__[[
 			@desc Resume the thread with or without new value
 			@param cancel boolean
 			@return nil
-		]======]
+		]]
 		function Resume(self, cancel)
 			if cancel then
 				return self.Thread(self.InitValue)
@@ -1174,12 +1080,10 @@ class "StructEditor"
 			end
 		end
 
-		doc [======[
-			@name GetValue
-			@type method
+		__Doc__[[
 			@desc Get the value of the editor
 			@return value
-		]======]
+		]]
 		function GetValue(self)
 			local ty
 			local parts = Reflector.GetStructParts(self.Struct)
@@ -1241,14 +1145,9 @@ class "StructEditor"
 	------------------------------------------------------
 	-- ArrayEditor
 	------------------------------------------------------
+	__Doc__[[Used to create a struct table of array type]]
 	class "ArrayEditor"
 		inherit "Form"
-
-		doc [======[
-			@name ArrayEditor
-			@type class
-			@desc Used to create a struct table of array type
-		]======]
 
 		------------------------------------------------------
 		-- Event
@@ -1281,15 +1180,13 @@ class "StructEditor"
 	------------------------------------------------------
 	-- Method
 	------------------------------------------------------
-	doc [======[
-		@name GetStructValue
-		@type method
+	__Doc__[[
 		@desc Get a struct value
 		@format srt[, value]
 		@param srt struct type
 		@param value init value
 		@return value
-	]======]
+	]]
 	function GetStructValue(self, srt, value)
 		if Reflector.IsStruct(srt) then
 			if Reflector.GetStructType(srt) == "MEMBER" then
