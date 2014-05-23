@@ -1,6 +1,7 @@
 -- Addon Initialize
 IGAS:NewAddon "Cube.Mdl_Browser"
 
+import "System"
 import "System.Reflector"
 
 IsClass = Reflector.IsClass
@@ -246,6 +247,22 @@ function BuildSubNamespace(ns)
 	return result
 end
 
+function GetDocumentPart(owner, name, part)
+	local doc = GetDocument(owner, name)
+	if doc and doc:match("<.->") then
+		return doc:gmatch(("<%s(.-)>(.-)</%s>"):format(part, part))
+	elseif doc and part == "desc" then
+		local flag = true
+		return function() if flag then flag = false return "", doc end end
+	end
+end
+
+function GetParameterPart(param, part)
+	if param then
+		return param:match(part .. "%s*=%s*[\'\"](.-)[\'\"]")
+	end
+end
+
 function BuildBody(data)
 	local ns = IGAS
 	local name = nil
@@ -291,13 +308,13 @@ function BuildBody(data)
 				if GetStructType(ns) == "MEMBER" then
 					-- Part
 					local parttype, typestring
-					local parts = GetStructParts(ns)
+					local parts = GetStructMembers(ns)
 
 					if parts and next(parts) then
 						result = result .. "<br/><br/>　<cyan>Member</cyan>:"
 
 						for _, name in ipairs(parts) do
-							parttype = GetStructPart(ns, name)
+							parttype = GetStructMember(ns, name)
 
 							typestring = ""
 
@@ -324,8 +341,6 @@ function BuildBody(data)
 
 							result = result .. "<br/>　　" .. name .. " =" .. typestring
 						end
-					else
-						result = result .. "<br/><br/>　<cyan>Basic Element</cyan>"
 					end
 				elseif GetStructType(ns) == "ARRAY" then
 					local parttype = GetStructArrayElement(ns)
@@ -355,6 +370,8 @@ function BuildBody(data)
 
 						result = result .. "<br/><br/>　<cyan>Element</cyan> :<br/>　　Type =" .. typestring
 					end
+				else
+					result = result .. "<br/><br/>　<cyan>Basic Element</cyan>"
 				end
 				return result
 			elseif IsClass(ns) or IsInterface(ns) then
@@ -362,28 +379,18 @@ function BuildBody(data)
 				if not name or name == "" then
 					local result
 					local desc
-					local hasDocument
+					local isInterface = false
 
 					if IsInterface(ns) then
+						isInterface = true
 						result = "<blue>[Interface]</blue> " .. BuildHref(ns) .. " :"
-
-						if HasDocument(ns, "interface", GetNameSpaceName(ns)) then
-							desc = GetDocument(ns, "interface", GetNameSpaceName(ns), "desc")
-						elseif HasDocument(ns, "default", GetNameSpaceName(ns)) then
-							desc = GetDocument(ns, "default", GetNameSpaceName(ns), "desc")
-						end
 					else
 						result = "<blue>[Class]</blue> " .. BuildHref(ns) .. " :"
-
-						if HasDocument(ns, "class", GetNameSpaceName(ns)) then
-							desc = GetDocument(ns, "class", GetNameSpaceName(ns), "desc")
-						elseif HasDocument(ns, "default", GetNameSpaceName(ns)) then
-							desc = GetDocument(ns, "default", GetNameSpaceName(ns), "desc")
-						end
 					end
 
 					-- Desc
-					desc = desc and desc()
+					desc = GetDocumentPart(ns, nil, "desc")
+					desc = desc and select(2, desc())
 					if desc then
 						result = result .. "<br/><br/>　<cyan>Description</cyan> :<br/>　　" .. desc:gsub("<br>", "<br/>　　")
 					end
@@ -410,11 +417,9 @@ function BuildBody(data)
 					if events and next(events) then
 						result = result .. "<br/><br/>　<cyan>Event</cyan> :"
 						for _, sc in pairs(events) do
-							hasDocument = HasDocument(ns, "event", sc)
-
 							-- Desc
-							desc = hasDocument and GetDocument(ns, "event", sc, "desc")
-							desc = desc and desc()
+							desc = GetDocumentPart(ns, sc, "desc")
+							desc = desc and select(2, desc())
 							if desc then
 								desc = "　-　" .. desc:gsub("<br>", "<br/>　　　　")
 							else
@@ -430,15 +435,21 @@ function BuildBody(data)
 					if props and next(props) then
 						result = result .. "<br/><br/>　<cyan>Property</cyan> :"
 						for _, prop in pairs(props) do
-							hasDocument = HasDocument(ns, "property", prop)
-
 							-- Desc
-							desc = hasDocument and GetDocument(ns, "property", prop, "desc")
-							desc = desc and desc()
+							desc = GetDocumentPart(ns, prop, "desc")
+							desc = desc and select(2, desc())
 							if desc then
 								desc = "　-　" .. desc:gsub("<br>", "<br/>　　　　")
 							else
 								desc = ""
+							end
+
+							if isInterface then
+								if IsRequireProperty(ns, prop) then
+									desc = desc .. "(Require)"
+								elseif IsOptionalProperty(ns, prop) then
+									desc = desc .. "(Optional)"
+								end
 							end
 
 							result = result .. "<br/>　　" .. BuildHref(GetNameSpaceFullName(ns).."."..prop.."-property", prop) .. desc
@@ -450,35 +461,24 @@ function BuildBody(data)
 					if methods and next(methods) then
 						result = result .. "<br/><br/>　<cyan>Method</cyan> :"
 						for _, method in pairs(methods) do
-							hasDocument = HasDocument(ns, "method", method)
-
 							-- Desc
-							desc = hasDocument and GetDocument(ns, "method", method, "desc")
-							desc = desc and desc()
+							desc = GetDocumentPart(ns, method, "desc")
+							desc = desc and select(2, desc())
 							if desc then
 								desc = "　-　" .. desc:gsub("<br>", "<br/>　　　　")
 							else
 								desc = ""
 							end
 
-							result = result .. "<br/>　　" .. BuildHref(GetNameSpaceFullName(ns).."."..method.."-method", method) .. desc
-						end
-					end
-
-					-- Need
-					if IsInterface(ns) then
-						desc = GetDocument(ns, "interface", GetNameSpaceName(ns), "overridable")
-
-						if desc then
-							result = result .. "<br/><br/>　<cyan>Overridable</cyan> :"
-
-							for need, info in desc do
-								if info and info:len() > 0 then
-									result = result .. "<br/>　　" .. need .. " - " .. ParseInfo(info)
-								else
-									result = result .. "<br/>　　" .. need
+							if isInterface then
+								if IsRequireMethod(ns, method) then
+									desc = desc .. "(Require)"
+								elseif IsOptionalMethod(ns, method) then
+									desc = desc .. "(Optional)"
 								end
 							end
+
+							result = result .. "<br/>　　" .. BuildHref(GetNameSpaceFullName(ns).."."..method.."-method", method) .. desc
 						end
 					end
 
@@ -486,60 +486,60 @@ function BuildBody(data)
 					local isFormat = false
 					desc = nil
 
-					if IsClass(ns) then
+					if not isInterface then
 						local ons = ns
 
 						while ns do
 							isFormat = true
 
-							if HasDocument(ns, "class", GetNameSpaceName(ns)) then
-								desc = GetDocument(ns, "class", GetNameSpaceName(ns), "format")
-								if not desc then
-									desc = GetDocument(ns, "class", GetNameSpaceName(ns), "param")
-									isFormat = false
-								end
-							elseif HasDocument(ns, "default", GetNameSpaceName(ns)) then
-								desc = GetDocument(ns, "default", GetNameSpaceName(ns), "desc")
-								if not desc then
-									desc = GetDocument(ns, "default", GetNameSpaceName(ns), "param")
-									isFormat = false
-								end
+							desc = GetDocumentPart(ns, nil, "format")
+							if not desc then
+								isFormat = false
+								desc = GetDocumentPart(ns, nil, "param")
 							end
 
 							if desc then
 								-- Constructor
 								result = result .. "<br/><br/>　<cyan>Constructor</cyan> :"
 								if isFormat then
-									for fmt in desc do
+									for _, fmt in desc do
 										result = result .. "<br/>　　" .. GetNameSpaceName(ns) .. "(" .. fmt .. ")"
 									end
 								else
 									result = result .. "<br/>　　" .. GetNameSpaceName(ns) .. "("
 
-									local isFirst = true
+									local cnt = 1
 
 									for param in desc do
-										if isFirst then
-											isFirst = false
-											result = result .. param
+										local name = GetParameterPart(param, "name") or "arg" .. cnt
+										if cnt == 1 then
+											result = result .. name
 										else
-											result = result .. ", " .. param
+											result = result .. ", " .. name
 										end
+										cnt = cnt + 1
 									end
 
 									result = result .. ")"
 								end
 
 								-- Params
-								desc = GetDocument(ns, "class", GetNameSpaceName(ns), "param") or GetDocument(ns, "default", GetNameSpaceName(ns), "param")
+								desc = GetDocumentPart(ns, nil, "param")
 								if desc then
 									result = result .. "<br/><br/>　<cyan>Parameter</cyan> :"
+									local cnt = 1
 									for param, info in desc do
+										local name = GetParameterPart(param, "name") or "arg" .. cnt
+										local ty = GetParameterPart(param, "type")
+
+										if ty then name = name .. " (" .. ty .. ")" end
+
 										if info and info:len() > 0 then
-											result = result .. "<br/>　　" .. ParseInfo(param) .. " - " .. ParseInfo(info)
+											result = result .. "<br/>　　" .. ParseInfo(name) .. " - " .. ParseInfo(info)
 										else
-											result = result .. "<br/>　　" .. ParseInfo(param)
+											result = result .. "<br/>　　" .. ParseInfo(name)
 										end
+										cnt = cnt + 1
 									end
 								end
 
@@ -553,15 +553,10 @@ function BuildBody(data)
 					end
 
 					-- Usage
-					if IsInterface(ns) then
-						desc = GetDocument(ns, "interface", GetNameSpaceName(ns), "usage")
-					else
-						desc = GetDocument(ns, "class", GetNameSpaceName(ns), "usage")
-					end
-
+					desc = GetDocumentPart(ns, nil, "usage")
 					if desc then
 						result = result .. "<br/><br/>　<cyan>Usage</cyan> :"
-						for usage in desc do
+						for _, usage in desc do
 							result = result .. "<br/>　　" .. usage:gsub("<br>", "<br/>　　"):gsub("  ", "　"):gsub("\t", "　　")
 						end
 					end
@@ -599,38 +594,36 @@ function BuildBody(data)
 						result = result .. "[" .. doctype .. "] " .. name .. " :"
 					end
 
-					local hasDocument = HasDocument(ns, doctype, name)
-
 					-- Desc
-					local desc = hasDocument and GetDocument(ns, doctype, name, "desc")
-					desc = desc and desc()
+					local desc = GetDocumentPart(ns, name, "desc")
+					desc = desc and select(2, desc())
 					if desc then
 						result = result .. "<br/><br/>　<cyan>Description</cyan> :<br/>　　" .. desc:gsub("<br>", "<br/>　　")
 					end
 
 					if querytype == "event" then
 						-- Format
-						desc = hasDocument and GetDocument(ns, doctype, name, "format")
+						desc = GetDocumentPart(ns, name, "format")
 						if desc then
 							result = result .. "<br/><br/>　<cyan>Format</cyan> :"
-							for fmt in desc do
+							for _, fmt in desc do
 								result = result .. "<br/>　　" .. "function object:" .. name .. "(" .. ParseInfo(fmt) .. ")<br/>　　   -- Handle the event<br/>　  end"
 							end
 						else
 							result = result .. "<br/><br/>　<cyan>Format</cyan> :<br/>　  function object:" .. name .. "("
 
-							desc = hasDocument and GetDocument(ns, doctype, name, "param")
+							desc = GetDocumentPart(ns, name, "param")
 
 							if desc then
-								local isFirst = true
-
+								local cnt = 1
 								for param in desc do
-									if isFirst then
-										isFirst = false
-										result = result .. ParseInfo(param)
+									local name = GetParameterPart(param, "name") or "arg" .. cnt
+									if cnt == 1 then
+										result = result .. ParseInfo(name)
 									else
-										result = result .. ", " .. ParseInfo(param)
+										result = result .. ", " .. ParseInfo(name)
 									end
+									cnt = cnt + 1
 								end
 							end
 
@@ -638,46 +631,27 @@ function BuildBody(data)
 						end
 
 						-- Params
-						desc = hasDocument and GetDocument(ns, doctype, name, "param")
+						desc = GetDocumentPart(ns, name, "param")
 						if desc then
+							local cnt = 1
 							result = result .. "<br/><br/>　<cyan>Parameter</cyan> :"
 							for param, info in desc do
+								local name = GetParameterPart(param, "name") or "arg" .. cnt
+								local ty = GetParameterPart(param, "type")
+								if ty then name = name .. " (" .. ty .. ")"
 								if info and info:len() > 0 then
-									result = result .. "<br/>　  " .. ParseInfo(param) .. " - " .. ParseInfo(info)
+									result = result .. "<br/>　  " .. ParseInfo(name) .. " - " .. ParseInfo(info)
 								else
-									result = result .. "<br/>　  " .. ParseInfo(param)
+									result = result .. "<br/>　  " .. ParseInfo(name)
 								end
+								cnt = cnt + 1
 							end
 						end
 					elseif querytype == "property" then
 						local types = GetPropertyType(ns, name)
 
 						if types then
-							local parttype = types
-							local typestring = ""
-
-							for _, tns in ipairs(parttype) do
-								typestring = typestring .. " + " .. BuildHref(tns)
-							end
-
-							-- NameSpace
-							local index = -1
-							while parttype[index] do
-								typestring = typestring .. " - " .. BuildHref(parttype[index])
-
-								index = index - 1
-							end
-
-							-- Allow nil
-							if parttype.AllowNil then
-								typestring = typestring .. " + nil"
-							end
-
-							if typestring:sub(1, 2) == " +" then
-								typestring = typestring:sub(3, -1)
-							end
-
-							result = result .. "<br/><br/>　<cyan>Type</cyan> :<br/>　　" .. typestring
+							result = result .. "<br/><br/>　<cyan>Type</cyan> :<br/>　　" .. tostring(types)
 						end
 
 						-- Readonly
@@ -688,20 +662,15 @@ function BuildBody(data)
 					elseif querytype == "method" then
 						local isGlobal = false
 
-						if name:match("^_") then
+						if name:match("^_") or (IsInterface(ns) and IsNonInheritable(ns)) then
 							isGlobal = true
-						else
-							desc = hasDocument and GetDocument(ns, doctype, name, "method")
-							if desc and desc() == "interface" then
-								isGlobal = true
-							end
 						end
 
 						-- Format
-						desc = hasDocument and GetDocument(ns, doctype, name, "format")
+						desc = GetDocumentPart(ns, name, "format")
 						result = result .. "<br/><br/>　<cyan>Format</cyan> :"
 						if desc then
-							for fmt in desc do
+							for _, fmt in desc do
 								if isGlobal then
 									result = result .. "<br/>　　" .. GetNameSpaceName(ns) .. "." .. name .. "(" .. ParseInfo(fmt) .. ")"
 								else
@@ -715,18 +684,18 @@ function BuildBody(data)
 								result = result .. "<br/>　　object:" .. name .. "("
 							end
 
-							desc = hasDocument and GetDocument(ns, doctype, name, "param")
+							desc = GetDocumentPart(ns, name, "param")
 
 							if desc then
-								local isFirst = true
-
+								local cnt = 1
 								for param in desc do
-									if isFirst then
-										isFirst = false
-										result = result .. ParseInfo(param)
+									local name = GetParameterPart(param, "name") or "arg" .. cnt
+									if cnt == 1 then
+										result = result .. ParseInfo(name)
 									else
-										result = result .. ", " .. ParseInfo(param)
+										result = result .. ", " .. ParseInfo(name)
 									end
+									cnt = cnt + 1
 								end
 							end
 
@@ -734,37 +703,47 @@ function BuildBody(data)
 						end
 
 						-- Params
-						desc = hasDocument and GetDocument(ns, doctype, name, "param")
+						desc = GetDocumentPart(ns, name, "param")
 						if desc then
+							local cnt = 1
 							result = result .. "<br/><br/>　<cyan>Parameter</cyan> :"
 							for param, info in desc do
+								local name = GetParameterPart(param, "name") or "arg" .. cnt
+								local ty = GetParameterPart(param, "type")
+								if ty then name = name .. " (" .. ty .. ")" end
 								if info and info:len() > 0 then
-									result = result .. "<br/>　　" .. ParseInfo(param) .. " - " .. ParseInfo(info)
+									result = result .. "<br/>　　" .. ParseInfo(name) .. " - " .. ParseInfo(info)
 								else
-									result = result .. "<br/>　　" .. ParseInfo(param)
+									result = result .. "<br/>　　" .. ParseInfo(name)
 								end
+								cnt = cnt + 1
 							end
 						end
 
 						-- ReturnFormat
-						desc = hasDocument and GetDocument(ns, doctype, name, "returnformat")
+						desc = GetDocumentPart(ns, name, "returnformat")
 						if desc then
 							result = result .. "<br/><br/>　<cyan>Return Format</cyan> :"
-							for fmt in desc do
+							for _, fmt in desc do
 								result = result .. "<br/>　　" .. ParseInfo(fmt)
 							end
 						end
 
 						-- Returns
-						desc = hasDocument and GetDocument(ns, doctype, name, "return")
+						desc = GetDocumentPart(ns, name, "return")
 						if desc then
+							local cnt = 1
 							result = result .. "<br/><br/>　<cyan>Return</cyan> :"
 							for ret, info in desc do
+								local name = GetParameterPart(ret, "name") or "ret" .. cnt
+								local ty = GetParameterPart(ret, "type")
+								if ty then name = name .. " (" .. ty .. ")" end
 								if info and info:len() > 0 then
-									result = result .. "<br/>　　" .. ParseInfo(ret) .. " - " .. ParseInfo(info)
+									result = result .. "<br/>　　" .. ParseInfo(name) .. " - " .. ParseInfo(info)
 								else
-									result = result .. "<br/>　　" .. ParseInfo(ret)
+									result = result .. "<br/>　　" .. ParseInfo(name)
 								end
+								cnt = cnt + 1
 							end
 						end
 					else
@@ -772,10 +751,10 @@ function BuildBody(data)
 					end
 
 					-- Usage
-					desc = hasDocument and GetDocument(ns, doctype, name, "usage")
+					desc = GetDocumentPart(ns, name, "usage")
 					if desc then
 						result = result .. "<br/><br/>　<cyan>Usage</cyan> :"
-						for usage in desc do
+						for _, usage in desc do
 							result = result .. "<br/>　　" .. usage:gsub("<br>", "<br/>　　"):gsub("  ", "　"):gsub("\t", "　　")
 						end
 					end
@@ -784,16 +763,10 @@ function BuildBody(data)
 				end
 			else
 				local result = "<blue>[NameSpace]</blue> " .. BuildHref(ns) .. " :"
-				local desc
-
-				if HasDocument(ns, "namespace", GetNameSpaceName(ns)) then
-					desc = GetDocument(ns, "namespace", GetNameSpaceName(ns), "desc")
-				elseif HasDocument(ns, "default", GetNameSpaceName(ns)) then
-					desc = GetDocument(ns, "default", GetNameSpaceName(ns), "desc")
-				end
+				local desc = GetDocumentPart(ns, nil, "desc")
 
 				-- Desc
-				desc = desc and desc()
+				desc = desc and select(2, desc())
 				if desc then
 					result = result .. "<br/><br/>　<cyan>Description</cyan> :<br/>　　" .. desc
 				end
