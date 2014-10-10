@@ -55,7 +55,7 @@ function _M:OnLoad()
 end
 
 function browser:OnShow()
-	if IsDocumentSystemEnabled() then
+	if _G.PLOOP_DOCUMENT_ENABLED or _G.PLOOP_DOCUMENT_ENABLED == nil then
 		html.Text = LoadUrl("System")
 	else
 		html.Text = HTML_NO_DOCUMENT
@@ -121,8 +121,8 @@ function BuildHref(data, text)
 		text = text or data
 		return HTML_HREF_TEMPLATE:format(data, text)
 	else
-		text = text or GetFullName(data)
-		return HTML_HREF_TEMPLATE:format(GetFullName(data), text)
+		text = text or GetNameSpaceFullName(data)
+		return HTML_HREF_TEMPLATE:format(GetNameSpaceFullName(data), text)
 	end
 end
 
@@ -367,18 +367,18 @@ function BuildBody(data)
 					if IsInterface(ns) then
 						result = "<blue>[Interface]</blue> " .. BuildHref(ns) .. " :"
 
-						if HasDocument(ns, "interface", GetName(ns)) then
-							desc = GetDocument(ns, "interface", GetName(ns), "desc")
-						elseif HasDocument(ns, "default", GetName(ns)) then
-							desc = GetDocument(ns, "default", GetName(ns), "desc")
+						if HasDocument(ns, "interface", GetNameSpaceName(ns)) then
+							desc = GetDocument(ns, "interface", GetNameSpaceName(ns), "desc")
+						elseif HasDocument(ns, "default", GetNameSpaceName(ns)) then
+							desc = GetDocument(ns, "default", GetNameSpaceName(ns), "desc")
 						end
 					else
 						result = "<blue>[Class]</blue> " .. BuildHref(ns) .. " :"
 
-						if HasDocument(ns, "class", GetName(ns)) then
-							desc = GetDocument(ns, "class", GetName(ns), "desc")
-						elseif HasDocument(ns, "default", GetName(ns)) then
-							desc = GetDocument(ns, "default", GetName(ns), "desc")
+						if HasDocument(ns, "class", GetNameSpaceName(ns)) then
+							desc = GetDocument(ns, "class", GetNameSpaceName(ns), "desc")
+						elseif HasDocument(ns, "default", GetNameSpaceName(ns)) then
+							desc = GetDocument(ns, "default", GetNameSpaceName(ns), "desc")
 						end
 					end
 
@@ -421,7 +421,7 @@ function BuildBody(data)
 								desc = ""
 							end
 
-							result = result .. "<br/>　　" .. BuildHref(GetFullName(ns).."."..sc.."-event", sc) .. desc
+							result = result .. "<br/>　　" .. BuildHref(GetNameSpaceFullName(ns).."."..sc.."-event", sc) .. desc
 						end
 					end
 
@@ -441,7 +441,7 @@ function BuildBody(data)
 								desc = ""
 							end
 
-							result = result .. "<br/>　　" .. BuildHref(GetFullName(ns).."."..prop.."-property", prop) .. desc
+							result = result .. "<br/>　　" .. BuildHref(GetNameSpaceFullName(ns).."."..prop.."-property", prop) .. desc
 						end
 					end
 
@@ -461,13 +461,13 @@ function BuildBody(data)
 								desc = ""
 							end
 
-							result = result .. "<br/>　　" .. BuildHref(GetFullName(ns).."."..method.."-method", method) .. desc
+							result = result .. "<br/>　　" .. BuildHref(GetNameSpaceFullName(ns).."."..method.."-method", method) .. desc
 						end
 					end
 
 					-- Need
 					if IsInterface(ns) then
-						desc = GetDocument(ns, "interface", GetName(ns), "overridable")
+						desc = GetDocument(ns, "interface", GetNameSpaceName(ns), "overridable")
 
 						if desc then
 							result = result .. "<br/><br/>　<cyan>Overridable</cyan> :"
@@ -492,16 +492,16 @@ function BuildBody(data)
 						while ns do
 							isFormat = true
 
-							if HasDocument(ns, "class", GetName(ns)) then
-								desc = GetDocument(ns, "class", GetName(ns), "format")
+							if HasDocument(ns, "class", GetNameSpaceName(ns)) then
+								desc = GetDocument(ns, "class", GetNameSpaceName(ns), "format")
 								if not desc then
-									desc = GetDocument(ns, "class", GetName(ns), "param")
+									desc = GetDocument(ns, "class", GetNameSpaceName(ns), "param")
 									isFormat = false
 								end
-							elseif HasDocument(ns, "default", GetName(ns)) then
-								desc = GetDocument(ns, "default", GetName(ns), "desc")
+							elseif HasDocument(ns, "default", GetNameSpaceName(ns)) then
+								desc = GetDocument(ns, "default", GetNameSpaceName(ns), "desc")
 								if not desc then
-									desc = GetDocument(ns, "default", GetName(ns), "param")
+									desc = GetDocument(ns, "default", GetNameSpaceName(ns), "param")
 									isFormat = false
 								end
 							end
@@ -511,10 +511,10 @@ function BuildBody(data)
 								result = result .. "<br/><br/>　<cyan>Constructor</cyan> :"
 								if isFormat then
 									for fmt in desc do
-										result = result .. "<br/>　　" .. GetName(ns) .. "(" .. fmt .. ")"
+										result = result .. "<br/>　　" .. GetNameSpaceName(ns) .. "(" .. fmt .. ")"
 									end
 								else
-									result = result .. "<br/>　　" .. GetName(ns) .. "("
+									result = result .. "<br/>　　" .. GetNameSpaceName(ns) .. "("
 
 									local isFirst = true
 
@@ -531,7 +531,7 @@ function BuildBody(data)
 								end
 
 								-- Params
-								desc = GetDocument(ns, "class", GetName(ns), "param") or GetDocument(ns, "default", GetName(ns), "param")
+								desc = GetDocument(ns, "class", GetNameSpaceName(ns), "param") or GetDocument(ns, "default", GetNameSpaceName(ns), "param")
 								if desc then
 									result = result .. "<br/><br/>　<cyan>Parameter</cyan> :"
 									for param, info in desc do
@@ -554,9 +554,9 @@ function BuildBody(data)
 
 					-- Usage
 					if IsInterface(ns) then
-						desc = GetDocument(ns, "interface", GetName(ns), "usage")
+						desc = GetDocument(ns, "interface", GetNameSpaceName(ns), "usage")
 					else
-						desc = GetDocument(ns, "class", GetName(ns), "usage")
+						desc = GetDocument(ns, "class", GetNameSpaceName(ns), "usage")
 					end
 
 					if desc then
@@ -703,14 +703,14 @@ function BuildBody(data)
 						if desc then
 							for fmt in desc do
 								if isGlobal then
-									result = result .. "<br/>　　" .. GetName(ns) .. "." .. name .. "(" .. ParseInfo(fmt) .. ")"
+									result = result .. "<br/>　　" .. GetNameSpaceName(ns) .. "." .. name .. "(" .. ParseInfo(fmt) .. ")"
 								else
 									result = result .. "<br/>　　object:" .. name .. "(" .. ParseInfo(fmt) .. ")"
 								end
 							end
 						else
 							if isGlobal then
-								result = result .. "<br/>　　" .. GetName(ns) .. "." .. name .. "("
+								result = result .. "<br/>　　" .. GetNameSpaceName(ns) .. "." .. name .. "("
 							else
 								result = result .. "<br/>　　object:" .. name .. "("
 							end
@@ -786,10 +786,10 @@ function BuildBody(data)
 				local result = "<blue>[NameSpace]</blue> " .. BuildHref(ns) .. " :"
 				local desc
 
-				if HasDocument(ns, "namespace", GetName(ns)) then
-					desc = GetDocument(ns, "namespace", GetName(ns), "desc")
-				elseif HasDocument(ns, "default", GetName(ns)) then
-					desc = GetDocument(ns, "default", GetName(ns), "desc")
+				if HasDocument(ns, "namespace", GetNameSpaceName(ns)) then
+					desc = GetDocument(ns, "namespace", GetNameSpaceName(ns), "desc")
+				elseif HasDocument(ns, "default", GetNameSpaceName(ns)) then
+					desc = GetDocument(ns, "default", GetNameSpaceName(ns), "desc")
 				end
 
 				-- Desc
