@@ -638,7 +638,7 @@ function BuildBody(data)
 							for param, info in desc do
 								local name = GetParameterPart(param, "name") or "arg" .. cnt
 								local ty = GetParameterPart(param, "type")
-								if ty then name = name .. " (" .. ty .. ")"
+								if ty then name = name .. " (" .. ty .. ")" end
 								if info and info:len() > 0 then
 									result = result .. "<br/>　  " .. ParseInfo(name) .. " - " .. ParseInfo(info)
 								else
