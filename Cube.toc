@@ -20,6 +20,7 @@ Cube.lua
 
 Scripts\lunit.lua
 Scripts\EventData.lua
+Scripts\WOWAPI.lua
 
 Frames\EventPicker.Designer.lua
 Frames\EventPicker.Script.lua

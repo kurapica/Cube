@@ -225,6 +225,8 @@ function OnLoad(self)
 			LoadAddon(subNode)
 		end
 	end
+
+	return MultiLineTextBox._AppendCommonAutoCompleteList(API_Data)
 end
 
 function OnEnable(self)
