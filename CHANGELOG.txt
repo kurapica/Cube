@@ -1,3 +1,8 @@
+2014/10/14: v5.7
+	1. WOW API added to auto complete list.
+	2. Menu added to modify code editor settings.
+	3. Fix some input error with "|" with IGAS v57.
+
 2013/08/15: v5.6
 	1. fix localization error
 
