@@ -205,8 +205,6 @@ function OnLoad(self)
 	fileTree:GetNode(1).ToggleState = true
 
 	-- Load the settings
-	chkShowRow.Checked = not CubeSave.NotShowRowNumber
-
 	if CubeSave.CubeMainSize then
 		Cube_Main.Size = CubeSave.CubeMainSize
 	end
@@ -214,6 +212,25 @@ function OnLoad(self)
 	if CubeSave.CubeMainLocation then
 		Cube_Main.Location = CubeSave.CubeMainLocation
 	end
+
+	if not CubeSave.EditorConfig then
+		CubeSave.EditorConfig = {
+			ShowLineNumber = true,
+			DefaultColor = System.Widget.ColorType(1, 1, 1, 1),
+			CommentColor = System.Widget.ColorType(0, 1, 0, 1),
+			StringColor = System.Widget.ColorType(0, 1, 0, 1),
+			NumberColor = System.Widget.ColorType(1, 1, 0, 1),
+			InstructionColor = System.Widget.ColorType(1, 0.39, 0.09, 1),
+			Font = {
+				path = STANDARD_TEXT_FONT,
+				height = 14,
+				outline = "NONE",
+				monochrome = false,
+			},
+		}
+	end
+
+	_EditorConfig = CubeSave.EditorConfig
 
 	-- Loading in-game addons
 	local node = fileTree:GetNode(2)
@@ -274,6 +291,61 @@ end
 
 function Cube_Main:OnPositionChanged()
 	CubeSave.CubeMainLocation = self.Location
+end
+
+function menuBtn:OnClick() cubeMenu.Visible = not cubeMenu.Visible end
+
+function cubeMenu:OnShow()
+	mnuFontPath.Text = L"Path" .. " : " .._EditorConfig.Font.path
+	mnuFontHeight.Text = L"Height" .. " : " .._EditorConfig.Font.height
+	lstFontOutline:SelectItemByValue(_EditorConfig.Font.outline)
+	mnuShowLineNum.Checked =_EditorConfig[mnuShowLineNum.Property]
+
+	for _, btn in ipairs(arMenuProperty) do
+		btn.Color = CubeSave.EditorConfig[btn.Property]
+	end
+end
+
+function mnuFontPath:OnClick()
+	cubeMenu.Visible = false
+
+	local path = IGAS:MsgBox(L"Please input the font path", "ic")
+	if path and strtrim(path) ~= "" then
+		_EditorConfig.Font.path = strtrim(path)
+
+		UpdateAllCodeEditor("Font", _EditorConfig.Font)
+	end
+end
+
+function mnuFontHeight:OnClick()
+	cubeMenu.Visible = false
+
+	local height = IGAS:MsgBox(L"Please input the font height", "ic")
+	if tonumber(height) and tonumber(height) >= 1 then
+		_EditorConfig.Font.height = tonumber(height)
+
+		UpdateAllCodeEditor("Font", _EditorConfig.Font)
+	end
+end
+
+function lstFontOutline:OnItemChoosed(key)
+	if self.Visible then
+		_EditorConfig.Font.outline = key
+
+		UpdateAllCodeEditor("Font", _EditorConfig.Font)
+	end
+end
+
+function mnuShowLineNum:OnCheckChanged()
+	_EditorConfig.ShowLineNumber = self.Checked
+
+	UpdateAllCodeEditor("ShowLineNumber", _EditorConfig.ShowLineNumber)
+end
+
+function arMenuProperty:OnColorPicked(index, r, g, b, a)
+	local prop = arMenuProperty[index].Property
+	_EditorConfig[prop] = ColorType(r, g, b)
+	UpdateAllCodeEditor(prop, _EditorConfig[prop])
 end
 
 function toggleBtn:OnClick()
@@ -650,19 +722,12 @@ function chkAuto:OnValueChanged(value)
 	end
 end
 
-function chkShowRow:OnValueChanged(value)
-	CubeSave.NotShowRowNumber = not value
-	for i = 1, tabCode.Count do
-		tabCode:GetWidget(i).ShowLineNumber = not CubeSave.NotShowRowNumber
-	end
-end
-
 function reset:OnClick()
 	local code = tabCode.SelectedWidget
 
 	if not code then return end
 
-	code.Text = code.Node.Content or code.Node.Script or ""
+	code.Text = code.Node.MetaData.Content or code.Node.MetaData.Script or ""
 end
 
 function save:OnClick()
@@ -814,7 +879,13 @@ function rycCodeEditor:OnPush(obj)
 end
 
 function rycCodeEditor:OnPop(obj)
-	obj.ShowLineNumber = not CubeSave.NotShowRowNumber
+	obj.ShowLineNumber = _EditorConfig.ShowLineNumber
+	obj.Font = _EditorConfig.Font
+	obj.DefaultColor = _EditorConfig.DefaultColor
+	obj.CommentColor = _EditorConfig.CommentColor
+	obj.StringColor = _EditorConfig.StringColor
+	obj.NumberColor = _EditorConfig.NumberColor
+	obj.InstructionColor = _EditorConfig.InstructionColor
 end
 
 function tabCode:OnTabClose(obj)
@@ -856,6 +927,12 @@ end
 -----------------------------------
 -- Helper API
 -----------------------------------
+function UpdateAllCodeEditor(prop, value)
+	for i = 1, tabCode.Count do
+		tabCode:GetWidget(i)[prop] = value
+	end
+end
+
 function GetTitle(node)
 	if node.Level == 2 and node.Parent.Index == 1 then
 		return node.MetaData.Text

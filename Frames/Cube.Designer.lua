@@ -31,15 +31,75 @@ toggleBtn:SetDisabledTexture("Interface\\BUTTONS\\UI-SpellbookIcon-PrevPage-Disa
 toggleBtn:SetHighlightTexture("Interface\\Buttons\\UI-Common-MouseHilight", "ADD")
 toggleBtn:SetPoint("TOPLEFT", Cube_Main, "TOPLEFT", 4, -4)
 
+-- Menu Button
+menuBtn = Button("MenuButton", Cube_Main)
+menuBtn.FrameLevel = fileTree.FrameLevel + 5
+menuBtn:SetWidth(32)
+menuBtn:SetHeight(32)
+menuBtn:SetNormalTexture("Interface\\BUTTONS\\UI-SpellbookIcon-PrevPage-Up")
+menuBtn:SetPushedTexture("Interface\\BUTTONS\\UI-SpellbookIcon-PrevPage-Down")
+menuBtn:SetDisabledTexture("Interface\\BUTTONS\\UI-SpellbookIcon-PrevPage-Disabled")
+menuBtn:SetHighlightTexture("Interface\\Buttons\\UI-Common-MouseHilight", "ADD")
+menuBtn:SetPoint("TOPLEFT", Cube_Main, "TOPLEFT", 42, -4)
+menuBtn.NormalTexture:RotateDegree(-90)
+menuBtn.PushedTexture:RotateDegree(-90)
+
+-- Config Menu
+cubeMenu = DropDownList("ConfigMenu", Cube_Main)
+cubeMenu.MultiSelect = true
+cubeMenu.ShowOnCursor = true
+cubeMenu.Visible = false
+
+mnuFontPath = cubeMenu:AddMenuButton(L"Font Settings", L"Path")
+mnuFontPath:ActiveThread("OnClick")
+mnuFontHeight = cubeMenu:AddMenuButton(L"Font Settings", L"Height")
+mnuFontHeight:ActiveThread("OnClick")
+mnuFontOutline = cubeMenu:AddMenuButton(L"Font Settings", L"Outline")
+do
+	lstFontOutline = List("LstOutline", mnuFontOutline)
+	lstFontOutline:SetList{
+		NONE = L"NONE",
+		NORMAL = L"NORMAL",
+		THICK = L"THICK",
+	}
+	lstFontOutline.Width = 150
+	lstFontOutline.Height = 250
+	lstFontOutline.Visible = false
+	mnuFontOutline.DropDownList = lstFontOutline
+end
+mnuShowLineNum = cubeMenu:AddMenuButton(L["Show Row Number"])
+mnuShowLineNum.IsCheckButton = true
+mnuShowLineNum.Property = "ShowLineNumber"
+
+mnuColorDefault = cubeMenu:AddMenuButton(L"Color Settings", L"Default Color")
+mnuColorDefault.IsColorPicker = true
+mnuColorDefault.Property = "DefaultColor"
+mnuColorComment = cubeMenu:AddMenuButton(L"Color Settings", L"Comment Color")
+mnuColorComment.IsColorPicker = true
+mnuColorComment.Property = "CommentColor"
+mnuColorString = cubeMenu:AddMenuButton(L"Color Settings", L"String Color")
+mnuColorString.IsColorPicker = true
+mnuColorString.Property = "StringColor"
+mnuColorNumber = cubeMenu:AddMenuButton(L"Color Settings", L"Number Color")
+mnuColorNumber.IsColorPicker = true
+mnuColorNumber.Property = "NumberColor"
+mnuColorInstruction = cubeMenu:AddMenuButton(L"Color Settings", L"Instruction Color")
+mnuColorInstruction.IsColorPicker = true
+mnuColorInstruction.Property = "InstructionColor"
+
+arMenuProperty = Array(DropDownList.DropDownMenuButton)
+arMenuProperty:Push(
+	mnuColorDefault,
+	mnuColorComment,
+	mnuColorString,
+	mnuColorNumber,
+	mnuColorInstruction
+)
+
 -- Check AutoRun
 chkAuto = CheckBox("AutoRun", Cube_Main)
 chkAuto.Text = L["AutoRun"]
 chkAuto:SetPoint("TOPRIGHT", Cube_Main, "TOPRIGHT", -4, -24)
-
--- Check RowNumber
-chkShowRow = CheckBox("ShowRow", Cube_Main)
-chkShowRow.Text = L["Show Row Number"]
-chkShowRow:SetPoint("TOPRIGHT", chkAuto, "TOPLEFT", 0, 0)
 
 -- CodeEditor Container
 tabCode = TabLayoutPanel("TabContainer", Cube_Main)

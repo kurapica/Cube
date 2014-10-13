@@ -10,7 +10,7 @@ local maxErr = 99
 local errIndex = 0
 local width
 
-_Addon.OnSlashCmd = _Addon.OnSlashCmd + function(self, option)		
+_Addon.OnSlashCmd = _Addon.OnSlashCmd + function(self, option)
 	if option and strupper(option) == "BUG" then
 		Cube_BugList.Visible = true
 		return true
@@ -19,7 +19,7 @@ end
 
 function _M:OnLoad()
 	_Enabled = (not CubeSave.DisableBugList)
-	
+
 	if CubeSave.IconPosition then
 		icon.Position = CubeSave.IconPosition
 	end
@@ -40,7 +40,7 @@ local function Refresh()
 		btnLeft:Enable()
 		leftNum.Text = tostring(errIndex - 1)
 	end
-	
+
 	if errIndex > getn(ErrList) - 1 then
 		btnRight:Disable()
 		rightNum.Text = ""
@@ -48,7 +48,7 @@ local function Refresh()
 		btnRight:Enable()
 		rightNum.Text = tostring(getn(ErrList) - errIndex)
 	end
-	
+
 	textView.Text = ErrList[errIndex] or ""
 	if getn(ErrList) > 0 then
 		icon.Text = tostring(getn(ErrList))
@@ -180,7 +180,7 @@ end
 local real_seterrorhandler = seterrorhandler
 
 -- Error handler
-local function grabError(err)		
+local function grabError(err)
 	if CubeSave.DisableBugList then return end
 	if getn(ErrList) >= maxErr then return end
 
