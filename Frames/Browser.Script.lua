@@ -53,6 +53,19 @@ function _M:OnLoad()
 	if CubeSave.BrowserLocation then
 		browser.Location = CubeSave.BrowserLocation
 	end
+
+	if not CubeSave.BrowserFont then
+		CubeSave.BrowserFont = {
+			path = STANDARD_TEXT_FONT,
+			height = 14,
+			outline = "NONE",
+			monochrome = false,
+		}
+	end
+
+	_BrowserFont = CubeSave.BrowserFont
+
+	html.Font = _BrowserFont
 end
 
 function browser:OnShow()
@@ -70,6 +83,44 @@ end
 
 function browser:OnPositionChanged()
 	CubeSave.BrowserLocation = self.Location
+end
+
+function menuBtn:OnClick() browserMenu.Visible = not browserMenu.Visible end
+
+function browserMenu:OnShow()
+	mnuFontPath.Text = L"Path" .. " : " .._BrowserFont.path
+	mnuFontHeight.Text = L"Height" .. " : " .._BrowserFont.height
+	lstFontOutline:SelectItemByValue(_BrowserFont.outline)
+end
+
+function mnuFontPath:OnClick()
+	browserMenu.Visible = false
+
+	local path = IGAS:MsgBox(L"Please input the font path", "ic")
+	if path and strtrim(path) ~= "" then
+		_BrowserFont.path = strtrim(path)
+
+		html.Font = _BrowserFont
+	end
+end
+
+function mnuFontHeight:OnClick()
+	browserMenu.Visible = false
+
+	local height = IGAS:MsgBox(L"Please input the font height", "ic")
+	if tonumber(height) and tonumber(height) >= 1 then
+		_BrowserFont.height = tonumber(height)
+
+		html.Font = _BrowserFont
+	end
+end
+
+function lstFontOutline:OnItemChoosed(key)
+	if self.Visible then
+		_BrowserFont.outline = key
+
+		html.Font = _BrowserFont
+	end
 end
 
 function html:OnHyperlinkClick(data)
