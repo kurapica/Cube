@@ -54,16 +54,19 @@ function _M:OnLoad()
 		browser.Location = CubeSave.BrowserLocation
 	end
 
-	if not CubeSave.BrowserFont then
-		CubeSave.BrowserFont = {
-			path = STANDARD_TEXT_FONT,
-			height = 14,
-			outline = "NONE",
-			monochrome = false,
+	if not CubeSave.BrowserConfig then
+		CubeSave.BrowserConfig = {
+			BrowserFont = {
+				path = STANDARD_TEXT_FONT,
+				height = 14,
+				outline = "NONE",
+				monochrome = false,
+			}
 		}
 	end
 
-	_BrowserFont = CubeSave.BrowserFont
+	_BrowserConfig = CubeSave.BrowserConfig
+	_BrowserFont = _BrowserConfig.BrowserFont
 
 	html.Font = _BrowserFont
 end
@@ -91,6 +94,8 @@ function browserMenu:OnShow()
 	mnuFontPath.Text = L"Path" .. " : " .._BrowserFont.path
 	mnuFontHeight.Text = L"Height" .. " : " .._BrowserFont.height
 	lstFontOutline:SelectItemByValue(_BrowserFont.outline)
+
+	mnuShowDesc.Checked = _BrowserConfig.ShowDescription
 end
 
 function mnuFontPath:OnClick()
@@ -123,6 +128,20 @@ function lstFontOutline:OnItemChoosed(key)
 	end
 end
 
+function mnuShowDesc:OnCheckChanged()
+	_BrowserConfig.ShowDescription = self.Checked
+
+	if _History.Index > 0 then
+		local data = LoadUrl(_History[_History.Index])
+
+		if data then
+			Threading.Sleep(0.1)
+
+			html.Text = data
+		end
+	end
+end
+
 function html:OnHyperlinkClick(data)
 	local data = LoadUrl(data)
 
@@ -133,9 +152,7 @@ function html:OnHyperlinkClick(data)
 	end
 end
 
-_History = {
-	Index = 0,
-}
+_History = { Index = 0 }
 
 function LoadUrl(data)
 	if data == "Back" then
@@ -154,12 +171,10 @@ function LoadUrl(data)
 		_History.Index = _History.Index + 1
 		data = _History[_History.Index]
 	else
-		if data == _History[_History.Index] then
-			return
+		if data ~= _History[_History.Index] then
+			_History.Index = _History.Index + 1
+			_History[_History.Index] = data
 		end
-
-		_History.Index = _History.Index + 1
-		_History[_History.Index] = data
 	end
 
 	local header = HTML_PAGE_TEMPLATE:format(BuildHeader(data))
@@ -258,7 +273,9 @@ function BuildSubNamespace(ns)
 			result = result .. "<br/><br/>　<cyan>Sub Enum</cyan> :"
 
 			for _, sns in ipairs(_Enums) do
-				result = result .. "<br/>　　" .. BuildHref(sns)
+				local desc = _BrowserConfig.ShowDescription and GetDescription(sns)
+				desc = desc and "　-　" .. desc .. "<br/>" or ""
+				result = result .. "<br/>　　" .. BuildHref(sns) .. desc
 			end
 		end
 
@@ -266,7 +283,9 @@ function BuildSubNamespace(ns)
 			result = result .. "<br/><br/>　<cyan>Sub Struct</cyan> :"
 
 			for _, sns in ipairs(_Structs) do
-				result = result .. "<br/>　　" .. BuildHref(sns)
+				local desc = _BrowserConfig.ShowDescription and GetDescription(sns)
+				desc = desc and "　-　" .. desc .. "<br/>" or ""
+				result = result .. "<br/>　　" .. BuildHref(sns) .. desc
 			end
 		end
 
@@ -274,7 +293,9 @@ function BuildSubNamespace(ns)
 			result = result .. "<br/><br/>　<cyan>Sub Interface</cyan> :"
 
 			for _, sns in ipairs(_Interfaces) do
-				result = result .. "<br/>　　" .. BuildHref(sns)
+				local desc = _BrowserConfig.ShowDescription and GetDescription(sns)
+				desc = desc and "　-　" .. desc .. "<br/>" or ""
+				result = result .. "<br/>　　" .. BuildHref(sns) .. desc
 			end
 		end
 
@@ -282,7 +303,9 @@ function BuildSubNamespace(ns)
 			result = result .. "<br/><br/>　<cyan>Sub Class</cyan> :"
 
 			for _, sns in ipairs(_Classes) do
-				result = result .. "<br/>　　" .. BuildHref(sns)
+				local desc = _BrowserConfig.ShowDescription and GetDescription(sns)
+				desc = desc and "　-　" .. desc .. "<br/>" or ""
+				result = result .. "<br/>　　" .. BuildHref(sns) .. desc
 			end
 		end
 
@@ -290,7 +313,9 @@ function BuildSubNamespace(ns)
 			result = result .. "<br/><br/>　<cyan>Sub NameSpace</cyan> :"
 
 			for _, sns in ipairs(_Namespaces) do
-				result = result .. "<br/>　　" .. BuildHref(sns)
+				local desc = _BrowserConfig.ShowDescription and GetDescription(sns)
+				desc = desc and "　-　" .. desc .. "<br/>" or ""
+				result = result .. "<br/>　　" .. BuildHref(sns) .. desc
 			end
 		end
 	end
@@ -312,6 +337,13 @@ function GetParameterPart(param, part)
 	if param then
 		return param:match(part .. "%s*=%s*[\'\"](.-)[\'\"]")
 	end
+end
+
+function GetDescription(owner, name, space)
+	space = space or ""
+	local desc = GetDocumentPart(owner, name, "desc")
+	desc = desc and select(2, desc())
+	return desc and desc:gsub("<br>", "<br/>" .. space)
 end
 
 function BuildBody(data)
@@ -440,10 +472,9 @@ function BuildBody(data)
 					end
 
 					-- Desc
-					desc = GetDocumentPart(ns, nil, "desc")
-					desc = desc and select(2, desc())
+					desc = GetDescription(ns, nil, "　　")
 					if desc then
-						result = result .. "<br/><br/>　<cyan>Description</cyan> :<br/>　　" .. desc:gsub("<br>", "<br/>　　")
+						result = result .. "<br/><br/>　<cyan>Description</cyan> :<br/>　　" .. desc
 					end
 
 					-- Inherit
@@ -469,15 +500,10 @@ function BuildBody(data)
 						result = result .. "<br/><br/>　<cyan>Event</cyan> :"
 						for _, sc in pairs(events) do
 							-- Desc
-							desc = GetDocumentPart(ns, sc, "desc")
-							desc = desc and select(2, desc())
+							desc = GetDescription(ns, sc, "　　　　")
 							if desc then
-								desc = "　-　" .. desc:gsub("<br>", "<br/>　　　　")
-							else
-								desc = ""
+								result = result .. "<br/>　　" .. BuildHref(GetNameSpaceFullName(ns).."."..sc.."-event", sc) .. "　-　" .. desc
 							end
-
-							result = result .. "<br/>　　" .. BuildHref(GetNameSpaceFullName(ns).."."..sc.."-event", sc) .. desc
 						end
 					end
 
@@ -486,24 +512,29 @@ function BuildBody(data)
 					if props and next(props) then
 						result = result .. "<br/><br/>　<cyan>Property</cyan> :"
 						for _, prop in pairs(props) do
+							local prev = ""
+
+							if IsStaticProperty(ns, prop) then
+								prev = prev .. "<blue>[Static]</blue>"
+							end
+
+							if isInterface then
+								if IsRequiredProperty(ns, prop) then
+									prev = prev .. "<red>[Required]</red>"
+								elseif IsOptionalProperty(ns, prop) then
+									prev = prev .. "<green>[Optional]</green>"
+								end
+							end
+
 							-- Desc
-							desc = GetDocumentPart(ns, prop, "desc")
-							desc = desc and select(2, desc())
+							desc = GetDescription(ns, prop, "　　　　")
 							if desc then
-								desc = "　-　" .. desc:gsub("<br>", "<br/>　　　　")
+								desc = "　-　" .. desc
 							else
 								desc = ""
 							end
 
-							if isInterface then
-								if IsRequireProperty(ns, prop) then
-									desc = desc .. "(Require)"
-								elseif IsOptionalProperty(ns, prop) then
-									desc = desc .. "(Optional)"
-								end
-							end
-
-							result = result .. "<br/>　　" .. BuildHref(GetNameSpaceFullName(ns).."."..prop.."-property", prop) .. desc
+							result = result .. "<br/>　　" .. prev .. BuildHref(GetNameSpaceFullName(ns).."."..prop.."-property", prop) .. desc
 						end
 					end
 
@@ -512,24 +543,29 @@ function BuildBody(data)
 					if methods and next(methods) then
 						result = result .. "<br/><br/>　<cyan>Method</cyan> :"
 						for _, method in pairs(methods) do
+							local prev = ""
+
+							if IsStaticMethod(ns, method) then
+								prev = prev .. "<blue>[Static]</blue>"
+							end
+
+							if isInterface then
+								if IsRequiredMethod(ns, method) then
+									prev = prev .. "<red>[Required]</red>"
+								elseif IsOptionalMethod(ns, method) then
+									prev = prev .. "<green>[Optional]</green>"
+								end
+							end
+
 							-- Desc
-							desc = GetDocumentPart(ns, method, "desc")
-							desc = desc and select(2, desc())
+							desc = GetDescription(ns, method, "　　　　")
 							if desc then
-								desc = "　-　" .. desc:gsub("<br>", "<br/>　　　　")
+								desc = "　-　" .. desc
 							else
 								desc = ""
 							end
 
-							if isInterface then
-								if IsRequireMethod(ns, method) then
-									desc = desc .. "(Require)"
-								elseif IsOptionalMethod(ns, method) then
-									desc = desc .. "(Optional)"
-								end
-							end
-
-							result = result .. "<br/>　　" .. BuildHref(GetNameSpaceFullName(ns).."."..method.."-method", method) .. desc
+							result = result .. "<br/>　　" .. prev .. BuildHref(GetNameSpaceFullName(ns).."."..method.."-method", method) .. desc
 						end
 					end
 
@@ -646,10 +682,9 @@ function BuildBody(data)
 					end
 
 					-- Desc
-					local desc = GetDocumentPart(ns, name, "desc")
-					desc = desc and select(2, desc())
+					local desc = GetDescription(ns, name, "　　")
 					if desc then
-						result = result .. "<br/><br/>　<cyan>Description</cyan> :<br/>　　" .. desc:gsub("<br>", "<br/>　　")
+						result = result .. "<br/><br/>　<cyan>Description</cyan> :<br/>　　" .. desc
 					end
 
 					if querytype == "event" then
@@ -710,12 +745,18 @@ function BuildBody(data)
 
 						-- Writable
 						result = result .. "<br/><br/>　<cyan>Writable</cyan> :<br/>　　" .. tostring(IsPropertyWritable(ns, name))
-					elseif querytype == "method" then
-						local isGlobal = false
 
-						if name:match("^_") or (IsInterface(ns) and IsNonInheritable(ns)) then
-							isGlobal = true
+						if IsStaticProperty(ns, name) then
+							result = result .. "<br/><br/>　<cyan>Static</cyan> :<br/>　　true"
 						end
+						if IsOptionalProperty(ns, name) then
+							result = result .. "<br/><br/>　<cyan>Optional</cyan> :<br/>　　true"
+						end
+						if IsRequiredProperty(ns, name) then
+							result = result .. "<br/><br/>　<cyan>Required</cyan> :<br/>　　true"
+						end
+					elseif querytype == "method" then
+						local isGlobal = IsStaticMethod(ns, name)
 
 						-- Format
 						desc = GetDocumentPart(ns, name, "format")
@@ -751,6 +792,16 @@ function BuildBody(data)
 							end
 
 							result = result .. ")"
+						end
+
+						if isGlobal then
+							result = result .. "<br/><br/>　<cyan>Static</cyan> :<br/>　　true"
+						end
+						if IsOptionalMethod(ns, name) then
+							result = result .. "<br/><br/>　<cyan>Optional</cyan> :<br/>　　true"
+						end
+						if IsRequiredMethod(ns, name) then
+							result = result .. "<br/><br/>　<cyan>Required</cyan> :<br/>　　true"
 						end
 
 						-- Params
@@ -814,10 +865,7 @@ function BuildBody(data)
 				end
 			else
 				local result = "<blue>[NameSpace]</blue> " .. BuildHref(ns) .. " :"
-				local desc = GetDocumentPart(ns, nil, "desc")
-
-				-- Desc
-				desc = desc and select(2, desc())
+				local desc = GetDescription(ns, nil)
 				if desc then
 					result = result .. "<br/><br/>　<cyan>Description</cyan> :<br/>　　" .. desc
 				end

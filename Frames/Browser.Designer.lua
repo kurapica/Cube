@@ -34,6 +34,12 @@ browserMenu.MultiSelect = true
 browserMenu.ShowOnCursor = true
 browserMenu.Visible = false
 
+-- Show Description
+mnuShowDesc = browserMenu:AddMenuButton(L"Show Description")
+mnuShowDesc.IsCheckButton = true
+mnuShowDesc:ActiveThread("OnCheckChanged")
+
+-- Font
 mnuFontPath = browserMenu:AddMenuButton(L"Font Settings", L"Path")
 mnuFontPath:ActiveThread("OnClick")
 mnuFontHeight = browserMenu:AddMenuButton(L"Font Settings", L"Height")

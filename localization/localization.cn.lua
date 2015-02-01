@@ -74,3 +74,5 @@ L["Please input the addon's name"] = "请输入插件的名称"
 L["Please input the module's name"] = "请输入模块的名称"
 L["Can't save code."] = "无法保存"
 L["Snippet is saved."] = "代码段保存完毕"
+
+L["Show Description"] = "显示概要"
