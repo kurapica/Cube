@@ -243,7 +243,7 @@ function OnLoad(self)
 		end
 	end
 
-	return MultiLineTextBox._AppendCommonAutoCompleteList(API_Data)
+	return CodeEditor._AppendCommonAutoCompleteList(API_Data)
 end
 
 function OnEnable(self)
