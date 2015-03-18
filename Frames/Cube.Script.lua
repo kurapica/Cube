@@ -863,6 +863,20 @@ function cubeLog:OnClick()
 	frmLog.Visible = not frmLog.Visible
 end
 
+function OnGameTooltipShow(self, gameTooltip, key)
+	local detail = API_Data[key]
+
+	if detail then
+		if detail.Desc then
+			gameTooltip:AddLine(detail.Desc, 1, 1, 1, true)
+		end
+	end
+end
+
+function OnAutoComplete(self, key)
+
+end
+
 function rycCodeEditor:OnInit(obj)
 	obj.ShowLineNumber = true
 
@@ -871,6 +885,8 @@ function rycCodeEditor:OnInit(obj)
 
 	obj.OnFunctionKey = OnFunctionKey
 	obj.OnControlKey = OnControlKey
+	obj.OnGameTooltipShow = OnGameTooltipShow
+	obj.OnAutoComplete = OnAutoComplete
 end
 
 function rycCodeEditor:OnPush(obj)
