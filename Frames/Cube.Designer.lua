@@ -134,6 +134,7 @@ save.Style = "CLASSIC"
 save.AutoSize = true
 save.Text = L["Save"]
 save:SetPoint("LEFT", reset, "RIGHT", 6, 0)
+save:ActiveThread("OnClick")
 
 -- Debug Button
 debug = NormalButton("Debug", Cube_Main)

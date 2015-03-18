@@ -733,11 +733,34 @@ end
 function save:OnClick()
 	local code = tabCode.SelectedWidget
 
-	if code and code.Node.Level > 1 then
-		if code.Node.MetaData.Type == "Frame" then
-			code.Node.MetaData.Script = code.Text
-		else
-			code.Node.MetaData.Content = code.Text
+	if code then
+		if code.Node.Level > 1 then
+			if code.Node.MetaData.Type == "Frame" then
+				code.Node.MetaData.Script = code.Text
+			else
+				code.Node.MetaData.Content = code.Text
+			end
+		elseif code.Node.Level == 1 and code.Node.Index == 1 then
+			local node = code.Node
+			local name = IGAS:MsgBox(L["Please input the snippet's name"], "ic")
+
+			if type(name) == "string" then
+				name = strtrim(name)
+
+				for i = 1, node.ChildNodeCount do
+					if node:GetNode(i).Text == name then
+						Cube_Main.Message = L["Can't save code."]
+						return
+					end
+				end
+
+				node = node:AddNode{Text = name, Content = code.Text, FunctionName = "Del" }
+
+				code.Node = node
+				tabCode:AddWidget(code, node.Text)
+
+				return
+			end
 		end
 	else
 		Cube_Main.Message = L["Can't save code."]
@@ -1163,12 +1186,7 @@ end
 
 function OnControlKey(self, key)
 	if key and string.upper(key) == "S" then
-		if self.Node.Level > 1 then
-			self.Node.MetaData.Content = self.Text
-			Cube_Main.Message = L["Snippet is saved."]
-		else
-			Cube_Main.Message = L["Can't save code."]
-		end
+		save:OnClick()
 	end
 end
 
