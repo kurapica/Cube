@@ -177,6 +177,35 @@ function OnLoad(self)
 		},
 	}
 
+	-- Command keys
+	if not CubeSave.CodeTree[3] then
+		CubeSave.CodeTree[3] = {
+			Text = "Command",
+			FunctionName = "Add",
+			ChildOrderChangable = true,
+			Childs = {
+				{
+					Text = "Undo",
+					Modify = "Ctrl",
+					Key = "Z",
+					Content = "self:Undo()",
+				},
+				{
+					Text = "Redo",
+					Modify = "Ctrl",
+					Key = "Y",
+					Content = "self:Redo()",
+				},
+				{
+					Text = "Save",
+					Modify = "Ctrl",
+					Key = "S",
+					Content = "IGAS.UIParent.Cube_Main.Save:Click()",
+				},
+			},
+		}
+	end
+
 	-- import data from the previous version
 	if type(CubeSave.CodeList) == "table" then
 		for i, v in pairs(CubeSave.CodeList) do
@@ -889,6 +918,8 @@ end
 function OnGameTooltipShow(self, gameTooltip, key)
 	local detail = API_Data[key]
 
+	gameTooltip:AddLine(" ")
+
 	if detail then
 		if detail.Desc then
 			gameTooltip:AddLine(detail.Desc, 1, 1, 1, true)
@@ -903,11 +934,9 @@ end
 function rycCodeEditor:OnInit(obj)
 	obj.ShowLineNumber = true
 
-	-- Register Ctrl+S to save the code
-	obj:RegisterControlKey("S")
-
 	obj.OnFunctionKey = OnFunctionKey
 	obj.OnControlKey = OnControlKey
+	obj.OnAltKey = OnAltKey
 	obj.OnGameTooltipShow = OnGameTooltipShow
 	obj.OnAutoComplete = OnAutoComplete
 end
@@ -1188,6 +1217,10 @@ function OnControlKey(self, key)
 	if key and string.upper(key) == "S" then
 		save:OnClick()
 	end
+end
+
+function OnAltKey(self, key)
+
 end
 
 -----------------------------------

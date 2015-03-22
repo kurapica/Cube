@@ -228,7 +228,14 @@ txtLog = MultiLineTextBox("Result", frmLog)
 txtLog:SetPoint("TOPLEFT", frmLog, "TOPLEFT", 4, -4)
 txtLog:SetPoint("BOTTOMRIGHT", frmLog, "BOTTOMRIGHT", -4, 4)
 
------------------------------------
--- New Addon Form
------------------------------------
+-- Command bind
+cboKey = ComboBox("CommandKey", Cube_Main)
+cboKey:SetPoint("RIGHT", run, "LEFT")
+cboKey.Width = 100
+cboKey.Visible = false
 
+cboModify = ComboBox("ModifyKey", Cube_Main)
+cboModify:SetPoint("RIGHT", cboKey, "LEFT")
+cboModify:SetList{ "", "Alt", "Ctrl" }
+cboModify.Width = 100
+cboModify.Visible = false
