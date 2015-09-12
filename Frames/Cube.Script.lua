@@ -157,7 +157,35 @@ IGAS:NewAddon "%s"
 
 ]]
 
+_CommandKeyOrder = {
+	"F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12",
+	"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+	"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "="
+}
+
+_ShortKeyListNoPre = {"F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"}
+
+_ShortKeyListAlt = {
+	"F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12",
+	"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+	"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "="
+}
+
+_ShortKeyListCtrl = {
+	"F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12",
+	"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+	"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "="
+}
+
+_NoPreCommand = {}
+_AltCommand = {}
+_CtrlCommand = {}
+
 function OnLoad(self)
+	for i, v in ipairs(_CommandKeyOrder) do
+		_CommandKeyOrder[v] = i
+	end
+
 	self:RegisterEvent("PLAYER_LOGOUT") -- used to clear to keep safe
 
 	_PlayerName = GetRealmName().."-"..GetUnitName("player")
@@ -178,7 +206,7 @@ function OnLoad(self)
 	}
 
 	-- Command keys
-	if not CubeSave.CodeTree[3] then
+	if true or not CubeSave.CodeTree[3] then
 		CubeSave.CodeTree[3] = {
 			Text = "Command",
 			FunctionName = "Add",
@@ -186,27 +214,37 @@ function OnLoad(self)
 			Childs = {
 				{
 					Text = "Undo",
+					FunctionName = "Del",
 					Modify = "Ctrl",
 					Key = "Z",
 					Content = "self:Undo()",
 				},
 				{
 					Text = "Redo",
+					FunctionName = "Del",
 					Modify = "Ctrl",
 					Key = "Y",
 					Content = "self:Redo()",
 				},
 				{
 					Text = "Save",
+					FunctionName = "Del",
 					Modify = "Ctrl",
 					Key = "S",
-					Content = "IGAS.UIParent.Cube_Main.Save:Click()",
+					Content = "self:Save()",
+				},
+				{
+					Text = "Run",
+					FunctionName = "Del",
+					Modify = "",
+					Key = "F5",
+					Content = "self:Run()",
 				},
 			},
 		}
 	end
 
-	-- import data from the previous version
+	-- import data from the v1.0 version
 	if type(CubeSave.CodeList) == "table" then
 		for i, v in pairs(CubeSave.CodeList) do
 			if type(i) == "string" and type(v) == "string" then
@@ -270,6 +308,13 @@ function OnLoad(self)
 		if subNode.MetaData[_PlayerName] then
 			LoadAddon(subNode)
 		end
+	end
+
+	-- Loading commands
+	node = fileTree:GetNode(3)
+	for i = 1, node.ChildNodeCount do
+		InstallCommand(node:GetNode(i))
+		LoadCommand(node:GetNode(i))
 	end
 
 	return CodeEditor._AppendCommonAutoCompleteList(API_Data)
@@ -412,22 +457,7 @@ function fileTree:OnNodeSelected(node)
 
 	tabCode:SelectWidget(code)
 
-	if node.Level == 2 then
-		chkAuto.Visible = true
-		chkAuto.Text = L["AutoRun"]
-		chkAuto.Checked = node.MetaData[_PlayerName]
-	--elseif node.Level > 2 then
-	--	chkAuto.Visible = true
-	--	chkAuto.Text = L["Disable"]
-	--	chkAuto.Checked = node.MetaData[_PlayerName]
-	else
-		chkAuto.Visible = false
-		chkAuto.Checked = false
-	end
-
-	Cube_Main.Message = ""
-	lstUnitTest.Visible = false
-	frmResult.Visible = false
+	UpdateForm(node)
 end
 
 function fileTree:OnNodeFunctionClick(func, node)
@@ -442,6 +472,11 @@ function fileTree:OnNodeFunctionClick(func, node)
 			if node.Level == 2 and node.Parent.Index == 1 then
 				-- Dispose snippets directly
 				node:Dispose()
+			elseif node.Level == 2 and node.Parent.Index == 3 then
+				-- Remove Command Cache
+				UninstallCommand(node)
+
+				node:Dispose()
 			else
 				-- Dispose the addon
 				if _LoadedModule[node] then
@@ -455,6 +490,23 @@ function fileTree:OnNodeFunctionClick(func, node)
 		if node.Level == 1 then
 			if node.Index == 1 then
 				local name = IGAS:MsgBox(L["Please input the snippet's name"], "ic")
+
+				if type(name) == "string" then
+					name = strtrim(name)
+
+					for i = 1, node.ChildNodeCount do
+						if node:GetNode(i).Text == name then
+							return node:GetNode(i):Select()
+						end
+					end
+
+					node = node:AddNode{Text = name, Content = "", FunctionName = "Del",}
+
+					return node:Select()
+				end
+			elseif node.Index == 3 then
+				-- Command
+				local name = IGAS:MsgBox(L["Please input the command's name"], "ic")
 
 				if type(name) == "string" then
 					name = strtrim(name)
@@ -756,21 +808,43 @@ function reset:OnClick()
 
 	if not code then return end
 
-	code.Text = code.Node.MetaData.Content or code.Node.MetaData.Script or ""
+	local node = code.Node
+
+	code.Text = node.MetaData.Content or node.MetaData.Script or ""
+
+	return cboModify.Visible and RefreshCboKey(node.MetaData.Modify)
 end
 
 function save:OnClick()
 	local code = tabCode.SelectedWidget
 
 	if code then
-		if code.Node.Level > 1 then
-			if code.Node.MetaData.Type == "Frame" then
-				code.Node.MetaData.Script = code.Text
+		local node = code.Node
+
+		if node.Level > 1 then
+			if node.Level == 2 and node.Parent.Index == 3 then
+				-- Command
+				local text = code.Text
+
+				if node.MetaData.Content ~= text then
+					node.MetaData.Content = text
+					LoadCommand(node)
+				end
+
+				if node.MetaData.Modify ~= cboModify.Text or node.MetaData.Key ~= cboKey.Text then
+					UninstallCommand(node)
+
+					node.MetaData.Modify = cboModify.Text
+					node.MetaData.Key = cboKey.Text
+
+					InstallCommand(node)
+				end
+			elseif node.MetaData.Type == "Frame" then
+				node.MetaData.Script = code.Text
 			else
-				code.Node.MetaData.Content = code.Text
+				node.MetaData.Content = code.Text
 			end
-		elseif code.Node.Level == 1 and code.Node.Index == 1 then
-			local node = code.Node
+		elseif node.Level == 1 and node.Index == 1 then
 			local name = IGAS:MsgBox(L["Please input the snippet's name"], "ic")
 
 			if type(name) == "string" then
@@ -792,7 +866,7 @@ function save:OnClick()
 			end
 		end
 	else
-		Cube_Main.Message = L["Can't save code."]
+		Cube_Main.Message = L["Can't save the code."]
 	end
 end
 
@@ -958,30 +1032,11 @@ end
 
 function tabCode:OnTabClose(obj)
 	rycCodeEditor(obj)
+	UpdateForm(false)
 end
 
 function tabCode:OnTabChange(old, new)
-	local node = new.Node
-
-	if node.Level == 2 then
-		chkAuto.Visible = true
-		chkAuto.Text = L["AutoRun"]
-		chkAuto.Checked = node.MetaData[_PlayerName]
-
-		if node.Parent.Index == 2 then
-			loadAddon.Visible = true
-		else
-			loadAddon.Visible = false
-		end
-	else
-		chkAuto.Visible = false
-		chkAuto.Checked = false
-		loadAddon.Visible = false
-	end
-
-	Cube_Main.Message = ""
-	lstUnitTest.Visible = false
-	frmResult.Visible = false
+	UpdateForm(new.Node)
 end
 
 function loadAddon:OnClick()
@@ -990,6 +1045,10 @@ function loadAddon:OnClick()
 	if code and code.Node.Level == 2 and code.Node.Parent.Index == 2 then
 		LoadAddon(code.Node)
 	end
+end
+
+function cboModify:OnTextChanged(text)
+	return RefreshCboKey(text)
 end
 
 -----------------------------------
@@ -1078,6 +1137,94 @@ function LoadAddon(node)
 		-- Fire OnLoad & OnEnable
 		FinishLoad(node)
 	end
+end
+
+function LoadCommand(node)
+	Log(2, "Loading Command......%s", GetTitle(node))
+
+	node.CommandFunc = nil
+
+	local code = node.MetaData.Content or ""
+
+	code = "return function(self)\n" .. code .. "\nend"
+
+	local func, err = loadstring(code)
+
+	if func then
+		func, err = pcall(func)
+
+		if func then
+			node.CommandFunc = err
+			return
+		end
+	end
+
+	Log(2, "Error Load Command %s: %s", GetTitle(node), err)
+end
+
+function UninstallCommand(node)
+	local meta = node.MetaData
+	local lst, keys
+
+	if meta.Modify == "Ctrl" then
+		lst = _CtrlCommand
+		keys = _ShortKeyListCtrl
+	elseif meta.Modify == "Alt" then
+		lst = _AltCommand
+		keys = _ShortKeyListAlt
+	else
+		lst = _NoPreCommand
+		keys = _ShortKeyListNoPre
+	end
+
+	local key = meta.Key
+
+	if not key or key == "" then return end
+
+	lst[key] = nil
+
+	Log(2, "Uninstall Command %s", (lst ~= _NoPreCommand and (meta.Modify .. "+") or "") .. key)
+
+	local order = _CommandKeyOrder[key]
+
+	for i, v in ipairs(keys) do
+		if _CommandKeyOrder[v] >= order then
+			return tinsert(keys, i, key)
+		end
+	end
+
+	return tinsert(keys, key)
+end
+
+function InstallCommand(node)
+	local meta = node.MetaData
+	local lst, keys
+
+	if meta.Modify == "Ctrl" then
+		lst = _CtrlCommand
+		keys = _ShortKeyListCtrl
+	elseif meta.Modify == "Alt" then
+		lst = _AltCommand
+		keys = _ShortKeyListAlt
+	else
+		lst = _NoPreCommand
+		keys = _ShortKeyListNoPre
+	end
+
+	local key = meta.Key
+
+	if not key or key == "" then return end
+
+	lst[key] = node
+
+	for i, v in ipairs(keys) do
+		if v == key then
+			tremove(keys, i)
+			break
+		end
+	end
+
+	Log(2, "Install Command %s for %s", (lst ~= _NoPreCommand and (meta.Modify .. "+") or "") .. key, GetTitle(node))
 end
 
 function FinishLoad(node)
@@ -1208,19 +1355,100 @@ function UpdateLocaleFile(cache, node)
 end
 
 function OnFunctionKey(self, key)
-    if key == "F5" then
-        run:OnClick()
-    end
+	local node = _NoPreCommand[strupper(key)]
+
+	if node and node.CommandFunc then
+		return node.CommandFunc(self)
+	end
 end
 
 function OnControlKey(self, key)
-	if key and string.upper(key) == "S" then
-		save:OnClick()
+	local node = _CtrlCommand[strupper(key)]
+
+	if node and node.CommandFunc then
+		return node.CommandFunc(self)
 	end
 end
 
 function OnAltKey(self, key)
+	local node = _AltCommand[strupper(key)]
 
+	if node and node.CommandFunc then
+		return node.CommandFunc(self)
+	end
+end
+
+function UpdateForm(node)
+	chkAuto.Visible = false
+	chkAuto.Checked = false
+	cboKey.Visible = false
+	cboModify.Visible = false
+	loadAddon.Visible = false
+
+	Cube_Main.Message = ""
+	lstUnitTest.Visible = false
+	frmResult.Visible = false
+	run.Visible = false
+
+	if node then
+		if node.Level == 2 and node.Parent.Index == 3 then
+			cboModify:BlockEvent("OnTextChanged")
+			cboKey:BlockEvent("OnTextChanged")
+
+			cboModify.Text = node.MetaData.Modify or ""
+			cboModify.DefaultModify = node.MetaData.Modify
+			cboModify.DefaultKey = node.MetaData.Key
+
+			RefreshCboKey(node.MetaData.Modify)
+
+			cboModify:UnBlockEvent("OnTextChanged")
+			cboKey:UnBlockEvent("OnTextChanged")
+
+			cboKey.Visible = true
+			cboModify.Visible = true
+		elseif node.Level == 2 then
+			chkAuto.Visible = true
+			chkAuto.Text = L["AutoRun"]
+			chkAuto.Checked = node.MetaData[_PlayerName]
+			run.Visible = true
+
+			loadAddon.Visible = (node.Parent.Index == 2)
+		end
+	end
+end
+
+function RefreshCboKey(text)
+	if text == "" then
+		cboKey:SetList(_ShortKeyListNoPre)
+	elseif text == "Ctrl" then
+		cboKey:SetList(_ShortKeyListCtrl)
+	elseif text == "Alt" then
+		cboKey:SetList(_ShortKeyListAlt)
+	end
+
+	if text == cboModify.DefaultModify then
+		if cboModify.DefaultKey then
+			cboKey.Keys[#cboKey.Keys + 1] = #cboKey.Keys + 1
+
+			local order = _CommandKeyOrder[cboModify.DefaultKey]
+			local inserted = false
+
+			for i, k in ipairs(cboKey.Items) do
+				if _CommandKeyOrder[k] >= order then
+					tinsert(cboKey.Items, i, cboModify.DefaultKey)
+					inserted = true
+					break
+				end
+			end
+
+			if not inserted then
+				tinsert(cboKey.Items, cboModify.DefaultKey)
+			end
+
+			cboKey.Text = cboModify.DefaultKey
+		end
+		cboKey.Value = 1
+	end
 end
 
 -----------------------------------
@@ -1252,3 +1480,13 @@ function Cube:AddSavedVariablePerCharacter(name)
 
 	return CubeSavePerCharacter.AddonSaveDB[name]
 end
+
+-----------------------------------
+-- CubeEditor
+-----------------------------------
+__Delegate__(Task.ThreadCall)
+function CubeEditor:Save() return save.Visible and save:OnClick() end
+
+function CubeEditor:Run() return run.Visible and run:OnClick() end
+
+function CubeEditor:Reset() return reset.Visible and reset:OnClick() end

@@ -73,7 +73,7 @@ L["Do you want delete %s."] = "是否確認刪除%s"
 L["Please input the snippet's name"] = "請輸入代碼段的名稱"
 L["Please input the addon's name"] = "請輸入插件的名稱"
 L["Please input the module's name"] = "請輸入模塊的名稱"
-L["Can't save code."] = "無法保存"
+L["Can't save the code."] = "無法保存"
 L["Snippet is saved."] = "代碼段保存完畢"
 
 L["Show Description"] = "顯示概要"

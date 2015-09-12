@@ -242,15 +242,10 @@ class "WidgetList"
 		------------------------------------------------------
 		__Doc__[[The widget class]]
 		property "Widget" {
-			Get = function(self)
-				return self.__Widget
-			end,
-			Set = function(self, value)
-				self.__Widget = value
-
+			Handler = function(self, value)
 				self.Text = System.Reflector.GetName(value) or ""
 			end,
-			Type = - System.Widget.UIObject - System.Widget.VirtualUIObject,
+			Type = Class,
 		}
 
 		------------------------------------------------------
@@ -494,15 +489,7 @@ class "WidgetList"
 	-- Property
 	------------------------------------------------------
 	__Doc__[[The selected widget button]]
-	property "SelectedButton" {
-		Get = function(self)
-			return self.__SelectedButton
-		end,
-		Set = function(self, value)
-			self.__SelectedButton = value
-		end,
-		Type = WidgetButton + nil,
-	}
+	property "SelectedButton" { Type = WidgetButton }
 
 	------------------------------------------------------
 	-- Constructor
@@ -852,7 +839,7 @@ class "PropertyList"
 					self.Parent:UpdateSize()
 				end
 			end,
-			Type = System.Boolean,
+			Type = Boolean,
 		}
 
 		------------------------------------------------------

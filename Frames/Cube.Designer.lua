@@ -109,7 +109,7 @@ tabCode.AutoDisposing = false
 tabCode.ShowCloseButton = true
 
 -- CodeEditor Recycle
-rycCodeEditor = Recycle(CodeEditor, "CodeEditor_%d", tabCode)
+rycCodeEditor = Recycle(CubeEditor, "CodeEditor_%d", tabCode)
 
 -- Code Form
 -- code = CodeEditor("Code", Cube_Main)
@@ -233,9 +233,11 @@ cboKey = ComboBox("CommandKey", Cube_Main)
 cboKey:SetPoint("RIGHT", run, "LEFT")
 cboKey.Width = 100
 cboKey.Visible = false
+cboKey.Editable = false
 
 cboModify = ComboBox("ModifyKey", Cube_Main)
 cboModify:SetPoint("RIGHT", cboKey, "LEFT")
 cboModify:SetList{ "", "Alt", "Ctrl" }
 cboModify.Width = 100
 cboModify.Visible = false
+cboModify.Editable = false

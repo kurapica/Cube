@@ -1,4 +1,4 @@
-﻿## Interface: 60100
+﻿## Interface: 60200
 ## Title: Cube
 ## Author: kurapica
 ## Version: v5.8
@@ -24,6 +24,7 @@ Scripts\WOWAPI.lua
 
 Frames\EventPicker.Designer.lua
 Frames\EventPicker.Script.lua
+Frames\Cube.Definition.lua
 Frames\Cube.Designer.lua
 Frames\Cube.Script.lua
 Frames\Debug.Designer.lua
