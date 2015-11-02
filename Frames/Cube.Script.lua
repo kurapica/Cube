@@ -1391,7 +1391,9 @@ function UpdateForm(node)
 	run.Visible = false
 
 	if node then
-		if node.Level == 2 and node.Parent.Index == 3 then
+		if node.Level == 1 and node.Index == 1 then
+			run.Visible = true
+		elseif node.Level == 2 and node.Parent.Index == 3 then
 			cboModify:BlockEvent("OnTextChanged")
 			cboKey:BlockEvent("OnTextChanged")
 
@@ -1446,8 +1448,9 @@ function RefreshCboKey(text)
 			end
 
 			cboKey.Text = cboModify.DefaultKey
+		else
+			cboKey.Value = 1
 		end
-		cboKey.Value = 1
 	end
 end
 
