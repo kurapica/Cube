@@ -68,6 +68,7 @@ L["Number Color"] = "數字色彩"
 L["Instruction Color"] = "關鍵字色彩"
 L["Please input the font path"] = "請輸入字體文件所在路徑"
 L["Please input the font height"] = "請輸入文字大小"
+L["Auto-Complete Delay"] = "自動完成延時"
 
 L["Do you want delete %s."] = "是否確認刪除%s"
 L["Please input the snippet's name"] = "請輸入代碼段的名稱"

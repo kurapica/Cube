@@ -96,6 +96,20 @@ arMenuProperty:Push(
 	mnuColorInstruction
 )
 
+mnuAutoCompleteDelay = cubeMenu:AddMenuButton(L"Auto-Complete Delay")
+lstAutoCompleteDelay = List("lstDelay", mnuAutoCompleteDelay)
+local key, item = {}, {}
+for i = 1, 9 do
+	key[i] = (i+1)/10
+	item[i] = tostring(key[i])
+end
+lstAutoCompleteDelay.Keys = key
+lstAutoCompleteDelay.Items = item
+lstAutoCompleteDelay.Width = 150
+lstAutoCompleteDelay.Height = 250
+lstAutoCompleteDelay.Visible = false
+mnuAutoCompleteDelay.DropDownList = lstAutoCompleteDelay
+
 -- Check AutoRun
 chkAuto = CheckBox("AutoRun", Cube_Main)
 chkAuto.Text = L["AutoRun"]

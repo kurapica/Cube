@@ -299,6 +299,13 @@ function OnLoad(self)
 
 	_EditorConfig = CubeSave.EditorConfig
 
+	-- AutoComplete-Delay
+	if not _EditorConfig.AutoCompleteDelay then
+		_EditorConfig.AutoCompleteDelay = 0.2
+	end
+
+	lstAutoCompleteDelay:SelectItemByValue(_EditorConfig.AutoCompleteDelay)
+
 	-- Loading in-game addons
 	local node = fileTree:GetNode(2)
 	local subNode
@@ -407,6 +414,16 @@ function lstFontOutline:OnItemChoosed(key)
 		_EditorConfig.Font.outline = key
 
 		UpdateAllCodeEditor("Font", _EditorConfig.Font)
+	end
+end
+
+function lstAutoCompleteDelay:OnItemChoosed(key, item)
+	if self.Visible then
+		_EditorConfig.AutoCompleteDelay = key
+
+		UpdateAllCodeEditor("AutoCompleteDelay", _EditorConfig.AutoCompleteDelay)
+
+		cubeMenu.Visible = false
 	end
 end
 
@@ -1028,6 +1045,7 @@ function rycCodeEditor:OnPop(obj)
 	obj.StringColor = _EditorConfig.StringColor
 	obj.NumberColor = _EditorConfig.NumberColor
 	obj.InstructionColor = _EditorConfig.InstructionColor
+	obj.AutoCompleteDelay = _EditorConfig.AutoCompleteDelay
 end
 
 function tabCode:OnTabClose(obj)
