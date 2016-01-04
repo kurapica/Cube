@@ -250,73 +250,67 @@ function BuildSubNamespace(ns)
 	wipe(_Interfaces)
 	wipe(_Namespaces)
 
-	local subNS = GetSubNamespace(ns)
-
-	if subNS and next(subNS) then
-		for _, sns in ipairs(subNS) do
-			sns = ns[sns]
-
-			if IsEnum(sns) then
-				tinsert(_Enums, sns)
-			elseif IsStruct(sns) then
-				tinsert(_Structs, sns)
-			elseif IsInterface(sns) then
-				tinsert(_Interfaces, sns)
-			elseif IsClass(sns) then
-				tinsert(_Classes, sns)
-			else
-				tinsert(_Namespaces, sns)
-			end
+	for _, sns in GetSubNamespace(ns) do
+		if IsEnum(sns) then
+			tinsert(_Enums, sns)
+		elseif IsStruct(sns) then
+			tinsert(_Structs, sns)
+		elseif IsInterface(sns) then
+			tinsert(_Interfaces, sns)
+		elseif IsClass(sns) then
+			tinsert(_Classes, sns)
+		else
+			tinsert(_Namespaces, sns)
 		end
+	end
 
-		if next(_Enums) then
-			result = result .. "<br/><br/>　<cyan>Sub Enum</cyan> :"
+	if next(_Enums) then
+		result = result .. "<br/><br/>　<cyan>Sub Enum</cyan> :"
 
-			for _, sns in ipairs(_Enums) do
-				local desc = _BrowserConfig.ShowDescription and GetDescription(sns)
-				desc = desc and "　-　" .. desc .. "<br/>" or ""
-				result = result .. "<br/>　　" .. BuildHref(sns) .. desc
-			end
+		for _, sns in ipairs(_Enums) do
+			local desc = _BrowserConfig.ShowDescription and GetDescription(sns)
+			desc = desc and "　-　" .. desc .. "<br/>" or ""
+			result = result .. "<br/>　　" .. BuildHref(sns) .. desc
 		end
+	end
 
-		if next(_Structs) then
-			result = result .. "<br/><br/>　<cyan>Sub Struct</cyan> :"
+	if next(_Structs) then
+		result = result .. "<br/><br/>　<cyan>Sub Struct</cyan> :"
 
-			for _, sns in ipairs(_Structs) do
-				local desc = _BrowserConfig.ShowDescription and GetDescription(sns)
-				desc = desc and "　-　" .. desc .. "<br/>" or ""
-				result = result .. "<br/>　　" .. BuildHref(sns) .. desc
-			end
+		for _, sns in ipairs(_Structs) do
+			local desc = _BrowserConfig.ShowDescription and GetDescription(sns)
+			desc = desc and "　-　" .. desc .. "<br/>" or ""
+			result = result .. "<br/>　　" .. BuildHref(sns) .. desc
 		end
+	end
 
-		if next(_Interfaces) then
-			result = result .. "<br/><br/>　<cyan>Sub Interface</cyan> :"
+	if next(_Interfaces) then
+		result = result .. "<br/><br/>　<cyan>Sub Interface</cyan> :"
 
-			for _, sns in ipairs(_Interfaces) do
-				local desc = _BrowserConfig.ShowDescription and GetDescription(sns)
-				desc = desc and "　-　" .. desc .. "<br/>" or ""
-				result = result .. "<br/>　　" .. BuildHref(sns) .. desc
-			end
+		for _, sns in ipairs(_Interfaces) do
+			local desc = _BrowserConfig.ShowDescription and GetDescription(sns)
+			desc = desc and "　-　" .. desc .. "<br/>" or ""
+			result = result .. "<br/>　　" .. BuildHref(sns) .. desc
 		end
+	end
 
-		if next(_Classes) then
-			result = result .. "<br/><br/>　<cyan>Sub Class</cyan> :"
+	if next(_Classes) then
+		result = result .. "<br/><br/>　<cyan>Sub Class</cyan> :"
 
-			for _, sns in ipairs(_Classes) do
-				local desc = _BrowserConfig.ShowDescription and GetDescription(sns)
-				desc = desc and "　-　" .. desc .. "<br/>" or ""
-				result = result .. "<br/>　　" .. BuildHref(sns) .. desc
-			end
+		for _, sns in ipairs(_Classes) do
+			local desc = _BrowserConfig.ShowDescription and GetDescription(sns)
+			desc = desc and "　-　" .. desc .. "<br/>" or ""
+			result = result .. "<br/>　　" .. BuildHref(sns) .. desc
 		end
+	end
 
-		if next(_Namespaces) then
-			result = result .. "<br/><br/>　<cyan>Sub NameSpace</cyan> :"
+	if next(_Namespaces) then
+		result = result .. "<br/><br/>　<cyan>Sub NameSpace</cyan> :"
 
-			for _, sns in ipairs(_Namespaces) do
-				local desc = _BrowserConfig.ShowDescription and GetDescription(sns)
-				desc = desc and "　-　" .. desc .. "<br/>" or ""
-				result = result .. "<br/>　　" .. BuildHref(sns) .. desc
-			end
+		for _, sns in ipairs(_Namespaces) do
+			local desc = _BrowserConfig.ShowDescription and GetDescription(sns)
+			desc = desc and "　-　" .. desc .. "<br/>" or ""
+			result = result .. "<br/>　　" .. BuildHref(sns) .. desc
 		end
 	end
 
@@ -369,8 +363,7 @@ function BuildBody(data)
 				-- Enum
 				local result = "<blue>[Enum]</blue> " .. BuildHref(ns) .. " :<br/>"
 				local value
-				for _, enums in ipairs(GetEnums(ns)) do
-					value = ns[enums]
+				for enums, value in GetEnums(ns) do
 
 					if type(value) == "string" then
 						value = ("%q"):format(value)
@@ -389,70 +382,18 @@ function BuildBody(data)
 				result = result .. BuildSubNamespace(ns)
 
 				if GetStructType(ns) == "MEMBER" then
-					-- Part
-					local parttype, typestring
-					local parts = GetStructMembers(ns)
+					result = result .. "<br/><br/>　<cyan>Member</cyan>:"
 
-					if parts and next(parts) then
-						result = result .. "<br/><br/>　<cyan>Member</cyan>:"
+					for _, name in GetStructMembers(ns) do
+						local ty, default, required = GetStructMember(ns, name)
 
-						for _, name in ipairs(parts) do
-							parttype = GetStructMember(ns, name)
-
-							typestring = ""
-
-							for _, tns in ipairs(parttype) do
-								typestring = typestring .. " + " .. BuildHref(tns)
-							end
-
-							-- NameSpace
-							local index = -1
-							while parttype[index] do
-								typestring = typestring .. " - " .. BuildHref(parttype[index])
-
-								index = index - 1
-							end
-
-							-- Allow nil
-							if parttype.AllowNil then
-								typestring = typestring .. " + nil"
-							end
-
-							if typestring:sub(1, 2) == " +" then
-								typestring = typestring:sub(3, -1)
-							end
-
-							result = result .. "<br/>　　" .. name .. " =" .. typestring
-						end
+						result = result .. "<br/>　　" .. name .. " : " .. (ty and BuildHref(ty) or "") .. (required and " (Required)" or "")
 					end
 				elseif GetStructType(ns) == "ARRAY" then
-					local parttype = GetStructArrayElement(ns)
+					local ty = GetStructArrayElement(ns)
 					local typestring = ""
 
-					if parttype then
-						for _, tns in ipairs(parttype) do
-							typestring = typestring .. " + " .. BuildHref(tns)
-						end
-
-						-- NameSpace
-						local index = -1
-						while parttype[index] do
-							typestring = typestring .. " - " .. BuildHref(parttype[index])
-
-							index = index - 1
-						end
-
-						-- Allow nil
-						if parttype.AllowNil then
-							typestring = typestring .. " + nil"
-						end
-
-						if typestring:sub(1, 2) == " +" then
-							typestring = typestring:sub(3, -1)
-						end
-
-						result = result .. "<br/><br/>　<cyan>Element</cyan> :<br/>　　Type =" .. typestring
-					end
+					result = result .. "<br/><br/>　<cyan>Element</cyan> :<br/>　　Type : " .. (ty and BuildHref(ty) or "")
 				else
 					result = result .. "<br/><br/>　<cyan>Basic Element</cyan>"
 				end
@@ -483,90 +424,78 @@ function BuildBody(data)
 					end
 
 					-- Extend
-					local extends = GetExtendInterfaces(ns)
-					if extends and next(extends) then
-						result = result .. "<br/><br/>　<cyan>Extend Interface</cyan> :"
-						for _, IF in ipairs(extends) do
-							result = result .. "<br/>　　" .. BuildHref(IF)
-						end
+					result = result .. "<br/><br/>　<cyan>Extend Interface</cyan> :"
+					for _, IF in GetExtendInterfaces(ns) do
+						result = result .. "<br/>　　" .. BuildHref(IF)
 					end
 
 					-- SubNameSpace
 					result = result .. BuildSubNamespace(ns)
 
 					-- Event
-					local events = GetEvents(ns, true)
-					if events and next(events) then
-						result = result .. "<br/><br/>　<cyan>Event</cyan> :"
-						for _, sc in pairs(events) do
-							-- Desc
-							desc = GetDescription(ns, sc, "　　　　")
-							if desc then
-								result = result .. "<br/>　　" .. BuildHref(GetNameSpaceFullName(ns).."."..sc.."-event", sc) .. "　-　" .. desc
-							end
+					result = result .. "<br/><br/>　<cyan>Event</cyan> :"
+					for sc in GetEvents(ns) do
+						-- Desc
+						desc = GetDescription(ns, sc, "　　　　")
+						if desc then
+							result = result .. "<br/>　　" .. BuildHref(GetNameSpaceFullName(ns).."."..sc.."-event", sc) .. "　-　" .. desc
 						end
 					end
 
 					-- Property
-					local props = GetProperties(ns, true)
-					if props and next(props) then
-						result = result .. "<br/><br/>　<cyan>Property</cyan> :"
-						for _, prop in pairs(props) do
-							local prev = ""
+					result = result .. "<br/><br/>　<cyan>Property</cyan> :"
+					for prop in GetProperties(ns) do
+						local prev = ""
 
-							if IsStaticProperty(ns, prop) then
-								prev = prev .. "<blue>[Static]</blue>"
-							end
-
-							if isInterface then
-								if IsRequiredProperty(ns, prop) then
-									prev = prev .. "<red>[Required]</red>"
-								elseif IsOptionalProperty(ns, prop) then
-									prev = prev .. "<green>[Optional]</green>"
-								end
-							end
-
-							-- Desc
-							desc = GetDescription(ns, prop, "　　　　")
-							if desc then
-								desc = "　-　" .. desc
-							else
-								desc = ""
-							end
-
-							result = result .. "<br/>　　" .. prev .. BuildHref(GetNameSpaceFullName(ns).."."..prop.."-property", prop) .. desc
+						if IsStaticProperty(ns, prop) then
+							prev = prev .. "<blue>[Static]</blue>"
 						end
+
+						if isInterface then
+							if IsRequiredProperty(ns, prop) then
+								prev = prev .. "<red>[Required]</red>"
+							elseif IsOptionalProperty(ns, prop) then
+								prev = prev .. "<green>[Optional]</green>"
+							end
+						end
+
+						-- Desc
+						desc = GetDescription(ns, prop, "　　　　")
+						if desc then
+							desc = "　-　" .. desc
+						else
+							desc = ""
+						end
+
+						result = result .. "<br/>　　" .. prev .. BuildHref(GetNameSpaceFullName(ns).."."..prop.."-property", prop) .. desc
 					end
 
 					-- Method
-					local methods = GetMethods(ns, true)
-					if methods and next(methods) then
-						result = result .. "<br/><br/>　<cyan>Method</cyan> :"
-						for _, method in pairs(methods) do
-							local prev = ""
+					result = result .. "<br/><br/>　<cyan>Method</cyan> :"
+					for method in GetMethods(ns) do
+						local prev = ""
 
-							if IsStaticMethod(ns, method) then
-								prev = prev .. "<blue>[Static]</blue>"
-							end
-
-							if isInterface then
-								if IsRequiredMethod(ns, method) then
-									prev = prev .. "<red>[Required]</red>"
-								elseif IsOptionalMethod(ns, method) then
-									prev = prev .. "<green>[Optional]</green>"
-								end
-							end
-
-							-- Desc
-							desc = GetDescription(ns, method, "　　　　")
-							if desc then
-								desc = "　-　" .. desc
-							else
-								desc = ""
-							end
-
-							result = result .. "<br/>　　" .. prev .. BuildHref(GetNameSpaceFullName(ns).."."..method.."-method", method) .. desc
+						if IsStaticMethod(ns, method) then
+							prev = prev .. "<blue>[Static]</blue>"
 						end
+
+						if isInterface then
+							if IsRequiredMethod(ns, method) then
+								prev = prev .. "<red>[Required]</red>"
+							elseif IsOptionalMethod(ns, method) then
+								prev = prev .. "<green>[Optional]</green>"
+							end
+						end
+
+						-- Desc
+						desc = GetDescription(ns, method, "　　　　")
+						if desc then
+							desc = "　-　" .. desc
+						else
+							desc = ""
+						end
+
+						result = result .. "<br/>　　" .. prev .. BuildHref(GetNameSpaceFullName(ns).."."..method.."-method", method) .. desc
 					end
 
 					-- Constructor
