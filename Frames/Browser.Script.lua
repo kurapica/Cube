@@ -454,7 +454,7 @@ function BuildBody(data)
 						if isInterface then
 							if IsRequiredProperty(ns, prop) then
 								prev = prev .. "<red>[Required]</red>"
-							elseif IsOptionalProperty(ns, prop) then
+							elseif __Optional__:IsPropertyAttributeDefined(ns, prop) then
 								prev = prev .. "<green>[Optional]</green>"
 							end
 						end
@@ -482,7 +482,7 @@ function BuildBody(data)
 						if isInterface then
 							if IsRequiredMethod(ns, method) then
 								prev = prev .. "<red>[Required]</red>"
-							elseif IsOptionalMethod(ns, method) then
+							elseif __Optional__:IsMethodAttributeDefined(ns, method) then
 								prev = prev .. "<green>[Optional]</green>"
 							end
 						end
@@ -678,7 +678,7 @@ function BuildBody(data)
 						if IsStaticProperty(ns, name) then
 							result = result .. "<br/><br/>　<cyan>Static</cyan> :<br/>　　true"
 						end
-						if IsOptionalProperty(ns, name) then
+						if __Optional__:IsPropertyAttributeDefined(ns, name) then
 							result = result .. "<br/><br/>　<cyan>Optional</cyan> :<br/>　　true"
 						end
 						if IsRequiredProperty(ns, name) then
@@ -726,7 +726,7 @@ function BuildBody(data)
 						if isGlobal then
 							result = result .. "<br/><br/>　<cyan>Static</cyan> :<br/>　　true"
 						end
-						if IsOptionalMethod(ns, name) then
+						if __Optional__:IsMethodAttributeDefined(ns, name) then
 							result = result .. "<br/><br/>　<cyan>Optional</cyan> :<br/>　　true"
 						end
 						if IsRequiredMethod(ns, name) then
