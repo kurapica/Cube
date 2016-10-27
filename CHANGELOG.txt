@@ -1,3 +1,6 @@
+2016/10/27 v5.12
+    1. Update toc for WOW 7.1
+
 2016/02/27: v5.10
 	1. Update for IGAS lib.
 	2. Auto-complete delay can be changed for less disturb.
