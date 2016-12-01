@@ -1,3 +1,6 @@
+2016/12/02 v5.13
+	1. Update for PLoop v163.
+
 2016/10/27 v5.12
     1. Update toc for WOW 7.1
 

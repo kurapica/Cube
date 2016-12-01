@@ -21,22 +21,6 @@ HTML_TEMPLATE = [[
 HTML_PAGE_TEMPLATE = [[<p>%s</p>]]
 HTML_HREF_TEMPLATE = [[<a href="%s">%s</a>]]
 
-HTML_NO_DOCUMENT = [[
-<html>
-<body>
-<p>
-The document system in IGAS is disabled, please enable it to use the browser :<br/><br/>
-
-Open the /World of Warcraft/Interface/AddOns/IGAS/IGAS.lua, find<br/><br/>
-<lime>System.Reflector.EnableDocumentSystem(<red>false</red>)</lime><br/><br/>
-Change to<br/><br/>
-<lime>System.Reflector.EnableDocumentSystem(<red>true</red>)</lime><br/><br/>
-Save the file, then reload the game.
-</p>
-</body>
-</html>
-]]
-
 -- Event handler
 _Addon.OnSlashCmd = _Addon.OnSlashCmd + function(self, option)
 	if option and (strupper(option) == "BROWSER" or strupper(option) == "BR") then
@@ -72,11 +56,7 @@ function _M:OnLoad()
 end
 
 function browser:OnShow()
-	if _G.PLOOP_DOCUMENT_ENABLED or _G.PLOOP_DOCUMENT_ENABLED == nil then
-		html.Text = LoadUrl("System")
-	else
-		html.Text = HTML_NO_DOCUMENT
-	end
+	html.Text = LoadUrl("System")
 	browser.OnShow = nil
 end
 
@@ -447,12 +427,12 @@ function BuildBody(data)
 					for prop in GetProperties(ns) do
 						local prev = ""
 
-						if IsStaticProperty(ns, prop) then
+						if __Static__:IsPropertyAttributeDefined(ns, prop) then
 							prev = prev .. "<blue>[Static]</blue>"
 						end
 
 						if isInterface then
-							if IsRequiredProperty(ns, prop) then
+							if __Require__:IsPropertyAttributeDefined(ns, prop) then
 								prev = prev .. "<red>[Required]</red>"
 							elseif __Optional__:IsPropertyAttributeDefined(ns, prop) then
 								prev = prev .. "<green>[Optional]</green>"
@@ -475,12 +455,12 @@ function BuildBody(data)
 					for method in GetMethods(ns) do
 						local prev = ""
 
-						if IsStaticMethod(ns, method) then
+						if __Static__:IsMethodAttributeDefined(ns, method) then
 							prev = prev .. "<blue>[Static]</blue>"
 						end
 
 						if isInterface then
-							if IsRequiredMethod(ns, method) then
+							if __Require__:IsMethodAttributeDefined(ns, method) then
 								prev = prev .. "<red>[Required]</red>"
 							elseif __Optional__:IsMethodAttributeDefined(ns, method) then
 								prev = prev .. "<green>[Optional]</green>"
@@ -675,17 +655,17 @@ function BuildBody(data)
 						-- Writable
 						result = result .. "<br/><br/>　<cyan>Writable</cyan> :<br/>　　" .. tostring(IsPropertyWritable(ns, name))
 
-						if IsStaticProperty(ns, name) then
+						if __Static__:IsPropertyAttributeDefined(ns, name) then
 							result = result .. "<br/><br/>　<cyan>Static</cyan> :<br/>　　true"
 						end
 						if __Optional__:IsPropertyAttributeDefined(ns, name) then
 							result = result .. "<br/><br/>　<cyan>Optional</cyan> :<br/>　　true"
 						end
-						if IsRequiredProperty(ns, name) then
+						if __Require__:IsPropertyAttributeDefined(ns, name) then
 							result = result .. "<br/><br/>　<cyan>Required</cyan> :<br/>　　true"
 						end
 					elseif querytype == "method" then
-						local isGlobal = IsStaticMethod(ns, name)
+						local isGlobal = __Static__:IsMethodAttributeDefined(ns, name)
 
 						-- Format
 						desc = GetDocumentPart(ns, name, "format")
@@ -729,7 +709,7 @@ function BuildBody(data)
 						if __Optional__:IsMethodAttributeDefined(ns, name) then
 							result = result .. "<br/><br/>　<cyan>Optional</cyan> :<br/>　　true"
 						end
-						if IsRequiredMethod(ns, name) then
+						if __Require__:IsMethodAttributeDefined(ns, name) then
 							result = result .. "<br/><br/>　<cyan>Required</cyan> :<br/>　　true"
 						end
 
