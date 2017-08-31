@@ -53,7 +53,7 @@ local function Refresh()
 	if getn(ErrList) > 0 then
 		icon.Text = tostring(getn(ErrList))
 		if not icon.Visible then
-			PlaySound("igMainMenuOpen")
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPEN)
 			icon.Visible = true
 		end
 	else
