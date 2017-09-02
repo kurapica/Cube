@@ -187,6 +187,7 @@ function OnLoad(self)
 	end
 
 	self:RegisterEvent("PLAYER_LOGOUT") -- used to clear to keep safe
+	self:RegisterEvent("UI_SCALE_CHANGED")
 
 	_PlayerName = GetRealmName().."-"..GetUnitName("player")
 
@@ -359,11 +360,17 @@ function OnEnable(self)
 	end)
 
 	fileTree:GetNode(1):Select()
+
+	UI_SCALE_CHANGED()
 end
 
 function PLAYER_LOGOUT(self)
 	ValidateTable(CubeSave.AddonSaveDB)
 	ValidateTable(CubeSavePerCharacter.AddonSaveDB)
+end
+
+function UI_SCALE_CHANGED(self)
+	Cube_Main:SetScale(1/UIParent:GetScale())
 end
 
 function Cube_Main:OnSizeChanged()

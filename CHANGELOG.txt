@@ -1,3 +1,6 @@
+2017/09/02 v5.16
+	1. Fix the highlight position not correct with ui scale.
+
 2016/12/02 v5.13
 	1. Update for PLoop v163.
 
