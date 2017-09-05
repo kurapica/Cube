@@ -1096,9 +1096,15 @@ function commandline:OnDirectionKey(args)
 		args.Handled = true
 		hisIdx = hisIdx + 1
 	end
-	if hisIdx >= 1 and hisIdx <= hisCnt then
+	if hisIdx < 1 then
+		self.HistoryIndex = 1
+		self.Text = self.History[1] or ""
+	elseif hisIdx >= 1 and hisIdx <= hisCnt then
 		self.HistoryIndex = hisIdx
 		self.Text = self.History[hisIdx]
+	else
+		self.HistoryIndex = hisCnt
+		self.Text = self.History[hisCnt] or ""
 	end
 end
 
@@ -1111,7 +1117,7 @@ function commandline:OnEnterPressed(args)
 
 		if self.History[hisCnt] ~= str then
 			self.History[hisCnt + 1] = str
-			self.HistoryIndex = hisCnt + 1
+			self.HistoryIndex = hisCnt + 2
 		end
 
 		self:InsertLine("> " .. str, 1, 1, 1)
