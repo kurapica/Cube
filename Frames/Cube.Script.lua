@@ -1547,14 +1547,8 @@ end
 -----------------------------------
 -- Cube API
 -----------------------------------
-function Cube:Log(...)
-	local msg = strjoin(" ", tostringall(...))
-
-	if txtLog.Text and txtLog.Text ~= "" then
-		txtLog.Text = txtLog.Text..msg.."\n"
-	else
-		txtLog.Text = msg.."\n"
-	end
+function Cube.Log(msg, r, g, b)
+	commandline:InsertLine(msg, r, g, b)
 	frmLog.Visible = true
 end
 

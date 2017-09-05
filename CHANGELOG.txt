@@ -1,3 +1,6 @@
+2017/09/05 v5.19
+	1. You can use "Cube.Log(msg, r, g, b)" to send msg into the Log panel.
+
 2017/09/05 v5.17
 	1. A new input box is added at the bottom of the Log. You can type commands like '=100 / 30' or 'print(UnitName("player"))' in it, and press the enter to run, the result would be shown in the Log. You also can use up and down to browse the command line's history.
 
