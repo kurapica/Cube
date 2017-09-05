@@ -242,6 +242,12 @@ txtLog = MultiLineTextBox("Result", frmLog)
 txtLog:SetPoint("TOPLEFT", frmLog, "TOPLEFT", 4, -4)
 txtLog:SetPoint("BOTTOMRIGHT", frmLog, "BOTTOMRIGHT", -4, 4)
 
+commandline = MultiLineTextBox("CommandLine", frmLog)
+commandline:SetPoint("TOPLEFT", txtLog, "BOTTOMLEFT", 0, -4)
+commandline:SetPoint("TOPRIGHT", txtLog, "BOTTOMRIGHT", 0, -4)
+commandline.Height = 36
+commandline.TextColor = ColorType(1, 1, 1)
+
 -- Command bind
 cboKey = ComboBox("CommandKey", Cube_Main)
 cboKey:SetPoint("RIGHT", run, "LEFT")

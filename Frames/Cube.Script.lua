@@ -1076,6 +1076,65 @@ function cboModify:OnTextChanged(text)
 	return RefreshCboKey(text)
 end
 
+----------------------------------------
+-- Command Line
+----------------------------------------
+local commandlineEnv = setmetatable( { print = function(...) commandline:InsertLine(strjoin("\t", tostringall(...)), 0, 1, 0) end }, { __index = _G } )
+function commandline:InsertLine(msg, r, g, b)
+	txtLog.Text = txtLog.Text .. ("\124cff%.2x%.2x%.2x"):format(r * 255, g * 255, b * 255) .. msg .. "|r\n"
+	txtLog:SetCursorPosition(#txtLog.Text)
+end
+
+function commandline:OnDirectionKey(args)
+	if not self.History then return end
+	local hisCnt = #self.History
+	local hisIdx = self.HistoryIndex
+	if args.Key == "UP" then
+		args.Handled = true
+		hisIdx = hisIdx - 1
+	elseif args.Key == "DOWN" then
+		args.Handled = true
+		hisIdx = hisIdx + 1
+	end
+	if hisIdx >= 1 and hisIdx <= hisCnt then
+		self.HistoryIndex = hisIdx
+		self.Text = self.History[hisIdx]
+	end
+end
+
+function commandline:OnEnterPressed(args)
+	args.Handled = true
+	local str = strtrim(self.Text)
+	if str ~= "" then
+		self.History = self.History or {}
+		local hisCnt = #self.History
+
+		if self.History[hisCnt] ~= str then
+			self.History[hisCnt + 1] = str
+			self.HistoryIndex = hisCnt + 1
+		end
+
+		self:InsertLine("> " .. str, 1, 1, 1)
+
+		if str:match("^=") then
+			str = [[print(]] .. str:sub(2, -1) .. [[)]]
+		end
+
+		local func, err = loadstring(str)
+		if func then
+			setfenv(func, commandlineEnv)
+			local ok, err = pcall(func)
+			if not ok then
+				commandline:InsertLine(err, 1, 0, 0)
+			end
+		else
+			commandline:InsertLine(err, 1, 0, 0)
+		end
+
+		self.Text = ""
+	end
+end
+
 -----------------------------------
 -- Helper API
 -----------------------------------

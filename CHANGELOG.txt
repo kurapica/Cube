@@ -1,3 +1,6 @@
+2017/09/05 v5.17
+	1. A new input box is added at the bottom of the Log. You can type commands like '=100 / 30' or 'print(UnitName("player"))' in it, and press the enter to run, the result would be shown in the Log. You also can use up and down to browse the command line's history.
+
 2017/09/02 v5.16
 	1. Fix the highlight position not correct with ui scale.
 
