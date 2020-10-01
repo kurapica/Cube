@@ -1,39 +1,18 @@
 ﻿## Interface: 80300
 ## Title: Cube
 ## Author: kurapica
-## Version: v5.25
-## Notes: Simple Development&Debug tools. type /cube to open GUI.
-## Notes-zhCN: 简单的开发调试工具，使用/cube 命令打开配置界面。
-## Notes-zhTW: 簡單的開發調試工具，使用/cube 命令打開配置界面。
+## Version: v6.00
+## Notes: In-Game Development & Debug tools
+## Notes-zhCN: 游戏内开发调试工具
 ## eMail: kurapica125@hotmail.com
-## URL: http://github.com/kurapica
-## Dependencies: IGAS
+## URL: http://github.com/kurapica/Cube
+## Dependencies: Scorpio.Widget
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
 ## SavedVariables: CubeSave
-## SavedVariablesPerCharacter: CubeSavePerCharacter
 
-localization\localization.cn.lua
-localization\localization.tw.lua
-
+# Core
 Cube.lua
 
-Scripts\lunit.lua
-Scripts\EventData.lua
-Scripts\WOWAPI.lua
-
-Frames\EventPicker.Designer.lua
-Frames\EventPicker.Script.lua
-Frames\Cube.Definition.lua
-Frames\Cube.Designer.lua
-Frames\Cube.Script.lua
-Frames\Debug.Designer.lua
-Frames\Debug.Script.lua
-Frames\BugList.Designer.lua
-Frames\BugList.Script.lua
-Frames\LogView.Designer.lua
-Frames\LogView.Script.lua
-
-Frames\Browser.Designer.lua
-Frames\Browser.Script.lua
-
+# Code Editor
+CubeEditor.lua
