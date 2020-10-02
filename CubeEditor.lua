@@ -94,6 +94,7 @@ seperator                       = Resizer         ("Separator",  CubeDialog)
 btnAdd                          = UIPanelButton   ("Add",        CubeDialog)
 btnDelete                       = UIPanelButton   ("Delete",     CubeDialog)
 btnRun                          = UIPanelButton   ("Run",        CubeDialog)
+btnClear                        = UIPanelButton   ("Clear",      CubeDialog)
 
 -------------------------------------------
 -- Cube Code Editor Event Handlers
@@ -162,6 +163,8 @@ function btnDelete:OnClick()
     if not snippet then return end
 
     if Confirm(_Locale["Are you sure you want to delete "] .. snippet.name) then
+        CubeDialog.CurrentSnippet = nil
+
         tremove(_SVDB.CodeList, index)
 
         cboSippets:ClearItems()
@@ -172,6 +175,10 @@ function btnDelete:OnClick()
         cboSippets.SelectedValue= 1
         cboSippets:OnSelectedChange(1)
     end
+end
+
+function btnClear:OnClick()
+    logView:SetText("")
 end
 
 function chkAutoRun:PostClick()
@@ -323,6 +330,10 @@ Style[CubeDialog]               = {
     Run                         = {
         text                    = _Locale["Run"] .. "(F5)",
         location                = { Anchor("BOTTOMRIGHT", -32, 16) },
+    },
+    Clear                       = {
+        text                    = _Locale["Clear"],
+        location                = { Anchor("RIGHT", -4, 0, "Run", "LEFT") },
     },
     AutoRun                     = {
         label                   = { text = _Locale["AutoRun"] },
