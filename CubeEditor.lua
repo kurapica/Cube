@@ -19,9 +19,9 @@ export {
 -- Addon Events
 -------------------------------------------
 function OnLoad()
-    _PlayerName = GetRealmName().."-"..GetUnitName("player")
+    _PlayerName                 = GetRealmName().."-"..GetUnitName("player")
 
-    -- Check if the save data is old version, only the snippets will be kept
+    -- Import the old save data
     if _SVDB.CodeTree then
         local codes             = { { name = "snippet" } }
 
@@ -40,8 +40,6 @@ function OnLoad()
                 code            = code.Content,
                 autorun         = autorun,
             }
-
-            print(i+1, code.Text)
         end
 
         _SVDB:Reset()
@@ -56,18 +54,22 @@ function OnLoad()
         cboSippets.Items[i]     = snippet.name
 
         if snippet.autorun and snippet.autorun[_PlayerName] then
-            if runCode(snippet.code, snippet.name) then
-                Info("[%s] is loaded", snippet.name)
+            if runCode(i, true) then
+                Info(_Locale["[%s] is loaded"], snippet.name)
             else
-                Info("[%s] loading failed", snippet.name)
+                Info(_Locale["[%s] loading failed"], snippet.name)
             end
         end
     end
 
-    cboSippets.SelectedValue    = 1
+    if #_SVDB.CodeList > 0 then
+        cboSippets.SelectedValue= 1
+        cboSippets:OnSelectedChange(1)
+    end
 end
 
 function OnQuit()
+    saveSnippet()
 end
 
 __SlashCmd__("cube", "code", _Locale["open/close the code editor"])
@@ -82,22 +84,28 @@ end
 CubeDialog                      = Dialog("Cube_Code_Editor")
 CubeDialog:Hide()
 
-cboSippets                      = ComboBox("CboSippets", CubeDialog)
-codeEditor                      = CodeEditor("Editor", CubeDialog)
-logView                         = InputScrollFrame("LogView", CubeDialog)
-tipLine                         = UIPanelLabel("Tips", CubeDialog)
+cboSippets                      = ComboBox        ("CboSippets", CubeDialog)
+codeEditor                      = CodeEditor      ("Editor",     CubeDialog)
+logView                         = InputScrollFrame("LogView",    CubeDialog)
+tipLine                         = UIPanelLabel    ("Tips",       CubeDialog)
+chkAutoRun                      = UICheckButton   ("AutoRun",    CubeDialog)
+seperator                       = Resizer         ("Separator",  CubeDialog)
 
-btnAdd                          = UIPanelButton("Add", CubeDialog)
-btnDelete                       = UIPanelButton("Delete", CubeDialog)
-btnSave                         = UIPanelButton("Save", CubeDialog)
-btnRun                          = UIPanelButton("Run", CubeDialog)
-btnReset                        = UIPanelButton("Reset", CubeDialog)
+btnAdd                          = UIPanelButton   ("Add",        CubeDialog)
+btnDelete                       = UIPanelButton   ("Delete",     CubeDialog)
+btnRun                          = UIPanelButton   ("Run",        CubeDialog)
 
 -------------------------------------------
 -- Cube Code Editor Event Handlers
 -------------------------------------------
 function cboSippets:OnSelectedChange(index)
-    codeEditor:SetText(_SVDB.CodeList[index] and _SVDB.CodeList[index].code or "")
+    saveSnippet()
+
+    CubeDialog.CurrentSnippet   = index
+
+    local snippet               = _SVDB.CodeList[index]
+    codeEditor:SetText   (snippet and snippet.code or "")
+    chkAutoRun:SetChecked(snippet and snippet.autorun and snippet.autorun[_PlayerName] or false)
 end
 
 function codeEditor:OnAltKey(key)
@@ -106,13 +114,13 @@ end
 
 function codeEditor:OnControlKey(key)
     if key:upper() == "S" then
-        btnSave:Click()
+        saveSnippet()
     end
 end
 
 function codeEditor:OnFunctionKey(key)
     if key == "F5" then
-        btnRun:Click()
+        runCode()
     end
 end
 
@@ -137,28 +145,24 @@ function btnAdd:OnClick()
     end
 end
 
-function btnSave:OnClick()
-    if cboSippets.SelectedValue and cboSippets.SelectedValue ~= 1 then
-        _SVDB.CodeList[cboSippets.SelectedValue].code = codeEditor:GetText()
-        showTip(_Locale["The code is saved"])
-    end
-end
-
 function btnRun:OnClick()
-    runCode(codeEditor:GetText(), cboSippets.SelectedValue and _SVDB.CodeList[cboSippets.SelectedValue].name)
-end
-
-function btnReset:OnClick()
-    codeEditor:SetText(cboSippets.SelectedValue and _SVDB.CodeList[cboSippets.SelectedValue] and _SVDB.CodeList[cboSippets.SelectedValue].code or "")
+    runCode()
 end
 
 __Async__()
 function btnDelete:OnClick()
-    local snippet               = cboSippets.SelectedValue and _SVDB.CodeList[cboSippets.SelectedValue]
+    local index                 = CubeDialog.CurrentSnippet
+    if not index then return end
+
+    if index == 1 then
+        return Confirm(_Locale["The first snippet can't be deleted"])
+    end
+
+    local snippet               = _SVDB.CodeList[index]
     if not snippet then return end
 
-    if Confirm("Are you sure you want to delete " .. snippet.name) then
-        tremove(_SVDB.CodeList, cboSippets.SelectedValue)
+    if Confirm(_Locale["Are you sure you want to delete "] .. snippet.name) then
+        tremove(_SVDB.CodeList, index)
 
         cboSippets:ClearItems()
 
@@ -166,17 +170,48 @@ function btnDelete:OnClick()
             cboSippets.Items[i] = snippet.name
         end
         cboSippets.SelectedValue= 1
+        cboSippets:OnSelectedChange(1)
     end
+end
+
+function chkAutoRun:PostClick()
+    local index                 = CubeDialog.CurrentSnippet
+    if not index then return end
+
+    local value                 = self:GetChecked()
+    local snippet               = _SVDB.CodeList[index]
+    snippet.autorun             = snippet.autorun or {}
+    snippet.autorun[_PlayerName]= value or false
 end
 
 __AsyncSingle__(true)
 function CubeDialog:OnShow()
+    CubeDialog:OnSizeChanged()
+
     while self:IsShown() do
         Delay(10)
 
         if not tipLine:GetText() or tipLine:GetText() == "" then
             showTip(_Tips[math.random(#_Tips)])
         end
+    end
+end
+
+function CubeDialog:OnHide()
+    saveSnippet()
+end
+
+function CubeDialog:OnSizeChanged()
+    -- ReCalc the Code Editor's Height since the resize won't work properly
+    local c, s                  = codeEditor:GetTop(), seperator:GetTop()
+    if c and s then codeEditor:SetHeight(c - s) end
+end
+
+__AsyncSingle__(true)
+function seperator:OnStartResizing()
+    while self.IsResizing do
+        Next()
+        CubeDialog:OnSizeChanged()
     end
 end
 
@@ -194,11 +229,25 @@ function showTip(text)
     tipLine:SetText("")
 end
 
-function runCode(text, source, silent)
-    -- Need replace the print to log
-    local func, err, ok         = loadsnippet(text or "", source)
+function saveSnippet()
+    local index                 = CubeDialog.CurrentSnippet
+    if not index then return end
+    local snippet               = _SVDB.CodeList[index]
+
+    snippet.code                = codeEditor:GetText()
+    showTip(_Locale["The code is saved"] .. "-" .. snippet.name)
+end
+
+function runCode(index, silent)
+    local text                  = not index and codeEditor:GetText()
+    local index                 = index or CubeDialog.CurrentSnippet
+    if not index then return end
+    local snippet               = _SVDB.CodeList[index]
+
+    local func, err, ok         = loadsnippet(text or snippet.code, snippet.name)
 
     if func then
+        -- print --> log
         local oldprint          = getprinthandler()
         setprinthandler(log)
         ok, err                 = pcall(func)
@@ -206,7 +255,7 @@ function runCode(text, source, silent)
     end
 
     if not silent and err then
-
+        print(err)
     end
 
     return not err and true or false
@@ -222,47 +271,62 @@ function log(...)
     editBox:Insert("\n")
 end
 
-
 -------------------------------------------
 -- Cube Code Editor Style
 -------------------------------------------
 Style[CubeDialog]               = {
     Header                      = { Text = _Locale["Cube"] .. " - " .. _Locale["Code Editor"] },
     Size                        = Size(800, 600),
+    clampedToScreen             = true,
+    minResize                   = Size(600, 400),
 
     CboSippets                  = {
         size                    = Size(200, 32),
         location                = { Anchor("TOPLEFT", 4, -26) },
     },
-    Editor                      = {
-        location                = { Anchor("TOPLEFT", 24, -8, "CboSippets", "BOTTOMLEFT"), Anchor("BOTTOM", 0, 16, "LogView", "TOP"), Anchor("RIGHT", -16, 0) },
-    },
     LogView                     = {
+        maxLetters              = 0,
+        hideCharCount           = true,
         height                  = 100,
         location                = { Anchor("BOTTOMLEFT", 28, 48), Anchor("RIGHT", -16, 0) },
+        resizable               = true,
+    },
+    Separator                   = {
+        location                = { Anchor("BOTTOMLEFT", 0, 0, "LogView", "TOPLEFT"), Anchor("BOTTOMRIGHT", 0, 0, "LogView", "TOPRIGHT") },
+        height                  = 16,
+        direction               = "TOP",
+        resizeTarget            = logView,
+
+        NormalTexture           = NIL,
+        PushedTexture           = NIL,
+        HighlightTexture        = {
+            file                = [[Interface\QuestFrame\UI-QuestTitleHighlight]],
+            alphamode           = "ADD",
+            setAllPoints        = true,
+        }
+    },
+    Editor                      = {
+        resizable               = true,
+        location                = { Anchor("TOPLEFT", 24, -8, "CboSippets", "BOTTOMLEFT"), Anchor("RIGHT", -16, 0) },
     },
     Tips                        = {
         location                = { Anchor("BOTTOMLEFT", 16, 16) }
     },
-    Add                         = {
-        text                    = _Locale["Add"],
-        location                = { Anchor("LEFT", 16, 0, "CboSippets", "RIGHT") },
-    },
     Delete                      = {
         text                    = _Locale["Delete"],
-        location                = { Anchor("LEFT", 16, 0, "Add", "RIGHT") },
+        location                = { Anchor("TOPRIGHT", -32, -26) },
     },
-    Reset                       = {
-        text                    = _Locale["Reset"],
-        location                = { Anchor("LEFT", 16, 0, "Delete", "RIGHT") },
-    },
-    Save                        = {
-        text                    = _Locale["Save"],
-        location                = { Anchor("LEFT", 16, 0, "Reset", "RIGHT") },
+    Add                         = {
+        text                    = _Locale["Add"],
+        location                = { Anchor("RIGHT", -4, 0, "Delete", "LEFT") },
     },
     Run                         = {
-        text                    = _Locale["Run"],
-        location                = { Anchor("TOP", 0, 0, "Add", "TOP"), Anchor("RIGHT", -16, 0) },
+        text                    = _Locale["Run"] .. "(F5)",
+        location                = { Anchor("BOTTOMRIGHT", -32, 16) },
+    },
+    AutoRun                     = {
+        label                   = { text = _Locale["AutoRun"] },
+        location                = { Anchor("LEFT", 4, 0, "CboSippets", "RIGHT") },
     },
 }
 
@@ -270,15 +334,17 @@ Style[CubeDialog]               = {
 -- Tips
 -------------------------------------------
 _Tips                           = {
-    _Locale["Ctrl+S can be used to save the current snippet"],
+    _Locale["The snippets will be auto saved"],
+    _Locale["Ctrl+S can be used to save the current snippet manually"],
     _Locale["Ctrl+Z can be used to undo the operations"],
     _Locale["Ctrl+Y can be used to redo the operations"],
-    _Locale["Ctrl+K can be used to format the code"],
+    _Locale["Ctrl+K can be used to format the current snippet"],
     _Locale["F5 can be used to run the current snippet"],
     _Locale["Double-click can be used to select a word"],
-    _Locale["Ctrl+Arrow key can be used to skip a word"],
-    _Locale["Shift+Ctrl+Arrow Key can be used to select text by word"],
-    _Locale["Use UP & DOWN to move in the auto complete word list"],
-    _Locale["Press ENTER or TAB to select the auto complete word"],
-    _Locale["Press TAB REPEATEDLY to toggle the auto complete words"],
+    _Locale["Hold ctrl with arrow key can be used to skip a word"],
+    _Locale["Hold shift and ctrl with arrow key can be used to select text by word"],
+    _Locale["Hold ctrl with delete or backspace can be used to delete codes by word"],
+    _Locale["Use up & down to move in the auto complete word list"],
+    _Locale["Press enter or tab to select word from the auto complete word"],
+    _Locale["Press tab repeatedly to toggle the auto complete words"],
 }
