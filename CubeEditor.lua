@@ -64,7 +64,7 @@ function OnLoad()
 
     if #_SVDB.CodeList > 0 then
         cboSippets.SelectedValue= 1
-        cboSippets:OnSelectedChange(1)
+        cboSippets:OnSelectChanged(1)
     end
 end
 
@@ -99,7 +99,7 @@ btnClear                        = UIPanelButton   ("Clear",      CubeDialog)
 -------------------------------------------
 -- Cube Code Editor Event Handlers
 -------------------------------------------
-function cboSippets:OnSelectedChange(index)
+function cboSippets:OnSelectChanged(index)
     saveSnippet()
 
     CubeDialog.CurrentSnippet   = index
@@ -142,7 +142,7 @@ function btnAdd:OnClick()
 
         cboSippets.Items[index] = name
         cboSippets.SelectedValue= index
-        cboSippets:OnSelectedChange(index)
+        cboSippets:OnSelectChanged(index)
     end
 end
 
@@ -173,7 +173,7 @@ function btnDelete:OnClick()
             cboSippets.Items[i] = snippet.name
         end
         cboSippets.SelectedValue= 1
-        cboSippets:OnSelectedChange(1)
+        cboSippets:OnSelectChanged(1)
     end
 end
 
