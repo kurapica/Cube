@@ -11,6 +11,8 @@ Scorpio           "Cube.Browser"                          ""
 
 import "System.Text"
 
+local _CurrentVal
+
 -------------------------------------------
 -- Addon Events
 -------------------------------------------
@@ -29,8 +31,8 @@ end
 Browser                         = Dialog("Cube_Data_Browser")
 Browser:Hide()
 
-input                           = InputBox       ("Input",  Browser)
-viewer                          = HTMLViewer     ("Viewer", Browser)
+input                           = InputBox  ("Input",  Browser)
+viewer                          = HtmlViewer("Viewer", Browser)
 
 -------------------------------------------
 -- Cube Browser Event Handlers
@@ -43,10 +45,13 @@ function input:OnEnterPressed()
 
             if ok then
                 if type(ret) == "table" and getmetatable(ret) == nil and ret ~= _G then
+                    _CurrentVal = ret
+
                     return viewer:SetText(TEMPLATE_TABLE{
                         _Locale = _Locale,
                         Color   = Color,
                         target  = ret,
+                        path    = "",
                     })
                 end
             end
@@ -57,6 +62,24 @@ function input:OnEnterPressed()
             Color               = Color,
         })
     end
+end
+
+function viewer:OnHyperlinkClick(path)
+    local val                   = _CurrentVal
+    if path ~= "#" then
+        for name in path:gmatch("[^%.]+") do
+            val                 = val[name]
+        end
+    else
+        path                    = ""
+    end
+
+    viewer:SetText(TEMPLATE_TABLE{
+        _Locale                 = _Locale,
+        Color                   = Color,
+        target                  = val,
+        path                    = path,
+    })
 end
 
 -------------------------------------------
@@ -71,7 +94,6 @@ Style[Browser]                  = {
     Input                       = {
         location                = { Anchor("TOPLEFT", 24, -32), Anchor("RIGHT", -24) },
         height                  = 32,
-        autofocus               = false,
     },
 
     Viewer                      = {
@@ -93,8 +115,23 @@ TEMPLATE_NOT_VALID              = TemplateString[[
 TEMPLATE_TABLE                  = TemplateString[[
     <html>
         <body>
+        @if path ~= "" then
+            <p>
+                <a href="#">@_Locale["Root"]</a>
+                @local link = ""
+                @for name in path:gmatch("[^%.]+") do link = link ~= "" and (link .. "." .. name) or name
+                / <a href="@\link">@\name</a>
+                @end
+            </p>
+            @>path = path .. "."
+        @end
+            <br/>
         @for k, v in pairs(target) do
-            <p><red>@k</red> - <yellow>@\v</yellow></p>
+            @if type(v) == "table" then
+                <p><a href="@(path)@k">table: @k</a></p>
+            @else
+                <p>@k = @\v</p>
+            @end
         @end
         </body>
     </html>
