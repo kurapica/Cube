@@ -3,13 +3,9 @@
 		Scorpio.FireSystemEvent("CUBE_CODE_EDITOR_TOGGLE")
 	</Binding>
 	<Binding name="CUBE_DEBUG">
-		if IGAS.UIParent.Cube_Debug then
-			IGAS.UIParent.Cube_Debug.Visible = not IGAS.UIParent.Cube_Debug.Visible
-		end
+		Scorpio.FireSystemEvent("CUBE_DEBUG_BROWSER_TOGGLE")
 	</Binding>
 	<Binding name="CUBE_BUGLIST">
-		if IGAS.UIParent.Cube_BugList then
-			IGAS.UIParent.Cube_BugList.Visible = not IGAS.UIParent.Cube_BugList.Visible
-		end
+		Scorpio.FireSystemEvent("CUBE_BUG_LIST_TOGGLE")
 	</Binding>
 </Bindings>

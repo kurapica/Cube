@@ -35,7 +35,7 @@ Fatal                           = logger[Logger.LogLevel.Fatal]
 _G.BINDING_HEADER_CUBE          = _Locale["Cube"]
 _G.BINDING_NAME_CUBE_CODE       = _Locale["Code Editor"]
 _G.BINDING_NAME_CUBE_BUGLIST    = _Locale["Bug List"]
-_G.BINDING_NAME_CUBE_DEBUG      = _Locale["Debug Tool"]
+_G.BINDING_NAME_CUBE_DEBUG      = _Locale["Data Browser"]
 
 -------------------------------------------
 -- Addon Events

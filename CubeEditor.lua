@@ -75,26 +75,26 @@ end
 __SlashCmd__("cube", "code", _Locale["open/close the code editor"])
 __SystemEvent__()
 function CUBE_CODE_EDITOR_TOGGLE()
-    CubeDialog:SetShown(not CubeDialog:IsShown())
+    CodeDialog:SetShown(not CodeDialog:IsShown())
 end
 
 -------------------------------------------
 -- Cube Code Editor
 -------------------------------------------
-CubeDialog                      = Dialog("Cube_Code_Editor")
-CubeDialog:Hide()
+CodeDialog                      = Dialog("Cube_Code_Editor")
+CodeDialog:Hide()
 
-cboSippets                      = ComboBox        ("CboSippets", CubeDialog)
-codeEditor                      = CodeEditor      ("Editor",     CubeDialog)
-logView                         = InputScrollFrame("LogView",    CubeDialog)
-tipLine                         = UIPanelLabel    ("Tips",       CubeDialog)
-chkAutoRun                      = UICheckButton   ("AutoRun",    CubeDialog)
-seperator                       = Resizer         ("Separator",  CubeDialog)
+cboSippets                      = ComboBox        ("CboSippets", CodeDialog)
+codeEditor                      = CodeEditor      ("Editor",     CodeDialog)
+logView                         = InputScrollFrame("LogView",    CodeDialog)
+tipLine                         = UIPanelLabel    ("Tips",       CodeDialog)
+chkAutoRun                      = UICheckButton   ("AutoRun",    CodeDialog)
+seperator                       = Resizer         ("Separator",  CodeDialog)
 
-btnAdd                          = UIPanelButton   ("Add",        CubeDialog)
-btnDelete                       = UIPanelButton   ("Delete",     CubeDialog)
-btnRun                          = UIPanelButton   ("Run",        CubeDialog)
-btnClear                        = UIPanelButton   ("Clear",      CubeDialog)
+btnAdd                          = UIPanelButton   ("Add",        CodeDialog)
+btnDelete                       = UIPanelButton   ("Delete",     CodeDialog)
+btnRun                          = UIPanelButton   ("Run",        CodeDialog)
+btnClear                        = UIPanelButton   ("Clear",      CodeDialog)
 
 -------------------------------------------
 -- Cube Code Editor Event Handlers
@@ -102,7 +102,7 @@ btnClear                        = UIPanelButton   ("Clear",      CubeDialog)
 function cboSippets:OnSelectChanged(index)
     saveSnippet()
 
-    CubeDialog.CurrentSnippet   = index
+    CodeDialog.CurrentSnippet   = index
 
     local snippet               = _SVDB.CodeList[index]
     codeEditor:SetText   (snippet and snippet.code or "")
@@ -152,7 +152,7 @@ end
 
 __Async__()
 function btnDelete:OnClick()
-    local index                 = CubeDialog.CurrentSnippet
+    local index                 = CodeDialog.CurrentSnippet
     if not index then return end
 
     if index == 1 then
@@ -163,7 +163,7 @@ function btnDelete:OnClick()
     if not snippet then return end
 
     if Confirm(_Locale["Are you sure you want to delete "] .. snippet.name) then
-        CubeDialog.CurrentSnippet = nil
+        CodeDialog.CurrentSnippet = nil
 
         tremove(_SVDB.CodeList, index)
 
@@ -182,7 +182,7 @@ function btnClear:OnClick()
 end
 
 function chkAutoRun:PostClick()
-    local index                 = CubeDialog.CurrentSnippet
+    local index                 = CodeDialog.CurrentSnippet
     if not index then return end
 
     local value                 = self:GetChecked()
@@ -192,8 +192,8 @@ function chkAutoRun:PostClick()
 end
 
 __AsyncSingle__(true)
-function CubeDialog:OnShow()
-    CubeDialog:OnSizeChanged()
+function CodeDialog:OnShow()
+    CodeDialog:OnSizeChanged()
 
     while self:IsShown() do
         Delay(10)
@@ -204,11 +204,11 @@ function CubeDialog:OnShow()
     end
 end
 
-function CubeDialog:OnHide()
+function CodeDialog:OnHide()
     saveSnippet()
 end
 
-function CubeDialog:OnSizeChanged()
+function CodeDialog:OnSizeChanged()
     -- ReCalc the Code Editor's Height since the resize won't work properly
     local c, s                  = codeEditor:GetTop(), seperator:GetTop()
     if c and s then codeEditor:SetHeight(c - s) end
@@ -218,7 +218,7 @@ __AsyncSingle__(true)
 function seperator:OnStartResizing()
     while self.IsResizing do
         Next()
-        CubeDialog:OnSizeChanged()
+        CodeDialog:OnSizeChanged()
     end
 end
 
@@ -237,7 +237,7 @@ function showTip(text)
 end
 
 function saveSnippet()
-    local index                 = CubeDialog.CurrentSnippet
+    local index                 = CodeDialog.CurrentSnippet
     if not index then return end
     local snippet               = _SVDB.CodeList[index]
 
@@ -247,7 +247,7 @@ end
 
 function runCode(index, silent)
     local text                  = not index and codeEditor:GetText()
-    local index                 = index or CubeDialog.CurrentSnippet
+    local index                 = index or CodeDialog.CurrentSnippet
     if not index then return end
     local snippet               = _SVDB.CodeList[index]
 
@@ -281,7 +281,7 @@ end
 -------------------------------------------
 -- Cube Code Editor Style
 -------------------------------------------
-Style[CubeDialog]               = {
+Style[CodeDialog]               = {
     Header                      = { Text = _Locale["Cube"] .. " - " .. _Locale["Code Editor"] },
     Size                        = Size(800, 600),
     clampedToScreen             = true,
@@ -350,6 +350,8 @@ _Tips                           = {
     _Locale["Ctrl+Z can be used to undo the operations"],
     _Locale["Ctrl+Y can be used to redo the operations"],
     _Locale["Ctrl+K can be used to format the current snippet"],
+    _Locale["Ctrl+Shift+D can be used to duplicate the current line"],
+    _Locale["Ctrl+Shift+K can be used to delete the current line"],
     _Locale["F5 can be used to run the current snippet"],
     _Locale["Double-click can be used to select a word"],
     _Locale["Hold ctrl with arrow key can be used to skip a word"],

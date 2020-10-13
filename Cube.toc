@@ -16,3 +16,6 @@ Cube.lua
 
 # Code Editor
 CubeEditor.lua
+
+# Data & Type Browser
+Browser.lua
