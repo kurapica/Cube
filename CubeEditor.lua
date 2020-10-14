@@ -262,7 +262,7 @@ function runCode(index, silent)
     end
 
     if not silent and err then
-        print(err)
+        log(err)
     end
 
     return not err and true or false
