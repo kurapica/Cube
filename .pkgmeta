@@ -1,6 +1,6 @@
 package-as: Cube
 
 required-dependencies:
-    - IGAS
+    - Scorpio
 
 manual-changelog: CHANGELOG.txt
