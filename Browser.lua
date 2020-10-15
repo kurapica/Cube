@@ -230,9 +230,9 @@ end
 
 function parseItem(item)
     if item.Nilable then
-        return "[" .. item.Name .. (item.Type and (":" .. item.Type) or "") .. "]"
+        return "[" .. item.Name .. (item.InnerType and (":{" .. item.InnerType .. "}") or item.Type and (":" .. item.Type) or "") .. "]"
     else
-        return item.Name .. (item.Type and (":" .. item.Type) or "")
+        return item.Name .. (item.InnerType and (":{" .. item.InnerType .. "}") or item.Type and (":" .. item.Type) or "")
     end
 end
 
