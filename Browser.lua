@@ -55,6 +55,9 @@ function input:OnEnterPressed()
             _Locale             = _Locale,
             Color               = Color,
             target              = _CurrentVal,
+
+            List                = List,
+            XDictionary         = XDictionary,
         })
     elseif text == "PLoop" or Namespace.GetNamespace(text) then
         -- Browser the PLoop & Scorpio Namespace
@@ -76,6 +79,7 @@ function input:OnEnterPressed()
             StructCategory      = StructCategory,
 
             List                = List,
+            XDictionary         = XDictionary,
         })
     else
         local ok, ret           = loadstring("return " .. text)
@@ -91,16 +95,12 @@ function input:OnEnterPressed()
                         Color   = Color,
                         target  = ret,
                         path    = "",
+
+                        List        = List,
+                        XDictionary = XDictionary,
                     }
 
-                    if UI.IsUIObject(ret) then
-                        local cls   = getmetatable(ret)
-                        if UI.IsUIObjectType(cls) then
-                            data.cls= "redirect:" .. tostring(cls)
-                        else
-                            data.cls= "meta:" .. ret:GetObjectType()
-                        end
-                    end
+                    parseUIObject(data, ret)
 
                     _ValueType  = VALUE_TYPE_NORMAL_TABLE
                     return viewer:SetText(TEMPLATE_TABLE(data))
@@ -109,6 +109,9 @@ function input:OnEnterPressed()
                         _Locale     = _Locale,
                         Color       = Color,
                         target      = ret,
+
+                        List        = List,
+                        XDictionary = XDictionary,
                     })
                 end
             end
@@ -144,6 +147,9 @@ function viewer:OnHyperlinkClick(path)
                 _Locale         = _Locale,
                 Color           = Color,
                 target          = _CurrentVal,
+
+                List            = List,
+                XDictionary     = XDictionary,
             })
         end
 
@@ -158,6 +164,9 @@ function viewer:OnHyperlinkClick(path)
                     parseEvent  = parseEvent,
                     parseFunc   = parseFunc,
                     parseTable  = parseTable,
+
+                    List        = List,
+                    XDictionary = XDictionary,
                 })
             end
         end
@@ -180,19 +189,14 @@ function viewer:OnHyperlinkClick(path)
             Color               = Color,
             target              = val,
             path                = path,
+
+            List                = List,
+            XDictionary         = XDictionary,
         }
 
-        if UI.IsUIObject(val) then
-            local cls           = getmetatable(val)
-            if UI.IsUIObjectType(cls) then
-                data.cls        = "redirect:" .. tostring(cls)
-            else
-                data.cls        = path .. "." .. "meta:" .. val:GetObjectType()
-            end
-        end
+        parseUIObject(data, val)
 
         return viewer:SetText(TEMPLATE_TABLE(data))
-    elseif _ValueType == VALUE_TYPE_PLOOP_TYPE then
     end
 end
 
@@ -211,6 +215,21 @@ function Browser:OnShow()
         if not tipLine:GetText() or tipLine:GetText() == "" then
             showTip(_Tips[math.random(#_Tips)])
         end
+    end
+end
+
+function parseUIObject(data, val)
+    if UI.IsUIObject(val) then
+        local cls           = getmetatable(val)
+        if UI.IsUIObjectType(cls) then
+            data.cls        = "redirect:" .. tostring(cls)
+            data.ploop      = true
+        else
+            data.cls        = path .. "." .. "meta:" .. val:GetObjectType()
+            data.origin     = true
+        end
+    elseif getmetatable(val) then
+        data.cls            = path .. "." .. "meta:" .. val:GetObjectType()
     end
 end
 
@@ -358,15 +377,77 @@ TEMPLATE_TABLE                  = TemplateString[[
             <p><cyan>@_Locale["ObjectType"]</cyan> - <a href="@\cls">@cls:match(":(.*)$")</a></p>
             <br/>
             @end
-            @for k, v in pairs(target) do
-                @if type(v) == "table" then
+
+            @{
+                local lists
+
+                for k, v in pairs(target) do
+                    if type(k) == "number" then
+                        lists           = lists or List()
+                        lists:Insert(k)
+                    end
+                end
+            }
+            @if lists then
+                <h1><cyan>List</cyan></h1>
+                @for _, k in lists:Sort():GetIterator() do local v = target[k]
+                    @if type(v) == "table" then
+                        @if v == _G then
+                            <p><a href="copyto:@\k">[@\k]</a> : _G</p>
+                        @else
+                            <p><a href="copyto:@\k">[@\k]</a> : <a href="@(path)@k">@tostring(v)</a></p>
+                        @end
+                    @else
+                        <p><a href="copyto:@\k">[@\k]</a> : @\v</p>
+                    @end
+                @end
+                <br/>
+            @end
+
+            @{
+                local tables, funcs, constants
+
+                for k, v in pairs(target) do
+                    if type(k) ~= "number" then
+                        local t         = type(v)
+                        k               = tostring(k)
+                        if t == "function" then
+                            funcs       = funcs or {}
+                            funcs[k]    = v
+                        elseif t == "table" then
+                            tables      = tables or {}
+                            tables[k]   = v
+                        else
+                            constants   = constants or {}
+                            constants[k]= v
+                        end
+                    end
+                end
+            }
+            @if constants then
+                <h1><cyan>Simple</cyan></h1>
+                @for _, k in XDictionary(constants).Keys:ToList():Sort():GetIterator() do
+                    <p><a href="copyto:@\k">@\k</a> : @\constants[k]</p>
+                @end
+                <br/>
+            @end
+
+            @if funcs then
+                <h1><cyan>Function</cyan></h1>
+                @for _, k in XDictionary(funcs).Keys:ToList():Sort():GetIterator() do
+                    <p><orange>[F]</orange><a href="copyto:@\k">@\k</a></p>
+                @end
+                <br/>
+            @end
+
+            @if tables then
+                <h1><cyan>Tables</cyan></h1>
+                @for _, k in XDictionary(tables).Keys:ToList():Sort():GetIterator() do local v = tables[k]
                     @if v == _G then
                         <p><a href="copyto:@\k">@\k</a> : _G</p>
                     @else
                         <p><a href="copyto:@\k">@\k</a> : <a href="@(path)@k">@tostring(v)</a></p>
                     @end
-                @else
-                    <p><a href="copyto:@\k">@\k</a> : @\v</p>
                 @end
             @end
         </body>
