@@ -100,7 +100,7 @@ function input:OnEnterPressed()
                         XDictionary = XDictionary,
                     }
 
-                    parseUIObject(data, ret)
+                    parseUIObject(data, ret, "")
 
                     _ValueType  = VALUE_TYPE_NORMAL_TABLE
                     return viewer:SetText(TEMPLATE_TABLE(data))
@@ -194,7 +194,7 @@ function viewer:OnHyperlinkClick(path)
             XDictionary         = XDictionary,
         }
 
-        parseUIObject(data, val)
+        parseUIObject(data, val, path)
 
         return viewer:SetText(TEMPLATE_TABLE(data))
     end
@@ -218,7 +218,7 @@ function Browser:OnShow()
     end
 end
 
-function parseUIObject(data, val)
+function parseUIObject(data, val, path)
     if UI.IsUIObject(val) then
         local cls           = getmetatable(val)
         if UI.IsUIObjectType(cls) then
@@ -229,7 +229,7 @@ function parseUIObject(data, val)
             data.origin     = true
         end
     elseif getmetatable(val) then
-        data.cls            = path .. "." .. "meta:" .. val:GetObjectType()
+        data.cls            = path .. "." .. "meta:" .. getmetatable(val)
     end
 end
 
