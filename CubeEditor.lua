@@ -352,6 +352,7 @@ _Tips                           = {
     _Locale["Ctrl+K can be used to format the current snippet"],
     _Locale["Ctrl+Shift+D can be used to duplicate the current line"],
     _Locale["Ctrl+Shift+K can be used to delete the current line"],
+    _Locale["Ctrl+Enter can be used to insert a new line after current line"],
     _Locale["F5 can be used to run the current snippet"],
     _Locale["Double-click can be used to select a word"],
     _Locale["Hold ctrl with arrow key can be used to skip a word"],

@@ -497,7 +497,7 @@ TEMPLATE_TYPE                   = TemplateString[[
 
             @if nmsps then
                 <h1><cyan>Namespace</cyan></h1>
-                @for _, ns in nmsps:GetIterator() do
+                @for _, ns in nmsps:Sort():GetIterator() do
                     <p><a href="redirect:@ns">@ns</a></p>
                 @end
                 <br/>
@@ -505,7 +505,7 @@ TEMPLATE_TYPE                   = TemplateString[[
 
             @if enums then
                 <h1><cyan>Enum</cyan></h1>
-                @for _, ns in enums:GetIterator() do
+                @for _, ns in enums:Sort():GetIterator() do
                     <p><a href="redirect:@ns">@ns</a></p>
                 @end
                 <br/>
@@ -513,7 +513,7 @@ TEMPLATE_TYPE                   = TemplateString[[
 
             @if structs then
                 <h1><cyan>Struct</cyan></h1>
-                @for _, ns in structs:GetIterator() do
+                @for _, ns in structs:Sort():GetIterator() do
                     <p><a href="redirect:@ns">@ns</a></p>
                 @end
                 <br/>
@@ -521,7 +521,7 @@ TEMPLATE_TYPE                   = TemplateString[[
 
             @if classes then
                 <h1><cyan>Class</cyan></h1>
-                @for _, ns in classes:GetIterator() do
+                @for _, ns in classes:Sort():GetIterator() do
                     <p><a href="redirect:@ns">@ns</a></p>
                 @end
                 <br/>
@@ -529,7 +529,7 @@ TEMPLATE_TYPE                   = TemplateString[[
 
             @if interfaces then
                 <h1><cyan>Interface</cyan></h1>
-                @for _, ns in interfaces:GetIterator() do
+                @for _, ns in interfaces:Sort():GetIterator() do
                     <p><a href="redirect:@ns">@ns</a></p>
                 @end
                 <br/>
@@ -622,7 +622,7 @@ TEMPLATE_TYPE                   = TemplateString[[
 
                 @if stevts then
                     <h1><cyan>Static Event</cyan></h1>
-                    @for _, name in stevts:GetIterator() do
+                    @for _, name in stevts:Sort():GetIterator() do
                         <p><a href="copyto:@name">@name</a></p>
                     @end
                     <br/>
@@ -630,7 +630,7 @@ TEMPLATE_TYPE                   = TemplateString[[
 
                 @if stprops then
                     <h1><cyan>Static Property</cyan></h1>
-                    @for _, name in stprops:GetIterator() do
+                    @for _, name in stprops:Sort():GetIterator() do
                         <p><a href="copyto:@name">@name</a></p>
                     @end
                     <br/>
@@ -638,7 +638,7 @@ TEMPLATE_TYPE                   = TemplateString[[
 
                 @if stmtds then
                     <h1><cyan>Static Method</cyan></h1>
-                    @for _, name in stmtds:GetIterator() do
+                    @for _, name in stmtds:Sort():GetIterator() do
                         <p><a href="copyto:@name">@name</a></p>
                     @end
                     <br/>
@@ -646,7 +646,7 @@ TEMPLATE_TYPE                   = TemplateString[[
 
                 @if evts then
                     <h1><cyan>Event</cyan></h1>
-                    @for _, name in evts:GetIterator() do
+                    @for _, name in evts:Sort():GetIterator() do
                         <p><a href="copyto:@name">@name</a></p>
                     @end
                     <br/>
@@ -654,7 +654,7 @@ TEMPLATE_TYPE                   = TemplateString[[
 
                 @if props then
                     <h1><cyan>Property</cyan></h1>
-                    @for _, name in props:GetIterator() do
+                    @for _, name in props:Sort():GetIterator() do
                         <p><a href="copyto:@name">@name</a></p>
                     @end
                     <br/>
@@ -662,7 +662,7 @@ TEMPLATE_TYPE                   = TemplateString[[
 
                 @if mtds then
                     <h1><cyan>Method</cyan></h1>
-                    @for _, name in mtds:GetIterator() do
+                    @for _, name in mtds:Sort():GetIterator() do
                         <p><a href="copyto:@name">@name</a></p>
                     @end
                     <br/>
