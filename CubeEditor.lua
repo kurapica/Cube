@@ -9,8 +9,15 @@
 Scorpio           "Cube.Editor"                           ""
 --========================================================--
 
+-- Check Scorpio's Version
+local _Ver                      = tonumber(GetAddOnMetadata("Scorpio", "Version"):match("%d+"))
+if _Ver < 58 then
+    return Alert(_Locale["Please update to the newest scorpio lib, or Cube's save data may be corrupted!"])
+end
+
 export {
     strtrim                     = Toolset.trim,
+    clone                       = Toolset.clone,
     tremove                     = table.remove,
     loadsnippet                 = Toolset.loadsnippet,
 }
@@ -47,7 +54,29 @@ function OnLoad()
         _SVDB.CodeList          = codes
     end
 
-    _SVDB:SetDefault{ CodeList  = { { name = "snippet" } } }
+    _SVDB:SetDefault{
+        CodeList                = { { name = "snippet" } },
+        EditorStyles            = {
+            Font                = {
+                font            = STANDARD_TEXT_FONT,
+                height          = 12,
+                outline         = "NORMAL",
+                monochrome      = false,
+            },
+            TabWidth            = 4,
+            ShowLineNum         = true,
+            DefaultColor        = ColorType(1, 1, 1),
+            CommentColor        = ColorType(0.5, 0.5, 0.5),
+            StringColor         = ColorType(0, 1, 0),
+            NumberColor         = ColorType(1, 1, 0),
+            InstructionColor    = ColorType(1, 0.39, 0.09),
+            FunctionColor       = ColorType(0.33, 1, 0.9),
+            AttributeColor      = ColorType(0.52, 0.12, 0.47),
+        },
+        Settings                = {
+            ShowLogView         = true,
+        }
+    }
 
     -- Loading the SavedVariables
     for i, snippet in ipairs(_SVDB.CodeList) do
@@ -66,6 +95,11 @@ function OnLoad()
         cboSippets.SelectedValue= 1
         cboSippets:OnSelectChanged(1)
     end
+
+    -- Loading settings
+    Style[codeEditor]           = _SVDB.EditorStyles
+    Style[logView].visible      = _SVDB.Settings.ShowLogView
+    Style[seperator].visible    = _SVDB.Settings.ShowLogView
 end
 
 function OnQuit()
@@ -93,6 +127,7 @@ seperator                       = Resizer         ("Separator",  CodeDialog)
 
 btnAdd                          = UIPanelButton   ("Add",        CodeDialog)
 btnDelete                       = UIPanelButton   ("Delete",     CodeDialog)
+btnMenu                         = UIPanelButton   ("Menu",       CodeDialog)
 btnRun                          = UIPanelButton   ("Run",        CodeDialog)
 btnClear                        = UIPanelButton   ("Clear",      CodeDialog)
 
@@ -148,6 +183,182 @@ end
 
 function btnRun:OnClick()
     runCode()
+end
+
+function btnMenu:OnClick()
+    ShowDropDownMenu{
+        {
+            text            = _Locale["Show Log View"],
+
+            check           = {
+                get         = function() return _SVDB.Settings.ShowLogView end,
+                set         = function(value)
+                    _SVDB.Settings.ShowLogView = value
+
+                    Style[logView].visible = value
+                    Style[seperator].visible = value
+
+                    -- Reset the editor's location
+                    CodeDialog:OnSizeChanged(true)
+                end,
+            }
+        },
+        {
+            text                = _Locale["Show Line Num"],
+            check               = {
+                get             = function() return _SVDB.EditorStyles.ShowLineNum end,
+                set             = function(value)
+                    _SVDB.EditorStyles.ShowLineNum = value
+                    Style[codeEditor].ShowLineNum  = value
+                end,
+            }
+        },
+        {
+            text            = _Locale["Font"],
+            submenu         = {
+                {
+                    text        = _Locale["font"] .. " - " .. _SVDB.EditorStyles.Font.font,
+                    click       = function()
+                        local path  = Input(_Locale["Please input the new font path"])
+                        if path and path ~= "" then
+                            _SVDB.EditorStyles.Font.font = path
+                            Style[codeEditor].font = clone(_SVDB.EditorStyles.Font)
+                        end
+                    end,
+                },
+                {
+                    text        = _Locale["height"] .. " - " .. _SVDB.EditorStyles.Font.height,
+                    click       = function()
+                        local height  = PickRange(_Locale["Choose the font height"], 10, 40, 1, _SVDB.EditorStyles.Font.height)
+                        if height then
+                            _SVDB.EditorStyles.Font.height = height
+                            Style[codeEditor].font = clone(_SVDB.EditorStyles.Font)
+                        end
+                    end,
+                },
+                {
+                    text        = _Locale["outline"],
+                    submenu     = {
+                        check       = {
+                            get     = function() return _SVDB.EditorStyles.Font.outline or "NONE" end,
+                            set     = function(value)
+                                _SVDB.EditorStyles.Font.outline = value
+                                Style[codeEditor].font = clone(_SVDB.EditorStyles.Font)
+                            end,
+                        },
+
+                        {
+                            text    = _Locale["NONE"],
+                            checkvalue = "NONE",
+                        },
+                        {
+                            text    = _Locale["NORMAL"],
+                            checkvalue = "NORMAL",
+                        },
+                        {
+                            text    = _Locale["THICK"],
+                            checkvalue = "THICK",
+                        },
+                    }
+                },
+                {
+                    text        = _Locale["monochrome"],
+                    check       = {
+                        get     = function() return _SVDB.EditorStyles.Font.monochrome end,
+                        set     = function(value)
+                            _SVDB.EditorStyles.Font.monochrome = value
+                            Style[codeEditor].font = clone(_SVDB.EditorStyles.Font)
+                        end,
+                    }
+                },
+            }
+        },
+        {
+            text                = _Locale["Tab Width"] .. " - " .. _SVDB.EditorStyles.TabWidth,
+            click               = function()
+                local value     = PickRange(_Locale["Choose the tab width"], 2, 8, 2, _SVDB.EditorStyles.TabWidth)
+                if value then
+                    _SVDB.EditorStyles.TabWidth = value
+                    Style[codeEditor].TabWidth  = value
+                end
+            end,
+        },
+        {
+            text                = _Locale["Editor Color"],
+            submenu             = {
+                {
+                    text        = _Locale["Default Color"],
+                    color       = {
+                        get     = _SVDB.EditorStyles.DefaultColor,
+                        set     = function(color)
+                            _SVDB.EditorStyles.DefaultColor = color
+                            Style[codeEditor].DefaultColor  = color
+                        end,
+                    }
+                },
+                {
+                    text        = _Locale["Comment Color"],
+                    color       = {
+                        get     = _SVDB.EditorStyles.CommentColor,
+                        set     = function(color)
+                            _SVDB.EditorStyles.CommentColor = color
+                            Style[codeEditor].CommentColor  = color
+                        end,
+                    }
+                },
+                {
+                    text        = _Locale["String Color"],
+                    color       = {
+                        get     = _SVDB.EditorStyles.StringColor,
+                        set     = function(color)
+                            _SVDB.EditorStyles.StringColor = color
+                            Style[codeEditor].StringColor  = color
+                        end,
+                    }
+                },
+                {
+                    text        = _Locale["Number Color"],
+                    color       = {
+                        get     = _SVDB.EditorStyles.NumberColor,
+                        set     = function(color)
+                            _SVDB.EditorStyles.NumberColor = color
+                            Style[codeEditor].NumberColor  = color
+                        end,
+                    }
+                },
+                {
+                    text        = _Locale["Instruction Color"],
+                    color       = {
+                        get     = _SVDB.EditorStyles.InstructionColor,
+                        set     = function(color)
+                            _SVDB.EditorStyles.InstructionColor = color
+                            Style[codeEditor].InstructionColor  = color
+                        end,
+                    }
+                },
+                {
+                    text        = _Locale["Function Color"],
+                    color       = {
+                        get     = _SVDB.EditorStyles.FunctionColor,
+                        set     = function(color)
+                            _SVDB.EditorStyles.FunctionColor = color
+                            Style[codeEditor].FunctionColor  = color
+                        end,
+                    }
+                },
+                {
+                    text        = _Locale["Attribute Color"],
+                    color       = {
+                        get     = _SVDB.EditorStyles.AttributeColor,
+                        set     = function(color)
+                            _SVDB.EditorStyles.AttributeColor = color
+                            Style[codeEditor].AttributeColor  = color
+                        end,
+                    }
+                },
+            }
+        },
+    }
 end
 
 __Async__()
@@ -208,10 +419,16 @@ function CodeDialog:OnHide()
     saveSnippet()
 end
 
-function CodeDialog:OnSizeChanged()
-    -- ReCalc the Code Editor's Height since the resize won't work properly
-    local c, s                  = codeEditor:GetTop(), seperator:GetTop()
-    if c and s then codeEditor:SetHeight(c - s) end
+function CodeDialog:OnSizeChanged(force)
+    if _SVDB.Settings.ShowLogView then
+        Style[codeEditor].location = { Anchor("TOPLEFT", 24, -8, "CboSippets", "BOTTOMLEFT"), Anchor("RIGHT", -16, 0) }
+
+        -- ReCalc the Code Editor's Height since the resize won't work properly
+        local c, s              = codeEditor:GetTop(), seperator:GetTop()
+        if c and s then codeEditor:SetHeight(c - s) end
+    elseif force then
+        Style[codeEditor].location = { Anchor("TOPLEFT", 24, -8, "CboSippets", "BOTTOMLEFT"), Anchor("RIGHT", -16, 0), Anchor("BOTTOM", 0, 48) }
+    end
 end
 
 __AsyncSingle__(true)
@@ -253,16 +470,26 @@ function runCode(index, silent)
 
     local func, err, ok         = loadsnippet(text or snippet.code, snippet.name)
 
-    if func then
-        -- print --> log
-        local oldprint          = getprinthandler()
-        setprinthandler(log)
-        ok, err                 = pcall(func)
-        setprinthandler(oldprint)
-    end
+    if _SVDB.Settings.ShowLogView then
+        if func then
+            -- print --> log
+            local oldprint          = getprinthandler()
+            setprinthandler(log)
+            ok, err                 = pcall(func)
+            setprinthandler(oldprint)
+        end
 
-    if not silent and err then
-        log(err)
+        if not silent and err then
+            log(err)
+        end
+    else
+        if func then
+            ok, err                 = pcall(func)
+        end
+
+        if not silent and err then
+            geterrorhandler()(err)
+        end
     end
 
     return not err and true or false
@@ -297,6 +524,7 @@ Style[CodeDialog]               = {
         height                  = 100,
         location                = { Anchor("BOTTOMLEFT", 28, 48), Anchor("RIGHT", -16, 0) },
         resizable               = true,
+        minResize               = Size(100, 30),
     },
     Separator                   = {
         location                = { Anchor("BOTTOMLEFT", 0, 0, "LogView", "TOPLEFT"), Anchor("BOTTOMRIGHT", 0, 0, "LogView", "TOPRIGHT") },
@@ -314,14 +542,18 @@ Style[CodeDialog]               = {
     },
     Editor                      = {
         resizable               = true,
-        location                = { Anchor("TOPLEFT", 24, -8, "CboSippets", "BOTTOMLEFT"), Anchor("RIGHT", -16, 0) },
+        location                = { Anchor("TOPLEFT", 24, -8, "CboSippets", "BOTTOMLEFT"), Anchor("RIGHT", -16, 0), Anchor("BOTTOM", 0, 48) },
     },
     Tips                        = {
         location                = { Anchor("BOTTOMLEFT", 16, 16) }
     },
+    Menu                        = {
+        text                    = _Locale["Menu"],
+        location                = { Anchor("TOPRIGHT", -32, -26) },
+    },
     Delete                      = {
         text                    = _Locale["Delete"],
-        location                = { Anchor("TOPRIGHT", -32, -26) },
+        location                = { Anchor("RIGHT", -4, 0, "Menu", "LEFT") },
     },
     Add                         = {
         text                    = _Locale["Add"],
