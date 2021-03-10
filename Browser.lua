@@ -11,16 +11,20 @@ Scorpio           "Cube.Browser"                          ""
 
 import "System.Text"
 
-export { strtrim = Toolset.trim }
+export { strtrim = Toolset.trim, tremove = table.remove, unpack = unpack or table.unpack }
 
 VALUE_TYPE_API_DOCUMENT         = 1
 VALUE_TYPE_NORMAL_TABLE         = 2
 VALUE_TYPE_PLOOP_TYPE           = 3
+VALUE_TYPE_BASIC_TYPE           = 4
 
 local _CurrentVal
 local _ValueType
 
 local FIRST_SHOW                = true
+
+local _History                  = {}
+local _UICache                  = Toolset.newtable(false, true)
 
 -------------------------------------------
 -- Addon Events
@@ -48,79 +52,28 @@ function input:OnEnterPressed()
     local text                  = strtrim(self:GetText())
 
     if text == "" then
-        _CurrentVal             = APIDocumentation
-        _ValueType              = VALUE_TYPE_API_DOCUMENT
-
-        return viewer:SetText(TEMPLATE_API_DOCUMENT_ROOT{
-            _Locale             = _Locale,
-            Color               = Color,
-            target              = _CurrentVal,
-
-            List                = List,
-            XDictionary         = XDictionary,
-        })
+        return pushUrl("", APIDocumentation, VALUE_TYPE_API_DOCUMENT)
     elseif text == "PLoop" or Namespace.GetNamespace(text) then
-        -- Browser the PLoop & Scorpio Namespace
-        _CurrentVal             = Namespace.GetNamespace(text) or PLoop
-        _ValueType              = VALUE_TYPE_PLOOP_TYPE
-
-        return viewer:SetText(TEMPLATE_TYPE{
-            _Locale             = _Locale,
-            Color               = Color,
-            target              = _CurrentVal,
-
-            Namespace           = Namespace,
-            Enum                = Enum,
-            Struct              = Struct,
-            Interface           = Interface,
-            Class               = Class,
-            Property            = Property,
-            Event               = Event,
-            StructCategory      = StructCategory,
-
-            List                = List,
-            XDictionary         = XDictionary,
-        })
+        return pushUrl(text, Namespace.GetNamespace(text) or PLoop, VALUE_TYPE_PLOOP_TYPE)
     else
         local ok, ret           = loadstring("return " .. text)
+
         if ok then
             ok, ret             = pcall(ok)
 
-            if ok and ret ~= _G then
-                if type(ret) == "table" then
-                    _CurrentVal = ret
+            if ok and ret and ret ~= _G then
+                return pushUrl(text, ret, type(ret) == "table" and VALUE_TYPE_NORMAL_TABLE or VALUE_TYPE_BASIC_TYPE)
+            else
+                -- Try the UI System
+                ret             = _UICache[text] or UIObject.FromName(text) or UIObject.FromName("UIParent." .. text)
 
-                    local data  = {
-                        _Locale = _Locale,
-                        Color   = Color,
-                        target  = ret,
-                        path    = "",
-
-                        List        = List,
-                        XDictionary = XDictionary,
-                    }
-
-                    parseUIObject(data, ret, "")
-
-                    _ValueType  = VALUE_TYPE_NORMAL_TABLE
-                    return viewer:SetText(TEMPLATE_TABLE(data))
-                else
-                    return viewer:SetText(TEMPLATE_SIMPLE{
-                        _Locale     = _Locale,
-                        Color       = Color,
-                        target      = ret,
-
-                        List        = List,
-                        XDictionary = XDictionary,
-                    })
+                if ret then
+                    return pushUrl(text, ret, VALUE_TYPE_NORMAL_TABLE)
                 end
             end
         end
 
-        viewer:SetText(TEMPLATE_NOT_VALID{
-            _Locale             = _Locale,
-            Color               = Color,
-        })
+        return showTip(_Locale["The input value is not valid"])
     end
 end
 
@@ -138,66 +91,14 @@ function viewer:OnHyperlinkClick(path)
 
         input:SetText(path)
         return input:OnEnterPressed()
+    elseif path == "^prev" then
+        return popUrl()
+    elseif path == "^none" then
+        return
     end
 
-    if _ValueType == VALUE_TYPE_API_DOCUMENT then
-        if path == "#" then
-            -- The root level
-            return viewer:SetText(TEMPLATE_API_DOCUMENT_ROOT{
-                _Locale         = _Locale,
-                Color           = Color,
-                target          = _CurrentVal,
-
-                List            = List,
-                XDictionary     = XDictionary,
-            })
-        end
-
-        local sys               = path:match("^([^%.]+)(.*)$")
-
-        for _, item in ipairs(APIDocumentation.systems) do
-            if item.Name == sys then
-                return viewer:SetText(TEMPLATE_API_DOCUMENT_SYSTEM{
-                    _Locale     = _Locale,
-                    Color       = Color,
-                    target      = item,
-                    parseEvent  = parseEvent,
-                    parseFunc   = parseFunc,
-                    parseTable  = parseTable,
-
-                    List        = List,
-                    XDictionary = XDictionary,
-                })
-            end
-        end
-    elseif _ValueType == VALUE_TYPE_NORMAL_TABLE then
-        local val               = _CurrentVal
-        if path ~= "#" then
-            for name in path:gmatch("[^%.]+") do
-                if name:match("^meta:") then
-                    val         = getmetatable(val)
-                else
-                    val         = val[name] or val[tonumber(name)]
-                end
-            end
-        else
-            path                = ""
-        end
-
-        local data              = {
-            _Locale             = _Locale,
-            Color               = Color,
-            target              = val,
-            path                = path,
-
-            List                = List,
-            XDictionary         = XDictionary,
-        }
-
-        parseUIObject(data, val, path)
-
-        return viewer:SetText(TEMPLATE_TABLE(data))
-    end
+    local text, value, dtype    = unpack(_History, #_History - 3)
+    return pushUrl(text, value, dtype, path)
 end
 
 __AsyncSingle__(true)
@@ -229,7 +130,7 @@ function parseUIObject(data, val, path)
             data.origin     = true
         end
     elseif getmetatable(val) then
-        data.cls            = path .. "." .. "meta:" .. getmetatable(val)
+        data.cls            = path .. "." .. "meta:" .. tostring(getmetatable(val))
     end
 end
 
@@ -270,6 +171,126 @@ function parseTable(sys)
     return sys.Fields and (" - " .. XList(sys.Fields):Map(parseItem):Join(", "))
 end
 
+function pushUrl(text, value, type, path)
+    if value == nil then return end
+
+    local index                 = #_History
+    _History[index + 1]         = text
+    _History[index + 2]         = value
+    _History[index + 3]         = type
+    _History[index + 4]         = (not path or path == "#") and "" or path
+
+    if index >= 80 then
+        for i = 1, 4 do tremove(_History, 1) end
+    end
+
+    return openUrl()
+end
+
+function popUrl()
+    if #_History < 8 then return end
+
+    for i = 1, 4 do tremove(_History) end
+    return openUrl()
+end
+
+function openUrl()
+    local index                 = #_History
+    if index < 4 then return end
+
+    local t, value, dtype, path = unpack(_History, index - 3)
+    input:SetText(t)
+
+    if dtype == VALUE_TYPE_API_DOCUMENT then
+        if path == "" then
+            -- The root level
+            return viewer:SetText(TEMPLATE_API_DOCUMENT_ROOT{
+                target          = value,
+
+                -- Helpers
+                _Locale         = _Locale,
+                Color           = Color,
+                List            = List,
+                XDictionary     = XDictionary,
+            })
+        end
+
+        local sys               = path:match("^([^%.]+)(.*)$")
+
+        for _, item in ipairs(APIDocumentation.systems) do
+            if item.Name == sys then
+                return viewer:SetText(TEMPLATE_API_DOCUMENT_SYSTEM{
+                    target      = item,
+
+                    -- Helpers
+                    parseEvent  = parseEvent,
+                    parseFunc   = parseFunc,
+                    parseTable  = parseTable,
+
+                    _Locale     = _Locale,
+                    Color       = Color,
+                    List        = List,
+                    XDictionary = XDictionary,
+                })
+            end
+        end
+    elseif dtype == VALUE_TYPE_PLOOP_TYPE then
+        return viewer:SetText(TEMPLATE_TYPE{
+            target              = value,
+
+            Namespace           = Namespace,
+            Enum                = Enum,
+            Struct              = Struct,
+            Interface           = Interface,
+            Class               = Class,
+            Property            = Property,
+            Event               = Event,
+            StructCategory      = StructCategory,
+
+            UI                  = UI,
+            _Locale             = _Locale,
+            Color               = Color,
+            List                = List,
+            XDictionary         = XDictionary,
+        })
+    elseif dtype == VALUE_TYPE_NORMAL_TABLE then
+        if path ~= "" then
+            for name in path:gmatch("[^%.]+") do
+                if name:match("^meta:") then
+                    value       = getmetatable(value)
+                else
+                    value       = value[name] or value[tonumber(name)]
+                end
+            end
+        end
+
+        local data              = {
+            target              = value,
+            path                = path,
+
+            _UICache            = _UICache,
+            _Locale             = _Locale,
+            Color               = Color,
+            List                = List,
+            XDictionary         = XDictionary,
+        }
+
+        parseUIObject(data, value, path)
+
+        return viewer:SetText(TEMPLATE_TABLE(data))
+    else
+        return viewer:SetText(TEMPLATE_SIMPLE{
+            target              = value,
+
+            -- Helpers
+            _Locale             = _Locale,
+            Color               = Color,
+            List                = List,
+            XDictionary         = XDictionary,
+        })
+    end
+end
+
 -------------------------------------------
 -- Cube Browser Style
 -------------------------------------------
@@ -304,17 +325,15 @@ Style[Browser]                  = {
 -------------------------------------------
 -- Cube Browser Template String
 -------------------------------------------
-TEMPLATE_NOT_VALID              = TemplateString[[
-    <html>
-        <body>
-            <p>@_Locale["The input value is not valid"]</p>
-        </body>
-    </html>
-]]
-
 TEMPLATE_SIMPLE                 = TemplateString[[
     <html>
         <body>
+            <h1>
+                <a href="^prev">&lt;&lt;&lt;</a>
+                |
+                <a href="^none">@type(target)</a>
+            </h1>
+            <br/>
             <p>@\target</p>
         </body>
     </html>
@@ -323,7 +342,11 @@ TEMPLATE_SIMPLE                 = TemplateString[[
 TEMPLATE_API_DOCUMENT_ROOT      = TemplateString[[
     <html>
         <body>
-            <h1><a href="#">API Document</a></h1>
+            <h1>
+                <a href="^prev">&lt;&lt;&lt;</a>
+                |
+                <a href="#">API Document</a>
+            </h1>
             <br/>
             @for _, sys in ipairs(target.systems) do
             <p><a href="@sys.Name">@sys.Name</a></p>
@@ -336,6 +359,8 @@ TEMPLATE_API_DOCUMENT_SYSTEM    = TemplateString[[
     <html>
         <body>
             <h1>
+                <a href="^prev">&lt;&lt;&lt;</a>
+                |
                 <a href="#">API Document</a>
                 /
                 <a href="@target.Name">@target.Name</a>
@@ -362,7 +387,9 @@ TEMPLATE_API_DOCUMENT_SYSTEM    = TemplateString[[
 TEMPLATE_TABLE                  = TemplateString[[
     <html>
         <body>
-            <p>
+            <h1>
+                <a href="^prev">&lt;&lt;&lt;</a>
+                |
             @if path ~= "" then
                 <a href="#">@_Locale["Root"]</a>
                 @local link = ""
@@ -370,8 +397,10 @@ TEMPLATE_TABLE                  = TemplateString[[
                     / <a href="@\link">@\name</a>
                 @end
                 @>path = path .. "."
+            @else
+                <a href="^none">table</a>
             @end
-            </p>
+            </h1>
             <br/>
             @if cls then
             <p><cyan>@_Locale["ObjectType"]</cyan> - <a href="@\cls">@cls:match(":(.*)$")</a></p>
@@ -406,6 +435,7 @@ TEMPLATE_TABLE                  = TemplateString[[
 
             @{
                 local tables, funcs, constants
+                local cache = {}
 
                 for k, v in pairs(target) do
                     if type(k) ~= "number" then
@@ -415,8 +445,12 @@ TEMPLATE_TABLE                  = TemplateString[[
                             funcs       = funcs or {}
                             funcs[k]    = v
                         elseif t == "table" then
-                            tables      = tables or {}
-                            tables[k]   = v
+                            if type(v[0]) == "userdata" then
+                                cache[v]= k
+                            else
+                                tables      = tables or {}
+                                tables[k]   = v
+                            end
                         else
                             constants   = constants or {}
                             constants[k]= v
@@ -447,6 +481,49 @@ TEMPLATE_TABLE                  = TemplateString[[
                         <p><a href="copyto:@\k">@\k</a> : _G</p>
                     @else
                         <p><a href="copyto:@\k">@\k</a> : <a href="@(path)@k">@tostring(v)</a></p>
+                    @end
+                @end
+                <br/>
+            @end
+
+            @if cls and target.GetChildren then
+                @if origin then
+                    <h1><cyan>Children</cyan></h1>
+                    @for i, child in ipairs{ target:GetChildren() } do
+                        @if not child:IsForbidden() then
+                            @local name = child:GetName(true)
+                            @if name then name = name:gsub("^UIParent%.", "")
+                                <p><a href="copyto:@name"><orange>[_G]</orange>@name</a> : <a href="redirect:@name">@child</a></p>
+                            @elseif cache[child] then name = cache[child] cache[child] = nil
+                                <p><a href="copyto:@name">[@name]</a> : <a href="@(path)@name">@child</a></p>
+                            @else _UICache[tostring(child)] = child
+                                <p><a href="redirect:@child">@child</a></p>
+                            @end
+                        @end
+                    @end
+                    <br/>
+
+                    <h1><cyan>Regions</cyan></h1>
+                    @for _, child in ipairs{ target:GetRegions() } do
+                        @if not child:IsForbidden() then
+                            @local name = child:GetName(true)
+                            @if name then name = name:gsub("^UIParent%.", "")
+                                <p><a href="copyto:@name"><orange>[_G]</orange>@name</a> : <a href="redirect:@name">@child</a></p>
+                            @elseif cache[child] then name = cache[child] cache[child] = nil
+                                <p><a href="copyto:@name">[@name]</a> : <a href="@(path)@name">@child</a></p>
+                            @else _UICache[tostring(child)] = child
+                                <p><a href="redirect:@child">@child</a></p>
+                            @end
+                        @end
+                    @end
+                    <br/>
+                @else
+                    @for name, child in target:GetChilds() do local cname = child:GetChildPropertyName()
+                        @if cname then
+                            <p><a href="copyto:@cname"><orange>[P]</orange>@cname</a> : <a href="redirect:@child:GetName(true):gsub('^UIParent%.', '')">@child</a></p>
+                        @else
+                            <p><a href="copyto:@name">@name</a> : <a href="redirect:@child:GetName(true):gsub('^UIParent%.', '')">@child</a></p>
+                        @end
                     @end
                 @end
             @end
@@ -484,13 +561,15 @@ TEMPLATE_TYPE                   = TemplateString[[
 
             @if fullname:find(".", 1, true) then
                 @local link
-                <p>
+                <h1>
+                    <a href="^prev">&lt;&lt;&lt;</a>
+                    |
                 @for sub in fullname:match("^(.*)%..-$"):gmatch("[^%.]+") do
                     @>link = link and (link .. "." .. sub) or sub
                     <a href="redirect:@\link">@\sub</a> /
                 @end
                 <a href="copyto:@\fullname">@\fullname:match("[^%.]+$")</a>
-                </p>
+                </h1>
                 <br/>
             @end
 
@@ -573,6 +652,8 @@ TEMPLATE_TYPE                   = TemplateString[[
                 @{
                     local stevts, evts, stprops, props, stmtds, mtds
                     local supercls = Class.Validate(target) and Class.GetSuperClass(target)
+                    local skins, simpprops, childprops
+
                     supercls = supercls and Namespace.GetNamespaceName(supercls)
 
                     local extends = List(Interface.GetExtends(target)):Map(Namespace.GetNamespaceName):ToList()
@@ -605,6 +686,24 @@ TEMPLATE_TYPE                   = TemplateString[[
                                 props:Insert(name)
                             end
                         end
+                    end
+
+                    if UI.IsUIObjectType(target) then
+                        skins = List(UI.Style.GetSkins(target)):Sort()
+
+                        simpprops = List()
+                        childprops = List()
+
+                        for name, prop in UI.Style.GetProperties(target) do
+                            if UI.IsUIObjectType(prop) then
+                                childprops:Insert(name)
+                            else
+                                simpprops:Insert(name)
+                            end
+                        end
+
+                        childprops:Sort()
+                        simpprops:Sort()
                     end
                 }
 
@@ -664,6 +763,32 @@ TEMPLATE_TYPE                   = TemplateString[[
                     <h1><cyan>Method</cyan></h1>
                     @for _, name in mtds:Sort():GetIterator() do
                         <p><a href="copyto:@name">@name</a></p>
+                    @end
+                    <br/>
+                @end
+
+                @if skins and #skins > 0 then
+                    <h1><cyan>Skins</cyan></h1>
+                    @for _, name in skins:GetIterator() do
+                        <p><a href="copyto:@name">@name</a></p>
+                    @end
+                    <br/>
+                @end
+
+                @if simpprops and #simpprops > 0 then
+                    <h1><cyan>Style Property</cyan></h1>
+                    @for _, name in simpprops:GetIterator() do
+                        @local type = UI.Style.GetProperty(target, name)
+                        <p><a href="copyto:@name">@name</a> - <a href="redirect:@type">@type</a></p>
+                    @end
+                    <br/>
+                @end
+
+                @if childprops and #childprops > 0 then
+                    <h1><cyan>Style Child Property</cyan></h1>
+                    @for _, name in childprops:GetIterator() do
+                        @local type = UI.Style.GetProperty(target, name)
+                        <p><a href="copyto:@name">@name</a> - <a href="redirect:@type">@type</a></p>
                     @end
                     <br/>
                 @end
