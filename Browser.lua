@@ -24,7 +24,7 @@ local _ValueType
 local FIRST_SHOW                = true
 
 local _History                  = {}
-local _UICache                  = Toolset.newtable(false, true)
+local _UICache                  = {}
 
 -------------------------------------------
 -- Addon Events
@@ -70,6 +70,13 @@ function input:OnEnterPressed()
                 if ret then
                     return pushUrl(text, ret, VALUE_TYPE_NORMAL_TABLE)
                 end
+            end
+        else
+            -- Try the UI System
+            ret             = _UICache[text] or UIObject.FromName(text) or UIObject.FromName("UIParent." .. text)
+
+            if ret then
+                return pushUrl(text, ret, VALUE_TYPE_NORMAL_TABLE)
             end
         end
 
@@ -486,37 +493,79 @@ TEMPLATE_TABLE                  = TemplateString[[
                 <br/>
             @end
 
-            @if cls and target.GetChildren then
+            @if cls then
                 @if origin then
-                    <h1><cyan>Children</cyan></h1>
-                    @for i, child in ipairs{ target:GetChildren() } do
-                        @if not child:IsForbidden() then
-                            @local name = child:GetName(true)
-                            @if name then name = name:gsub("^UIParent%.", "")
-                                <p><a href="copyto:@name"><orange>[_G]</orange>@name</a> : <a href="redirect:@name">@child</a></p>
-                            @elseif cache[child] then name = cache[child] cache[child] = nil
-                                <p><a href="copyto:@name">[@name]</a> : <a href="@(path)@name">@child</a></p>
-                            @else _UICache[tostring(child)] = child
-                                <p><a href="redirect:@child">@child</a></p>
+                    @if target.GetChildren then
+                        <h1><cyan>Children</cyan></h1>
+                        @for i, child in ipairs{ target:GetChildren() } do
+                            @if not (child.IsForbidden and child:IsForbidden()) then
+                                @local name = child:GetName(true)
+                                @local otype = child:GetObjectType()
+                                @if name then name = name:gsub("^UIParent%.", "")
+                                    <p><white>[@otype]</white><a href="copyto:@name"><orange>[_G]</orange>@name</a> : <a href="redirect:@name">@child</a></p>
+                                @elseif cache[child] then name = cache[child] cache[child] = nil
+                                    <p><white>[@otype]</white><a href="copyto:@name">[@name]</a> : <a href="@(path)@name">@child</a></p>
+                                @else local debugname = child.GetDebugName and child:GetDebugName() or tostring(child) _UICache[debugname] = child
+                                    <p><white>[@otype]</white><a href="redirect:@debugname">@debugname</a></p>
+                                @end
                             @end
                         @end
+                        <br/>
                     @end
-                    <br/>
 
-                    <h1><cyan>Regions</cyan></h1>
-                    @for _, child in ipairs{ target:GetRegions() } do
-                        @if not child:IsForbidden() then
-                            @local name = child:GetName(true)
-                            @if name then name = name:gsub("^UIParent%.", "")
-                                <p><a href="copyto:@name"><orange>[_G]</orange>@name</a> : <a href="redirect:@name">@child</a></p>
-                            @elseif cache[child] then name = cache[child] cache[child] = nil
-                                <p><a href="copyto:@name">[@name]</a> : <a href="@(path)@name">@child</a></p>
-                            @else _UICache[tostring(child)] = child
-                                <p><a href="redirect:@child">@child</a></p>
+                    @if target.GetRegions then
+                        <h1><cyan>Regions</cyan></h1>
+                        @for _, child in ipairs{ target:GetRegions() } do
+                            @if not (child.IsForbidden and child:IsForbidden()) then
+                                @local name = child:GetName(true)
+                                @local otype = child:GetObjectType()
+                                @if name then name = name:gsub("^UIParent%.", "")
+                                    <p><white>[@otype]</white><a href="copyto:@name"><orange>[_G]</orange>@name</a> : <a href="redirect:@name">@child</a></p>
+                                @elseif cache[child] then name = cache[child] cache[child] = nil
+                                    <p><white>[@otype]</white><a href="copyto:@name">[@name]</a> : <a href="@(path)@name">@child</a></p>
+                                @else local debugname = child.GetDebugName and child:GetDebugName() or tostring(child) _UICache[debugname] = child
+                                    <p><white>[@otype]</white><a href="redirect:@debugname">@debugname</a></p>
+                                @end
                             @end
                         @end
+                        <br/>
                     @end
-                    <br/>
+
+                    @if target.GetAnimationGroups then
+                        <h1><cyan>AnimationGroup</cyan></h1>
+                        @for _, child in ipairs{ target:GetAnimationGroups() } do
+                            @if not (child.IsForbidden and child:IsForbidden()) then
+                                @local name = child:GetName(true)
+                                @local otype = child:GetObjectType()
+                                @if name then name = name:gsub("^UIParent%.", "")
+                                    <p><white>[@otype]</white><a href="copyto:@name"><orange>[_G]</orange>@name</a> : <a href="redirect:@name">@child</a></p>
+                                @elseif cache[child] then name = cache[child] cache[child] = nil
+                                    <p><white>[@otype]</white><a href="copyto:@name">[@name]</a> : <a href="@(path)@name">@child</a></p>
+                                @else local debugname = child.GetDebugName and child:GetDebugName() or tostring(child) _UICache[debugname] = child
+                                    <p><white>[@otype]</white><a href="redirect:@debugname">@debugname</a></p>
+                                @end
+                            @end
+                        @end
+                        <br/>
+                    @end
+
+                    @if target.GetAnimations then
+                        <h1><cyan>Animation</cyan></h1>
+                        @for _, child in ipairs{ target:GetAnimations() } do
+                            @if not (child.IsForbidden and child:IsForbidden()) then
+                                @local name = child:GetName(true)
+                                @local otype = child:GetObjectType()
+                                @if name then name = name:gsub("^UIParent%.", "")
+                                    <p><white>[@otype]</white><a href="copyto:@name"><orange>[_G]</orange>@name</a> : <a href="redirect:@name">@child</a></p>
+                                @elseif cache[child] then name = cache[child] cache[child] = nil
+                                    <p><white>[@otype]</white><a href="copyto:@name">[@name]</a> : <a href="@(path)@name">@child</a></p>
+                                @else local debugname = child.GetDebugName and child:GetDebugName() or tostring(child) _UICache[debugname] = child
+                                    <p><white>[@otype]</white><a href="redirect:@debugname">@debugname</a></p>
+                                @end
+                            @end
+                        @end
+                        <br/>
+                    @end
                 @else
                     @for name, child in target:GetChilds() do local cname = child:GetChildPropertyName()
                         @if cname then
