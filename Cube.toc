@@ -1,7 +1,7 @@
 ﻿## Interface: 90005
 ## Title: Cube
 ## Author: kurapica
-## Version: v6.07
+## Version: v6.08
 ## Notes: In-Game Development & Debug tools
 ## Notes-zhCN: 游戏内开发调试工具
 ## eMail: kurapica125@hotmail.com

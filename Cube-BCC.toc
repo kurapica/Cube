@@ -1,0 +1,21 @@
+﻿## Interface: 20501
+## Title: Cube
+## Author: kurapica
+## Version: v6.08
+## Notes: In-Game Development & Debug tools
+## Notes-zhCN: 游戏内开发调试工具
+## eMail: kurapica125@hotmail.com
+## URL: http://github.com/kurapica/Cube
+## Dependencies: Scorpio.Widget
+## DefaultState: Enabled
+## LoadOnDemand: 0
+## SavedVariables: CubeSave
+
+# Core
+Cube.lua
+
+# Code Editor
+CubeEditor.lua
+
+# Data & Type Browser
+Browser.lua
