@@ -566,7 +566,7 @@ TEMPLATE_TABLE                  = TemplateString[[
                         @end
                         <br/>
                     @end
-                @else
+                @elseif target.GetChilds then
                     @for name, child in target:GetChilds() do local cname = child:GetChildPropertyName()
                         @if cname then
                             <p><a href="copyto:@cname"><orange>[P]</orange>@cname</a> : <a href="redirect:@child:GetName(true):gsub('^UIParent%.', '')">@child</a></p>
