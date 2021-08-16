@@ -1,12 +1,12 @@
 ﻿## Interface: 11307
 ## Title: Cube
 ## Author: kurapica
-## Version: v6.09
+## Version: v6.10
 ## Notes: In-Game Development & Debug tools
 ## Notes-zhCN: 游戏内开发调试工具
 ## eMail: kurapica125@hotmail.com
 ## URL: http://github.com/kurapica/Cube
-## Dependencies: Scorpio.Widget
+## Dependencies: Scorpio
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
 ## SavedVariables: CubeSave
