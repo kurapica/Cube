@@ -1,7 +1,7 @@
-﻿## Interface: 20501
+﻿## Interface: 20502
 ## Title: Cube
 ## Author: kurapica
-## Version: v6.10
+## Version: @project-version@
 ## Notes: In-Game Development & Debug tools
 ## Notes-zhCN: 游戏内开发调试工具
 ## eMail: kurapica125@hotmail.com

@@ -745,13 +745,13 @@ TEMPLATE_TYPE                   = TemplateString[[
 
                         for name, prop in UI.Style.GetProperties(target) do
                             if UI.IsUIObjectType(prop) then
-                                childprops:Insert(name)
+                                childprops:Insert{ name = name, type = prop, tname = tostring(prop) }
                             else
                                 simpprops:Insert(name)
                             end
                         end
 
-                        childprops:Sort()
+                        childprops:Sort("x,y=>x.tname == y.tname and x.name < y.name or x.tname < y.tname")
                         simpprops:Sort()
                     end
                 }
@@ -835,9 +835,8 @@ TEMPLATE_TYPE                   = TemplateString[[
 
                 @if childprops and #childprops > 0 then
                     <h1><cyan>Style Child Property</cyan></h1>
-                    @for _, name in childprops:GetIterator() do
-                        @local type = UI.Style.GetProperty(target, name)
-                        <p><a href="copyto:@name">@name</a> - <a href="redirect:@type">@type</a></p>
+                    @for _, child in childprops:GetIterator() do
+                        <p><a href="copyto:@child.name">@child.name</a> - <a href="redirect:@child.type">@child.type</a></p>
                     @end
                     <br/>
                 @end
