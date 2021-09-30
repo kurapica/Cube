@@ -9,12 +9,6 @@
 Scorpio           "Cube.Editor"                           ""
 --========================================================--
 
--- Check Scorpio's Version
-local _Ver                      = tonumber(GetAddOnMetadata("Scorpio", "Version"):match("%d+"))
-if _Ver < 58 then
-    return Alert(_Locale["Please update to the newest scorpio lib, or Cube's save data may be corrupted!"])
-end
-
 export {
     strtrim                     = Toolset.trim,
     clone                       = Toolset.clone,
