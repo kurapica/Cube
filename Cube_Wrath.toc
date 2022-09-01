@@ -1,0 +1,23 @@
+﻿## Interface: 30400
+## Title: Cube
+## Author: kurapica
+## Version: @project-version@
+## Notes: In-Game Development & Debug tools
+## Notes-zhCN: 游戏内开发调试工具
+## eMail: kurapica125@hotmail.com
+## URL: http://github.com/kurapica/Cube
+## Dependencies: Scorpio
+## DefaultState: Enabled
+## LoadOnDemand: 0
+## SavedVariables: CubeSave
+## X-Curse-Project-ID: 17086
+## X-Wago-ID: RqGYReNg
+
+# Core
+Cube.lua
+
+# Code Editor
+CubeEditor.lua
+
+# Data & Type Browser
+Browser.lua
