@@ -562,8 +562,8 @@ Style[CodeDialog]               = {
         location                = { Anchor("RIGHT", -4, 0, "Run", "LEFT") },
     },
     AutoRun                     = {
-        label                   = { text = _Locale["AutoRun"] },
         location                = { Anchor("LEFT", 4, 0, "CboSippets", "RIGHT") },
+        text                    = _Locale["AutoRun"],
     },
 }
 
