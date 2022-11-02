@@ -112,7 +112,7 @@ __AsyncSingle__(true)
 function Browser:OnShow()
     if FIRST_SHOW then
         FIRST_SHOW              = false
-        LoadAddOn("Blizzard_APIDocumentation")
+        LoadAddOn("Blizzard_APIDocumentationGenerated")
 
         input:OnEnterPressed()
     end
