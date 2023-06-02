@@ -106,6 +106,11 @@ function CUBE_CODE_EDITOR_TOGGLE()
     CodeDialog:SetShown(not CodeDialog:IsShown())
 end
 
+function UpdateFont()
+    Style[codeEditor].font = clone(_SVDB.EditorStyles.Font)
+    Style[logView].ScrollChild.EditBox.font = clone(_SVDB.EditorStyles.Font)
+end
+
 -------------------------------------------
 -- Cube Code Editor
 -------------------------------------------
@@ -216,7 +221,7 @@ function btnMenu:OnClick()
                         local path  = Input(_Locale["Please input the new font path"])
                         if path and path ~= "" then
                             _SVDB.EditorStyles.Font.font = path
-                            Style[codeEditor].font = clone(_SVDB.EditorStyles.Font)
+                            UpdateFont()
                         end
                     end,
                 },
@@ -226,7 +231,7 @@ function btnMenu:OnClick()
                         local height  = PickRange(_Locale["Choose the font height"], 10, 40, 1, _SVDB.EditorStyles.Font.height)
                         if height then
                             _SVDB.EditorStyles.Font.height = height
-                            Style[codeEditor].font = clone(_SVDB.EditorStyles.Font)
+                            UpdateFont()
                         end
                     end,
                 },
@@ -237,7 +242,7 @@ function btnMenu:OnClick()
                             get     = function() return _SVDB.EditorStyles.Font.outline or "NONE" end,
                             set     = function(value)
                                 _SVDB.EditorStyles.Font.outline = value
-                                Style[codeEditor].font = clone(_SVDB.EditorStyles.Font)
+                                UpdateFont()
                             end,
                         },
 
@@ -261,7 +266,7 @@ function btnMenu:OnClick()
                         get     = function() return _SVDB.EditorStyles.Font.monochrome end,
                         set     = function(value)
                             _SVDB.EditorStyles.Font.monochrome = value
-                            Style[codeEditor].font = clone(_SVDB.EditorStyles.Font)
+                            UpdateFont()
                         end,
                     }
                 },
@@ -399,6 +404,8 @@ end
 __AsyncSingle__(true)
 function CodeDialog:OnShow()
     CodeDialog:OnSizeChanged()
+
+    UpdateFont()
 
     while self:IsShown() do
         Delay(10)
