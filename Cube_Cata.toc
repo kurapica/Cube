@@ -1,4 +1,4 @@
-﻿## Interface: 11502
+﻿## Interface: 40400
 ## Title: Cube
 ## Author: kurapica
 ## Version: @project-version@
@@ -10,6 +10,8 @@
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
 ## SavedVariables: CubeSave
+## X-Curse-Project-ID: 17086
+## X-Wago-ID: RqGYReNg
 
 # Core
 Cube.lua
