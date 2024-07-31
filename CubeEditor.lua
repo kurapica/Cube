@@ -16,6 +16,15 @@ export {
     loadsnippet                 = Toolset.loadsnippet,
 }
 
+function saveSnippet()
+    local index                 = CodeDialog.CurrentSnippet
+    if not index then return end
+    local snippet               = _SVDB.CodeList[index]
+
+    snippet.code                = codeEditor:GetText()
+    showTip(_Locale["The code is saved"] .. "-" .. snippet.name)
+end
+
 -------------------------------------------
 -- Addon Events
 -------------------------------------------
@@ -452,15 +461,6 @@ function showTip(text)
     local total                 = GetFramerate() * 3
     for i = total, 0, -1 do tipLine:SetAlpha(i / total) Next() end
     tipLine:SetText("")
-end
-
-function saveSnippet()
-    local index                 = CodeDialog.CurrentSnippet
-    if not index then return end
-    local snippet               = _SVDB.CodeList[index]
-
-    snippet.code                = codeEditor:GetText()
-    showTip(_Locale["The code is saved"] .. "-" .. snippet.name)
 end
 
 function runCode(index, silent)
